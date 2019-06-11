@@ -1,0 +1,4 @@
+# Gone.io Docker Base
+Docker PHP Base kit based on phusion/baseimage, featuring PHP %%Php_Version%%
+
+%%Availability_Table%%

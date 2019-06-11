@@ -1,0 +1,112 @@
+version: '2.3'
+
+services:
+  apache-php56-instance:
+    build:
+      context: ./test-app
+      dockerfile: Dockerfile.apache-php56
+
+  apache-php56-test:
+    build: tester
+    command: "ab -c 500 -n 10000 -l http://apache-php56-instance/"
+    links:
+      - apache-php56-instance
+        
+  apache-php70-instance:
+    build:
+      context: ./test-app
+      dockerfile: Dockerfile.apache-php70
+
+  apache-php70-test:
+    build: tester
+    command: "ab -c 500 -n 10000 -l http://apache-php70-instance/"
+    links:
+      - apache-php70-instance
+
+  apache-php71-instance:
+    build:
+      context: ./test-app
+      dockerfile: Dockerfile.apache-php71
+
+  apache-php71-test:
+    build: tester
+    command: "ab -c 500 -n 10000 -l http://apache-php71-instance/"
+    links:
+      - apache-php71-instance
+
+  apache-php72-instance:
+    build:
+      context: ./test-app
+      dockerfile: Dockerfile.apache-php72
+
+  apache-php72-test:
+    build: tester
+    command: "ab -c 500 -n 10000 -l http://apache-php72-instance/"
+    links:
+      - apache-php72-instance
+
+  apache-php73-instance:
+    build:
+      context: ./test-app
+      dockerfile: Dockerfile.apache-php73
+
+  apache-php73-test:
+    build: tester
+    command: "ab -c 500 -n 10000 -l http://apache-php73-instance/"
+    links:
+      - apache-php73-instance
+
+  nginx-php56-instance:
+    build:
+      context: ./test-app
+      dockerfile: Dockerfile.nginx-php56
+
+  nginx-php56-test:
+    build: tester
+    command: "ab -c 500 -n 10000 -l http://nginx-php56-instance/"
+    links:
+      - nginx-php56-instance
+  
+  nginx-php70-instance:
+    build:
+      context: ./test-app
+      dockerfile: Dockerfile.nginx-php70
+
+  nginx-php70-test:
+    build: tester
+    command: "ab -c 500 -n 10000 -l http://nginx-php70-instance/"
+    links:
+      - nginx-php70-instance
+
+  nginx-php71-instance:
+    build:
+      context: ./test-app
+      dockerfile: Dockerfile.nginx-php71
+
+  nginx-php71-test:
+    build: tester
+    command: "ab -c 500 -n 10000 -l http://nginx-php71-instance/"
+    links:
+      - nginx-php71-instance
+
+  nginx-php72-instance:
+    build:
+      context: ./test-app
+      dockerfile: Dockerfile.nginx-php72
+
+  nginx-php72-test:
+    build: tester
+    command: "ab -c 500 -n 10000 -l http://nginx-php72-instance/"
+    links:
+      - nginx-php72-instance
+
+  nginx-php73-instance:
+    build:
+      context: ./test-app
+      dockerfile: Dockerfile.nginx-php73
+
+  nginx-php73-test:
+    build: tester
+    command: "ab -c 500 -n 10000 -l http://nginx-php73-instance/"
+    links:
+      - nginx-php73-instance

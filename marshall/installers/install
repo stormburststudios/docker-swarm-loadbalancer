@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -e
+
+for file in /app/installers/*.sh
+do
+  
+  /bin/bash $file
+done

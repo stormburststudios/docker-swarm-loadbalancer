@@ -23,6 +23,6 @@ build:marshall:master:
   stage: build
   script:
     - make -f Makefile.working build-marshall
-    - GIT_BRANCH=$(CI_COMMIT_REF_SLUG) make -f Makefile.working push-marshall
+    - GIT_BRANCH=$CI_COMMIT_REF_SLUG make -f Makefile.working push-marshall
   only:
     - master

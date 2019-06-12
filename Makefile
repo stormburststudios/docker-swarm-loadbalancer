@@ -59,35 +59,35 @@ tag-php-core:
 build-php-core: build-php-core-5.6 build-php-core-7.0 build-php-core-7.1 build-php-core-7.2 build-php-core-7.3 tag-php-core
 
 build-php-cli-5.6:
-	sed 's/FROM .*/FROM gone\/php\:core\-5\.6/g' ./php+cli/Dockerfile > ./php+cli/Dockerfile.php56
+	sed 's|FROM .*|FROM gone/php:core-5.6|g' ./php+cli/Dockerfile > ./php+cli/Dockerfile.php56
 	docker build -t gone/php:cli-php5.6 -f ./php+cli/Dockerfile.php56 ./php+cli
 	docker tag gone/php:cli-php5.6 gone/php:cli-php5.6-$(ARCH)
 	docker tag gone/php:cli-php5.6 gone/php:cli-php5.6-$(ARCH)-$(DATE)
 	rm ./php+cli/Dockerfile.php56
 
 build-php-cli-7.0:
-	sed 's/FROM .*/FROM gone\/php\:core\-7\.0/g' ./php+cli/Dockerfile > ./php+cli/Dockerfile.php70
+	sed 's|FROM .*|FROM gone/php:core-7.0|g' ./php+cli/Dockerfile > ./php+cli/Dockerfile.php70
 	docker build -t gone/php:cli-php7.0 -f ./php+cli/Dockerfile.php70 ./php+cli
 	docker tag gone/php:cli-php7.0 gone/php:cli-php7.0-$(ARCH)
 	docker tag gone/php:cli-php7.0 gone/php:cli-php7.0-$(ARCH)-$(DATE)
 	rm ./php+cli/Dockerfile.php70
 
 build-php-cli-7.1:
-	sed 's/FROM .*/FROM gone\/php\:core\-7\.1/g' ./php+cli/Dockerfile > ./php+cli/Dockerfile.php71
+	sed 's|FROM .*|FROM gone/php:core-7.1|g' ./php+cli/Dockerfile > ./php+cli/Dockerfile.php71
 	docker build -t gone/php:cli-php7.1 -f ./php+cli/Dockerfile.php71 ./php+cli
 	docker tag gone/php:cli-php7.1 gone/php:cli-php7.1-$(ARCH)
 	docker tag gone/php:cli-php7.1 gone/php:cli-php7.1-$(ARCH)-$(DATE)
 	rm ./php+cli/Dockerfile.php71
 
 build-php-cli-7.2:
-	sed 's/FROM .*/FROM gone\/php\:core\-7\.2/g' ./php+cli/Dockerfile > ./php+cli/Dockerfile.php72
+	sed 's|FROM .*|FROM gone/php:core-7.2|g' ./php+cli/Dockerfile > ./php+cli/Dockerfile.php72
 	docker build -t gone/php:cli-php7.2 -f ./php+cli/Dockerfile.php72 ./php+cli
 	docker tag gone/php:cli-php7.2 gone/php:cli-php7.2-$(ARCH)
 	docker tag gone/php:cli-php7.2 gone/php:cli-php7.2-$(ARCH)-$(DATE)
 	rm ./php+cli/Dockerfile.php72
 
 build-php-cli-7.3:
-	sed 's/FROM .*/FROM gone\/php\:core\-7\.3/g' ./php+cli/Dockerfile > ./php+cli/Dockerfile.php73
+	sed 's|FROM .*|FROM gone/php:core-7.3|g' ./php+cli/Dockerfile > ./php+cli/Dockerfile.php73
 	docker build -t gone/php:cli-php7.3 -f ./php+cli/Dockerfile.php73 ./php+cli
 	docker tag gone/php:cli-php7.3 gone/php:cli-php7.3-$(ARCH)
 	docker tag gone/php:cli-php7.3 gone/php:cli-php7.3-$(ARCH)-$(DATE)
@@ -106,7 +106,7 @@ tag-php-cli:
 build-php-cli: build-php-cli-7.0 build-php-cli-7.1 build-php-cli-7.2 build-php-cli-7.3 tag-php-cli
 
 build-php-apache-5.6:
-	sed 's/FROM .*/FROM gone\/php\:core\-5\.6/g' ./php+apache/Dockerfile > ./php+apache/Dockerfile.php56
+	sed 's|FROM .*|FROM gone/php:core-5.6|g' ./php+apache/Dockerfile > ./php+apache/Dockerfile.php56
 	sed -i 's/{{PHPVERSION}}/5.6/g' ./php+apache/Dockerfile.php56
 	docker build -t gone/php:apache-php5.6 -f ./php+apache/Dockerfile.php56 ./php+apache
 	docker tag gone/php:apache-php5.6 gone/php:apache-php5.6-$(DATE)
@@ -115,7 +115,7 @@ build-php-apache-5.6:
 	rm ./php+apache/Dockerfile.php56
 	
 build-php-apache-7.0:
-	sed 's/FROM .*/FROM gone\/php\:core\-7\.0/g' ./php+apache/Dockerfile > ./php+apache/Dockerfile.php70
+	sed 's|FROM .*|FROM gone/php:core-7.0|g' ./php+apache/Dockerfile > ./php+apache/Dockerfile.php70
 	sed -i 's/{{PHPVERSION}}/7.0/g' ./php+apache/Dockerfile.php70
 	docker build -t gone/php:apache-php7.0 -f ./php+apache/Dockerfile.php70 ./php+apache
 	docker tag gone/php:apache-php7.0 gone/php:apache-php7.0-$(DATE)
@@ -124,7 +124,7 @@ build-php-apache-7.0:
 	rm ./php+apache/Dockerfile.php70
 	
 build-php-apache-7.1:
-	sed 's/FROM .*/FROM gone\/php\:core\-7\.1/g' ./php+apache/Dockerfile > ./php+apache/Dockerfile.php71
+	sed 's|FROM .*|FROM gone/php:core-7.1|g' ./php+apache/Dockerfile > ./php+apache/Dockerfile.php71
 	sed -i 's/{{PHPVERSION}}/7.1/g' ./php+apache/Dockerfile.php71
 	docker build -t gone/php:apache-php7.1 -f ./php+apache/Dockerfile.php71 ./php+apache
 	docker tag gone/php:apache-php7.1 gone/php:apache-php7.1-$(DATE)
@@ -133,7 +133,7 @@ build-php-apache-7.1:
 	rm ./php+apache/Dockerfile.php71
 	
 build-php-apache-7.2:
-	sed 's/FROM .*/FROM gone\/php\:core\-7\.2/g' ./php+apache/Dockerfile > ./php+apache/Dockerfile.php72
+	sed 's|FROM .*|FROM gone/php:core-7.2|g' ./php+apache/Dockerfile > ./php+apache/Dockerfile.php72
 	sed -i 's/{{PHPVERSION}}/7.2/g' ./php+apache/Dockerfile.php72
 	docker build -t gone/php:apache-php7.2 -f ./php+apache/Dockerfile.php72 ./php+apache
 	docker tag gone/php:apache-php7.2 gone/php:apache-php7.2-$(DATE)
@@ -142,7 +142,7 @@ build-php-apache-7.2:
 	rm ./php+apache/Dockerfile.php72
 	
 build-php-apache-7.3:
-	sed 's/FROM .*/FROM gone\/php\:core\-7\.3/g' ./php+apache/Dockerfile > ./php+apache/Dockerfile.php73
+	sed 's|FROM .*|FROM gone/php:core-7.3|g' ./php+apache/Dockerfile > ./php+apache/Dockerfile.php73
 	sed -i 's/{{PHPVERSION}}/7.3/g' ./php+apache/Dockerfile.php73
 	docker build -t gone/php:apache-php7.3 -f ./php+apache/Dockerfile.php73 ./php+apache
 	docker tag gone/php:apache-php7.3 gone/php:apache-php7.3-$(DATE)
@@ -192,8 +192,8 @@ test-php-apache-7.3:
 build-php-apache: build-php-apache-5.6 build-php-apache-7.0 build-php-apache-7.1 build-php-apache-7.2 build-php-apache-7.3 tag-apache
 
 build-php-nginx-5.6:
-	sed 's/FROM .*/FROM gone\/php\:core\-7\.0/g' ./php+nginx/Dockerfile > ./php+nginx/Dockerfile.php56
-	sed -i 's/{{PHPVERSION}}/7\.0/g' ./php+nginx/Dockerfile.php56
+	sed 's|FROM .*|FROM gone/php:core-7.0|g' ./php+nginx/Dockerfile > ./php+nginx/Dockerfile.php56
+	sed -i 's/{{PHPVERSION}}/7.0|g' ./php+nginx/Dockerfile.php56
 	docker build -t gone/php:nginx-php5.6 -f ./php+nginx/Dockerfile.php56 ./php+nginx
 	docker tag gone/php:nginx-php5.6 gone/php:nginx-php5.6-$(DATE)
 	docker tag gone/php:nginx-php5.6 gone/php:nginx-php5.6-$(ARCH)-$(DATE)
@@ -201,8 +201,8 @@ build-php-nginx-5.6:
 	rm ./php+nginx/Dockerfile.php56
 	
 build-php-nginx-7.0:
-	sed 's/FROM .*/FROM gone\/php\:core\-7\.0/g' ./php+nginx/Dockerfile > ./php+nginx/Dockerfile.php70
-	sed -i 's/{{PHPVERSION}}/7\.0/g' ./php+nginx/Dockerfile.php70
+	sed 's|FROM .*|FROM gone/php:core-7.0|g' ./php+nginx/Dockerfile > ./php+nginx/Dockerfile.php70
+	sed -i 's/{{PHPVERSION}}/7.0|g' ./php+nginx/Dockerfile.php70
 	docker build -t gone/php:nginx-php7.0 -f ./php+nginx/Dockerfile.php70 ./php+nginx
 	docker tag gone/php:nginx-php7.0 gone/php:nginx-php7.0-$(DATE)
 	docker tag gone/php:nginx-php7.0 gone/php:nginx-php7.0-$(ARCH)-$(DATE)
@@ -210,7 +210,7 @@ build-php-nginx-7.0:
 	rm ./php+nginx/Dockerfile.php70
 
 build-php-nginx-7.1:
-	sed 's/FROM .*/FROM gone\/php\:core\-7\.1/g' ./php+nginx/Dockerfile > ./php+nginx/Dockerfile.php71
+	sed 's|FROM .*|FROM gone/php:core-7.1|g' ./php+nginx/Dockerfile > ./php+nginx/Dockerfile.php71
 	sed -i 's/{{PHPVERSION}}/7.1/g' ./php+nginx/Dockerfile.php71
 	docker build -t gone/php:nginx-php7.1 -f ./php+nginx/Dockerfile.php71 ./php+nginx
 	docker tag gone/php:nginx-php7.1 gone/php:nginx-php7.1-$(DATE)
@@ -219,7 +219,7 @@ build-php-nginx-7.1:
 	rm ./php+nginx/Dockerfile.php71
 
 build-php-nginx-7.2:
-	sed 's/FROM .*/FROM gone\/php\:core\-7\.2/g' ./php+nginx/Dockerfile > ./php+nginx/Dockerfile.php72
+	sed 's|FROM .*|FROM gone/php:core-7.2|g' ./php+nginx/Dockerfile > ./php+nginx/Dockerfile.php72
 	sed -i 's/{{PHPVERSION}}/7.2/g' ./php+nginx/Dockerfile.php72
 	docker build -t gone/php:nginx-php7.2 -f ./php+nginx/Dockerfile.php72 ./php+nginx
 	docker tag gone/php:nginx-php7.2 gone/php:nginx-php7.2-$(DATE)
@@ -228,7 +228,7 @@ build-php-nginx-7.2:
 	rm ./php+nginx/Dockerfile.php72
 
 build-php-nginx-7.3:
-	sed 's/FROM .*/FROM gone\/php\:core\-7\.3/g' ./php+nginx/Dockerfile > ./php+nginx/Dockerfile.php73
+	sed 's|FROM .*|FROM gone/php:core-7.3|g' ./php+nginx/Dockerfile > ./php+nginx/Dockerfile.php73
 	sed -i 's/{{PHPVERSION}}/7.3/g' ./php+nginx/Dockerfile.php73
 	docker build -t gone/php:nginx-php7.3 -f ./php+nginx/Dockerfile.php73 ./php+nginx
 	docker tag gone/php:nginx-php7.3 gone/php:nginx-php7.3-$(DATE)

@@ -7,7 +7,7 @@ before_script:
   - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   - sh generate_makefile.sh
   - make -f Makefile.working prepare
-  - printenv
+  - printenv | sort
 
 after_script:
   - rm Makefile.working
@@ -23,6 +23,6 @@ build:marshall:master:
   stage: build
   script:
     - make -f Makefile.working build-marshall
-    - make -f Makefile.working push-marshall
+    - GIT_BRANCH=$(CI_COMMIT_REF_SLUG) make -f Makefile.working push-marshall
   only:
     - master

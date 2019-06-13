@@ -448,20 +448,40 @@ else
 	echo "Skipping push, on branch \"$(GIT_BRANCH)\" not on branch \"master\""
 endif
 
-push-node:
+push-node: push-node-8 push-node-10 push-node-11 push-node-12
+
+push-node-8:
 ifeq ($(GIT_BRANCH), master)
 	docker push gone/node:8
 	docker push gone/node:8-$(DATE)
 	docker push gone/node:8-$(ARCH)-$(DATE)
 	docker push gone/node:8-$(ARCH)
+else
+	echo "Skipping push, on branch \"$(GIT_BRANCH)\" not on branch \"master\""
+endif
+
+push-node-10:
+ifeq ($(GIT_BRANCH), master)
 	docker push gone/node:10
 	docker push gone/node:10-$(DATE)
 	docker push gone/node:10-$(ARCH)-$(DATE)
 	docker push gone/node:10-$(ARCH)
+else
+	echo "Skipping push, on branch \"$(GIT_BRANCH)\" not on branch \"master\""
+endif
+
+push-node-11:
+ifeq ($(GIT_BRANCH), master)
 	docker push gone/node:11
 	docker push gone/node:11-$(DATE)
 	docker push gone/node:11-$(ARCH)-$(DATE)
 	docker push gone/node:11-$(ARCH)
+else
+	echo "Skipping push, on branch \"$(GIT_BRANCH)\" not on branch \"master\""
+endif
+
+push-node-12:
+ifeq ($(GIT_BRANCH), master)
 	docker push gone/node:12
 	docker push gone/node:12-$(DATE)
 	docker push gone/node:12-$(ARCH)-$(DATE)

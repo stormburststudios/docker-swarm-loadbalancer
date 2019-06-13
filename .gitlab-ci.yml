@@ -48,21 +48,65 @@ build:php-core:master:
   only:
     - master
 
-build:node-core:
+build:node-core:8:
   stage: core
   script:
-    - make -f Makefile.working build-node
+    - make -f Makefile.working build-node-8
   except:
     - master
 
-build:node-core:master:
+build:node-core:8:master:
   stage: core
   script:
-    - make -f Makefile.working build-node
-    - make -f Makefile.working push-node
+    - make -f Makefile.working build-node-8
+    - make -f Makefile.working push-node-8
   only:
     - master
 
+build:node-core:10:
+  stage: core
+  script:
+    - make -f Makefile.working build-node-10
+  except:
+    - master
+
+build:node-core:10:master:
+  stage: core
+  script:
+    - make -f Makefile.working build-node-10
+    - make -f Makefile.working push-node-10
+  only:
+    - master
+      
+build:node-core:11:
+  stage: core
+  script:
+    - make -f Makefile.working build-node-11
+  except:
+    - master
+
+build:node-core:11:master:
+  stage: core
+  script:
+    - make -f Makefile.working build-node-11
+    - make -f Makefile.working push-node-11
+  only:
+    - master
+      
+build:node-core:12:
+  stage: core
+  script:
+    - make -f Makefile.working build-node-12
+  except:
+    - master
+
+build:node-core:12:master:
+  stage: core
+  script:
+    - make -f Makefile.working build-node-12
+    - make -f Makefile.working push-node-12
+  only:
+    - master
 
 build:derived:cli:
   stage: derived

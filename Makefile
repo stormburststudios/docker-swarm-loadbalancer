@@ -490,12 +490,12 @@ aliases:
 	docker tag gone/php:cli-php7.3 gone/php:cli
 	docker tag gone/php:nginx-php7.3 gone/php:nginx
 	docker tag gone/php:apache-php7.3 gone/php:apache
-	docker tag gone/node:12 gone/node
+	docker tag gone/node:12 gone/node:latest
 
 	docker push gone/php:cli
 	docker push gone/php:nginx
 	docker push gone/php:apache
-	docker push gone/node
+	docker push gone/node:latest
 
 readme:
 	./docs

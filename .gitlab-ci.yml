@@ -405,4 +405,4 @@ nginx:7.3:master:
 aliases:
   stage: post
   script:
-    - make -f Makefile.working
+    - make -f Makefile.working aliases

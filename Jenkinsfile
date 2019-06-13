@@ -238,6 +238,7 @@ pipeline {
             parallel {
                 stage('Push') {
                     agent { node { label 'x86' } }
+                    when { branch 'master' }
                     steps {
                          sh 'make push-marshall'
                          sh 'make push-core'
@@ -245,6 +246,7 @@ pipeline {
                          sh 'make push-nginx'
                          sh 'make push-apache'
                          sh 'make push-node'
+                         sh 'make aliases'
                          telegramSend 'Updated Base Images have been pushed'
                     }
                 }

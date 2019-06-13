@@ -35,18 +35,22 @@ build-php-core-5.6:
 	docker build --pull -t gone/php:core-5.6 -f ./php-core/Dockerfile.php56 ./php-core
 	docker tag gone/php:core-5.6 gone/php:core-5.6-$(ARCH)
 	docker tag gone/php:core-5.6 gone/php:core-5.6-$(ARCH)-$(DATE)
+
 build-php-core-7.0:
 	docker build --pull -t gone/php:core-7.0 -f ./php-core/Dockerfile.php70 ./php-core
 	docker tag gone/php:core-7.0 gone/php:core-7.0-$(ARCH)
 	docker tag gone/php:core-7.0 gone/php:core-7.0-$(ARCH)-$(DATE)
+
 build-php-core-7.1:
 	docker build --pull -t gone/php:core-7.1 -f ./php-core/Dockerfile.php71 ./php-core
 	docker tag gone/php:core-7.1 gone/php:core-7.1-$(ARCH)
 	docker tag gone/php:core-7.1 gone/php:core-7.1-$(ARCH)-$(DATE)
+
 build-php-core-7.2:
 	docker build --pull -t gone/php:core-7.2 -f ./php-core/Dockerfile.php72 ./php-core
 	docker tag gone/php:core-7.2 gone/php:core-7.2-$(ARCH)
 	docker tag gone/php:core-7.2 gone/php:core-7.2-$(ARCH)-$(DATE)
+
 build-php-core-7.3:
 	docker build --pull -t gone/php:core-7.3 -f ./php-core/Dockerfile.php73 ./php-core
 	docker tag gone/php:core-7.3 gone/php:core-7.3-$(ARCH)
@@ -93,15 +97,6 @@ build-php-cli-7.3:
 	docker tag gone/php:cli-php7.3 gone/php:cli-php7.3-$(ARCH)-$(DATE)
 	rm ./php+cli/Dockerfile.php73
 
-tag-php-cli:
-	docker run gone/php:cli-php5.6 php --version
-	docker run gone/php:cli-php7.0 php --version
-	docker run gone/php:cli-php7.1 php --version
-	docker run gone/php:cli-php7.2 php --version
-	docker run gone/php:cli-php7.3 php --version
-	docker tag gone/php:cli-php7.3 gone/php:cli-$(ARCH)-$(DATE)
-	docker tag gone/php:cli-php7.3 gone/php:cli-$(ARCH)
-	docker tag gone/php:cli-php7.3 gone/php:cli
 
 build-php-cli: build-php-cli-7.0 build-php-cli-7.1 build-php-cli-7.2 build-php-cli-7.3 tag-php-cli
 
@@ -315,16 +310,24 @@ build-node-12:
 
 build-node: build-node-8 build-node-10 build-node-11 build-node-12
 
-tag-node:
+tag-node: tag-node-8 tag-node-10 tag-node-11 tag-node-12
+
+tag-node-8:
 	docker tag gone/node:8  gone/node:8-$(DATE)
 	docker tag gone/node:8  gone/node:8-$(ARCH)-$(DATE)
 	docker tag gone/node:8  gone/node:8-$(ARCH)
+
+tag-node-10:
 	docker tag gone/node:10 gone/node:10-$(DATE)
 	docker tag gone/node:10 gone/node:10-$(ARCH)-$(DATE)
 	docker tag gone/node:10 gone/node:10-$(ARCH)
+
+tag-node-11:
 	docker tag gone/node:11 gone/node:11-$(DATE)
 	docker tag gone/node:11 gone/node:11-$(ARCH)-$(DATE)
 	docker tag gone/node:11 gone/node:11-$(ARCH)
+
+tag-node-12:
 	docker tag gone/node:12 gone/node:12-$(DATE)
 	docker tag gone/node:12 gone/node:12-$(ARCH)-$(DATE)
 	docker tag gone/node:12 gone/node:12-$(ARCH)
@@ -340,157 +343,149 @@ build:
 	$(MAKE) build-node
 
 push-marshall:
-ifeq ($(GIT_BRANCH), master)
 	docker push gone/marshall:latest
 	docker push gone/marshall:$(DATE)
 	docker push gone/marshall:$(ARCH)
 	docker push gone/marshall:$(ARCH)-$(DATE)
-else
-	echo "Skipping push, on branch \"$(GIT_BRANCH)\" not on branch \"master\""
-endif
 
-push-core:
-ifeq ($(GIT_BRANCH), master)
+push-core-5.6:
 	docker push gone/php:core-5.6-$(ARCH)-$(DATE)
 	docker push gone/php:core-5.6-$(ARCH)
 	docker push gone/php:core-5.6
+
+push-core-7.0:
 	docker push gone/php:core-7.0-$(ARCH)-$(DATE)
 	docker push gone/php:core-7.0-$(ARCH)
 	docker push gone/php:core-7.0
+
+push-core-7.1:
 	docker push gone/php:core-7.1-$(ARCH)-$(DATE)
 	docker push gone/php:core-7.1-$(ARCH)
 	docker push gone/php:core-7.1
+
+push-core-7.2:
 	docker push gone/php:core-7.2-$(ARCH)-$(DATE)
 	docker push gone/php:core-7.2-$(ARCH)
 	docker push gone/php:core-7.2
+
+push-core-7.3:
 	docker push gone/php:core-7.3-$(ARCH)-$(DATE)
 	docker push gone/php:core-7.3-$(ARCH)
 	docker push gone/php:core-7.3
 
-	docker push gone/php:core-$(ARCH)
-	docker push gone/php:core
-else
-	echo "Skipping push, on branch \"$(GIT_BRANCH)\" not on branch \"master\""
-endif
-
-push-cli:
-ifeq ($(GIT_BRANCH), master)
+push-cli-5.6:
 	docker push gone/php:cli-php5.6-$(ARCH)-$(DATE)
 	docker push gone/php:cli-php5.6-$(ARCH)
 	docker push gone/php:cli-php5.6
+
+push-cli-7.0:
 	docker push gone/php:cli-php7.0-$(ARCH)-$(DATE)
 	docker push gone/php:cli-php7.0-$(ARCH)
 	docker push gone/php:cli-php7.0
+
+push-cli-7.1:
 	docker push gone/php:cli-php7.1-$(ARCH)-$(DATE)
 	docker push gone/php:cli-php7.1-$(ARCH)
 	docker push gone/php:cli-php7.1
+
+push-cli-7.2:
 	docker push gone/php:cli-php7.2-$(ARCH)-$(DATE)
 	docker push gone/php:cli-php7.2-$(ARCH)
 	docker push gone/php:cli-php7.2
+
+push-cli-7.3:
 	docker push gone/php:cli-php7.3-$(ARCH)-$(DATE)
 	docker push gone/php:cli-php7.3-$(ARCH)
 	docker push gone/php:cli-php7.3
 
-	docker push gone/php:cli-$(ARCH)-$(DATE)
-	docker push gone/php:cli-$(ARCH)
-	docker push gone/php:cli
-else
-	echo "Skipping push, on branch \"$(GIT_BRANCH)\" not on branch \"master\""
-endif
-
-push-apache:
-ifeq ($(GIT_BRANCH), master)
+push-apache-5.6:
 	docker push gone/php:apache-php5.6-$(ARCH)-$(DATE)
 	docker push gone/php:apache-php5.6-$(ARCH)
 	docker push gone/php:apache-php5.6
+
+push-apache-7.0:
 	docker push gone/php:apache-php7.0-$(ARCH)-$(DATE)
 	docker push gone/php:apache-php7.0-$(ARCH)
 	docker push gone/php:apache-php7.0
+
+push-apache-7.1:
 	docker push gone/php:apache-php7.1-$(ARCH)-$(DATE)
 	docker push gone/php:apache-php7.1-$(ARCH)
 	docker push gone/php:apache-php7.1
+
+push-apache-7.2:
 	docker push gone/php:apache-php7.2-$(ARCH)-$(DATE)
 	docker push gone/php:apache-php7.2-$(ARCH)
 	docker push gone/php:apache-php7.2
+
+push-apache-7.3:
 	docker push gone/php:apache-php7.3-$(ARCH)-$(DATE)
 	docker push gone/php:apache-php7.3-$(ARCH)
 	docker push gone/php:apache-php7.3
 
-	docker push gone/php:apache-$(ARCH)-$(DATE)
-	docker push gone/php:apache-$(ARCH)
-	docker push gone/php:apache
-else
-	echo "Skipping push, on branch \"$(GIT_BRANCH)\" not on branch \"master\""
-endif
-
-push-nginx:
-ifeq ($(GIT_BRANCH), master)
+push-nginx-5.6:
 	docker push gone/php:nginx-php5.6-$(ARCH)-$(DATE)
 	docker push gone/php:nginx-php5.6-$(ARCH)
 	docker push gone/php:nginx-php5.6
+	
+push-nginx-7.0:
 	docker push gone/php:nginx-php7.0-$(ARCH)-$(DATE)
 	docker push gone/php:nginx-php7.0-$(ARCH)
 	docker push gone/php:nginx-php7.0
+	
+push-nginx-7.1:
 	docker push gone/php:nginx-php7.1-$(ARCH)-$(DATE)
 	docker push gone/php:nginx-php7.1-$(ARCH)
 	docker push gone/php:nginx-php7.1
+	
+push-nginx-7.2:
 	docker push gone/php:nginx-php7.2-$(ARCH)-$(DATE)
 	docker push gone/php:nginx-php7.2-$(ARCH)
 	docker push gone/php:nginx-php7.2
+	
+push-nginx-7.3:
 	docker push gone/php:nginx-php7.3-$(ARCH)-$(DATE)
 	docker push gone/php:nginx-php7.3-$(ARCH)
 	docker push gone/php:nginx-php7.3
-	
-	docker push gone/php:nginx-$(ARCH)-$(DATE)
-	docker push gone/php:nginx-$(ARCH)
-	docker push gone/php:nginx
-else
-	echo "Skipping push, on branch \"$(GIT_BRANCH)\" not on branch \"master\""
-endif
-
-push-node: push-node-8 push-node-10 push-node-11 push-node-12
 
 push-node-8:
-ifeq ($(GIT_BRANCH), master)
 	docker push gone/node:8
 	docker push gone/node:8-$(DATE)
 	docker push gone/node:8-$(ARCH)-$(DATE)
 	docker push gone/node:8-$(ARCH)
-else
-	echo "Skipping push, on branch \"$(GIT_BRANCH)\" not on branch \"master\""
-endif
 
 push-node-10:
-ifeq ($(GIT_BRANCH), master)
 	docker push gone/node:10
 	docker push gone/node:10-$(DATE)
 	docker push gone/node:10-$(ARCH)-$(DATE)
 	docker push gone/node:10-$(ARCH)
-else
-	echo "Skipping push, on branch \"$(GIT_BRANCH)\" not on branch \"master\""
-endif
 
 push-node-11:
-ifeq ($(GIT_BRANCH), master)
 	docker push gone/node:11
 	docker push gone/node:11-$(DATE)
 	docker push gone/node:11-$(ARCH)-$(DATE)
 	docker push gone/node:11-$(ARCH)
-else
-	echo "Skipping push, on branch \"$(GIT_BRANCH)\" not on branch \"master\""
-endif
 
 push-node-12:
-ifeq ($(GIT_BRANCH), master)
 	docker push gone/node:12
 	docker push gone/node:12-$(DATE)
 	docker push gone/node:12-$(ARCH)-$(DATE)
 	docker push gone/node:12-$(ARCH)
-else
-	echo "Skipping push, on branch \"$(GIT_BRANCH)\" not on branch \"master\""
-endif
 
+push-core: push-core-5.6 push-core-7.0 push-core-7.1 push-core-7.2 push-core-7.3
+push-cli: push-cli-5.6 push-cli-7.0 push-cli-7.1 push-cli-7.2 push-cli-7.3
+push-apache: push-apache-5.6 push-apache-7.0 push-apache-7.1 push-apache-7.2 push-apache-7.3
+push-nginx: push-nginx-5.6 push-nginx-7.0 push-nginx-7.1 push-nginx-7.2 push-nginx-7.3
+push-node: push-node-8 push-node-10 push-node-11 push-node-12
 push: push-marshall push-core push-cli push-apache push-nginx push-node
+
+aliases:
+	docker tag gone/php:cli-php7.3 gone/php:cli
+	docker push gone/php:cli
+	docker tag gone/php:nginx-php7.3 gone/php:nginx
+	docker push gone/php:nginx
+	docker tag gone/php:apache-php7.3 gone/php:apache
+	docker push gone/php:apache
 
 readme:
 	./docs

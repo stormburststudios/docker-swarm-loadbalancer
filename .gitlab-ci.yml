@@ -2,6 +2,11 @@ image: gone/mule
 
 services:
   - docker:dind
+    
+stages:
+  - marshall
+  - core
+  - derived
 
 before_script:
   - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
@@ -14,16 +19,92 @@ after_script:
   - rm Makefile.working
 
 build:marshall:
-  stage: build
+  stage: marshall
   script:
     - make -f Makefile.working build-marshall
   except:
     - master
 
 build:marshall:master:
-  stage: build
+  stage: marshall
   script:
     - make -f Makefile.working build-marshall
     - make -f Makefile.working push-marshall
+  only:
+    - master
+
+build:php-core:
+  stage: core
+  script:
+    - make -f Makefile.working build-php-core
+  except:
+    - master
+
+build:php-core:master:
+  stage: core
+  script:
+    - make -f Makefile.working build-php-core
+    - make -f Makefile.working push-core
+  only:
+    - master
+
+build:node-core:
+  stage: core
+  script:
+    - make -f Makefile.working build-node
+  except:
+    - master
+
+build:node-core:master:
+  stage: core
+  script:
+    - make -f Makefile.working build-node
+    - make -f Makefile.working push-node
+  only:
+    - master
+
+
+build:derived:cli:
+  stage: derived
+  script:
+    - make -f Makefile.working build-php-cli
+  except:
+    - master
+
+build:derived:cli:master:
+  stage: derived
+  script:
+    - make -f Makefile.working build-php-cli
+    - make -f Makefile.working push-cli
+  only:
+    - master
+      
+build:derived:apache:
+  stage: derived
+  script:
+    - make -f Makefile.working build-php-apache
+  except:
+    - master
+
+build:derived:apache:master:
+  stage: derived
+  script:
+    - make -f Makefile.working build-php-apache
+    - make -f Makefile.working push-apache
+  only:
+    - master
+      
+build:derived:nginx:
+  stage: derived
+  script:
+    - make -f Makefile.working build-php-nginx
+  except:
+    - master
+
+build:derived:nginx:master:
+  stage: derived
+  script:
+    - make -f Makefile.working build-php-nginx
+    - make -f Makefile.working push-nginx
   only:
     - master

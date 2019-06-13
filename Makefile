@@ -480,12 +480,20 @@ push-node: push-node-8 push-node-10 push-node-11 push-node-12
 push: push-marshall push-core push-cli push-apache push-nginx push-node
 
 aliases:
+	docker pull gone/php:cli-php7.3
+	docker pull gone/php:nginx-php7.3
+	docker pull gone/php:apache-php7.3
+	docker pull gone/node:12
+
 	docker tag gone/php:cli-php7.3 gone/php:cli
-	docker push gone/php:cli
 	docker tag gone/php:nginx-php7.3 gone/php:nginx
-	docker push gone/php:nginx
 	docker tag gone/php:apache-php7.3 gone/php:apache
+	docker tag gone/node:12 gone/node
+
+	docker push gone/php:cli
+	docker push gone/php:nginx
 	docker push gone/php:apache
+	docker push gone/node
 
 readme:
 	./docs

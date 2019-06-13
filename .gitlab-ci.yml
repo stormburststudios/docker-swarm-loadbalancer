@@ -7,6 +7,7 @@ stages:
   - precursor
   - core
   - derived
+  - post
 
 before_script:
   - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
@@ -33,14 +34,14 @@ marshall:master:
   only:
     - master
 
-core:php:5.6:
+php:5.6:
   stage: core
   script:
     - make -f Makefile.working build-php-core-5.6
   except:
     - master
 
-core:php:5.6:master:
+php:5.6:master:
   stage: core
   script:
     - make -f Makefile.working build-php-core-5.6
@@ -48,14 +49,14 @@ core:php:5.6:master:
   only:
     - master
 
-core:php:7.0:
+php:7.0:
   stage: core
   script:
     - make -f Makefile.working build-php-core-7.0
   except:
     - master
 
-core:php:7.0:master:
+php:7.0:master:
   stage: core
   script:
     - make -f Makefile.working build-php-core-7.0
@@ -63,14 +64,14 @@ core:php:7.0:master:
   only:
     - master
 
-core:php:7.1:
+php:7.1:
   stage: core
   script:
     - make -f Makefile.working build-php-core-7.1
   except:
     - master
 
-core:php:7.1:master:
+php:7.1:master:
   stage: core
   script:
     - make -f Makefile.working build-php-core-7.1
@@ -78,14 +79,14 @@ core:php:7.1:master:
   only:
     - master
 
-core:php:7.2:
+php:7.2:
   stage: core
   script:
     - make -f Makefile.working build-php-core-7.2
   except:
     - master
 
-core:php:7.2:master:
+php:7.2:master:
   stage: core
   script:
     - make -f Makefile.working build-php-core-7.2
@@ -93,14 +94,14 @@ core:php:7.2:master:
   only:
     - master
 
-core:php:7.3:
+php:7.3:
   stage: core
   script:
     - make -f Makefile.working build-php-core-7.3
   except:
     - master
 
-core:php:7.3:master:
+php:7.3:master:
   stage: core
   script:
     - make -f Makefile.working build-php-core-7.3
@@ -108,14 +109,14 @@ core:php:7.3:master:
   only:
     - master
 
-core:node:8:
+node:8:
   stage: core
   script:
     - make -f Makefile.working build-node-8
   except:
     - master
 
-core:node:8:master:
+node:8:master:
   stage: core
   script:
     - make -f Makefile.working build-node-8
@@ -124,14 +125,14 @@ core:node:8:master:
   only:
     - master
 
-core:node:10:
+node:10:
   stage: core
   script:
     - make -f Makefile.working build-node-10
   except:
     - master
 
-core:node:10:master:
+node:10:master:
   stage: core
   script:
     - make -f Makefile.working build-node-10
@@ -140,14 +141,14 @@ core:node:10:master:
   only:
     - master
       
-core:node:11:
+node:11:
   stage: core
   script:
     - make -f Makefile.working build-node-11
   except:
     - master
 
-core:node:11:master:
+node:11:master:
   stage: core
   script:
     - make -f Makefile.working build-node-11
@@ -156,14 +157,14 @@ core:node:11:master:
   only:
     - master
       
-core:node:12:
+node:12:
   stage: core
   script:
     - make -f Makefile.working build-node-12
   except:
     - master
 
-core:node:12:master:
+node:12:master:
   stage: core
   script:
     - make -f Makefile.working build-node-12
@@ -172,14 +173,14 @@ core:node:12:master:
   only:
     - master
 
-derived:cli:5.6:
+cli:5.6:
   stage: derived
   script:
     - make -f Makefile.working build-php-cli-5.6
   except:
     - master
 
-derived:cli:5.6:master:
+cli:5.6:master:
   stage: derived
   script:
     - make -f Makefile.working build-php-cli-5.6
@@ -187,14 +188,14 @@ derived:cli:5.6:master:
   only:
     - master
 
-derived:apache:5.6:
+apache:5.6:
   stage: derived
   script:
     - make -f Makefile.working build-php-apache-5.6
   except:
     - master
 
-derived:apache:5.6:master:
+apache:5.6:master:
   stage: derived
   script:
     - make -f Makefile.working build-php-apache-5.6
@@ -202,14 +203,14 @@ derived:apache:5.6:master:
   only:
     - master
 
-derived:nginx:5.6:
+nginx:5.6:
   stage: derived
   script:
     - make -f Makefile.working build-php-nginx
   except:
     - master
 
-derived:nginx:5.6:master:
+nginx:5.6:master:
   stage: derived
   script:
     - make -f Makefile.working build-php-nginx-5.6
@@ -218,14 +219,14 @@ derived:nginx:5.6:master:
     - master
 
 
-derived:cli:7.0:
+cli:7.0:
   stage: derived
   script:
     - make -f Makefile.working build-php-cli-7.0
   except:
     - master
 
-derived:cli:7.0:master:
+cli:7.0:master:
   stage: derived
   script:
     - make -f Makefile.working build-php-cli-7.0
@@ -233,14 +234,14 @@ derived:cli:7.0:master:
   only:
     - master
 
-derived:apache:7.0:
+apache:7.0:
   stage: derived
   script:
     - make -f Makefile.working build-php-apache-7.0
   except:
     - master
 
-derived:apache:7.0:master:
+apache:7.0:master:
   stage: derived
   script:
     - make -f Makefile.working build-php-apache-7.0
@@ -248,14 +249,14 @@ derived:apache:7.0:master:
   only:
     - master
 
-derived:nginx:7.0:
+nginx:7.0:
   stage: derived
   script:
     - make -f Makefile.working build-php-nginx
   except:
     - master
 
-derived:nginx:7.0:master:
+nginx:7.0:master:
   stage: derived
   script:
     - make -f Makefile.working build-php-nginx-7.0
@@ -264,14 +265,14 @@ derived:nginx:7.0:master:
     - master
 
 
-derived:cli:7.1:
+cli:7.1:
   stage: derived
   script:
     - make -f Makefile.working build-php-cli-7.1
   except:
     - master
 
-derived:cli:7.1:master:
+cli:7.1:master:
   stage: derived
   script:
     - make -f Makefile.working build-php-cli-7.1
@@ -279,14 +280,14 @@ derived:cli:7.1:master:
   only:
     - master
 
-derived:apache:7.1:
+apache:7.1:
   stage: derived
   script:
     - make -f Makefile.working build-php-apache-7.1
   except:
     - master
 
-derived:apache:7.1:master:
+apache:7.1:master:
   stage: derived
   script:
     - make -f Makefile.working build-php-apache-7.1
@@ -294,14 +295,14 @@ derived:apache:7.1:master:
   only:
     - master
 
-derived:nginx:7.1:
+nginx:7.1:
   stage: derived
   script:
     - make -f Makefile.working build-php-nginx
   except:
     - master
 
-derived:nginx:7.1:master:
+nginx:7.1:master:
   stage: derived
   script:
     - make -f Makefile.working build-php-nginx-7.1
@@ -310,14 +311,14 @@ derived:nginx:7.1:master:
     - master
 
 
-derived:cli:7.2:
+cli:7.2:
   stage: derived
   script:
     - make -f Makefile.working build-php-cli-7.2
   except:
     - master
 
-derived:cli:7.2:master:
+cli:7.2:master:
   stage: derived
   script:
     - make -f Makefile.working build-php-cli-7.2
@@ -325,14 +326,14 @@ derived:cli:7.2:master:
   only:
     - master
 
-derived:apache:7.2:
+apache:7.2:
   stage: derived
   script:
     - make -f Makefile.working build-php-apache-7.2
   except:
     - master
 
-derived:apache:7.2:master:
+apache:7.2:master:
   stage: derived
   script:
     - make -f Makefile.working build-php-apache-7.2
@@ -340,14 +341,14 @@ derived:apache:7.2:master:
   only:
     - master
 
-derived:nginx:7.2:
+nginx:7.2:
   stage: derived
   script:
     - make -f Makefile.working build-php-nginx
   except:
     - master
 
-derived:nginx:7.2:master:
+nginx:7.2:master:
   stage: derived
   script:
     - make -f Makefile.working build-php-nginx-7.2
@@ -356,14 +357,14 @@ derived:nginx:7.2:master:
     - master
 
 
-derived:cli:7.3:
+cli:7.3:
   stage: derived
   script:
     - make -f Makefile.working build-php-cli-7.3
   except:
     - master
 
-derived:cli:7.3:master:
+cli:7.3:master:
   stage: derived
   script:
     - make -f Makefile.working build-php-cli-7.3
@@ -371,14 +372,14 @@ derived:cli:7.3:master:
   only:
     - master
 
-derived:apache:7.3:
+apache:7.3:
   stage: derived
   script:
     - make -f Makefile.working build-php-apache-7.3
   except:
     - master
 
-derived:apache:7.3:master:
+apache:7.3:master:
   stage: derived
   script:
     - make -f Makefile.working build-php-apache-7.3
@@ -386,17 +387,22 @@ derived:apache:7.3:master:
   only:
     - master
 
-derived:nginx:7.3:
+nginx:7.3:
   stage: derived
   script:
     - make -f Makefile.working build-php-nginx
   except:
     - master
 
-derived:nginx:7.3:master:
+nginx:7.3:master:
   stage: derived
   script:
     - make -f Makefile.working build-php-nginx-7.3
     - make -f Makefile.working push-nginx-7.3
   only:
     - master
+
+aliases:
+  stage: post
+  script:
+    - make -f Makefile.working

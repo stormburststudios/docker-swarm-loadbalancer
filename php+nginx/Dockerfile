@@ -50,10 +50,8 @@ RUN rm -fr /var/www/html && \
     mv NginxDefault /etc/nginx/sites-enabled/default && \
     mkdir /etc/service/nginx && \
     mkdir /etc/service/php-fpm && \
-    mkdir /etc/service/show_logs && \
-    mv run.nginx.sh /etc/service/nginx/run && \
-    mv run.php-fpm.sh /etc/service/php-fpm/run && \
-    mv run.show_logs.sh /etc/service/show_logs/run && \
+    mv nginx.runit /etc/service/nginx/run && \
+    mv php-fpm.runit /etc/service/php-fpm/run && \
     chmod +x /etc/service/*/run && \
     rm /app/* && \
     sed -i "s/{{PHP}}/{{PHPVERSION}}/g" /etc/nginx/sites-enabled/default && \

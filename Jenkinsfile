@@ -9,7 +9,6 @@ pipeline {
             steps {
                  sh 'printenv'
                  telegramSend "Pipeline STARTED: `${env.JOB_NAME}`\n\nAuthor: `${env.GIT_AUTHOR_NAME} <${env.GIT_AUTHOR_EMAIL}>`\nBuild Number: ${env.BUILD_NUMBER}\n\n${env.RUN_DISPLAY_URL}"
-                 sh 'make prepare'
             }
         }
         stage('Build Marshall') {
@@ -18,6 +17,7 @@ pipeline {
                     agent { node { label 'x86' } }
                     when { not { branch 'master' } }
                     steps {
+                         sh 'make prepare'
                          sh 'make build-marshall'
                     }
                 }
@@ -25,6 +25,7 @@ pipeline {
                     agent { node { label 'x86' } }
                     when {  branch 'master' }
                     steps {
+                         sh 'make prepare'
                          sh 'make build-marshall'
                          sh 'make push-marshall'
                     }

@@ -10,7 +10,7 @@ ENV DEBIAN_FRONTEND="teletype" \
     COLOUR_NONE='\e[39m' \
     DEFAULT_TZ='Europe/London'
 
-CMD ["/usr/bin/runsvdir-start"]
+CMD ["runsvdir", "-P", "/etc/service"]
 
 WORKDIR /app
 

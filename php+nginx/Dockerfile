@@ -22,20 +22,7 @@ RUN apt-get -qq update && \
         && \
     apt-get autoremove -y && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    \
-    sed -i "s/cgi.fix_pathinfo.*/cgi.fix_pathinfo=0/g" /etc/php/{{PHPVERSION}}/fpm/php.ini && \
-    sed -i "s/upload_max_filesize.*/upload_max_filesize = 1024M/g" /etc/php/{{PHPVERSION}}/fpm/php.ini && \
-    sed -i "s/post_max_size.*/post_max_size = 1024M/g" /etc/php/{{PHPVERSION}}/fpm/php.ini && \
-    sed -i "s/max_execution_time.*/max_execution_time = 0/g" /etc/php/{{PHPVERSION}}/fpm/php.ini && \
-    sed -i "s/variables_order.*/variables_order = \"EGPCS\"/g" /etc/php/{{PHPVERSION}}/fpm/php.ini && \
-    sed -i "s/error_reporting.*/error_reporting = E_ALL \& \~E_DEPRECATED \& \~E_STRICT \& \~E_CORE_WARNING/g" /etc/php/{{PHPVERSION}}/fpm/php.ini && \
-    cp /etc/php/{{PHPVERSION}}/fpm/php.ini /etc/php/{{PHPVERSION}}/cli/php.ini && \
-    echo "clear_env=no" >> /etc/php/{{PHPVERSION}}/fpm/php-fpm.conf && \
-    echo "clear_env=no" >> /etc/php/{{PHPVERSION}}/fpm/pool.d/www.ini && \
-    mkdir /run/php && \
-    cat /etc/php/{{PHPVERSION}}/fpm/php-fpm.conf | grep clear_env && \
-    cat /etc/php/{{PHPVERSION}}/fpm/pool.d/www.ini | grep clear_env
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Expose ports.
 EXPOSE 80
@@ -45,7 +32,9 @@ HEALTHCHECK --interval=30s --timeout=3s \
     CMD curl -f http://localhost/ || exit 1
 
 COPY . /app
-RUN rm -fr /var/www/html && \
+RUN bash /app/configure-nginx.php{{PHPVERSION}}.sh && \
+    rm -f /app/configure-nginx.php{{PHPVERSION}}.sh && \
+    rm -fr /var/www/html && \
     ln -s /app /var/www/html && \
     mv NginxDefault /etc/nginx/sites-enabled/default && \
     mkdir /etc/service/nginx && \

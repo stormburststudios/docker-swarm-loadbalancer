@@ -3,10 +3,13 @@ FROM gone/marshall:latest
 #RUN groupadd --gid 1000 node \
 #  && useradd --uid 1000 --gid node --shell /bin/bash --create-home node
 
-ENV NODE_VERSION {{NODE_VERSION}}
-ENV YARN_VERSION {{YARN_VERSION}}
+ENV NODE_VERSION={{NODE_VERSION}} \
+    YARN_VERSION={{YARN_VERSION}} \
+    PATH="/app/node_modules/.bin:${PATH}"
 
-RUN apt-get -qq update && \
+RUN mkdir ~/.gnupg && \
+    echo "disable-ipv6" >> ~/.gnupg/dirmngr.conf && \
+    apt-get -qq update && \
     apt-get -yq install --no-install-recommends \
         lsb-core \
         gnupg \
@@ -67,8 +70,6 @@ RUN apt-get -qq update && \
   && ln -s /opt/yarn-v$YARN_VERSION/bin/yarn /usr/local/bin/yarn \
   && ln -s /opt/yarn-v$YARN_VERSION/bin/yarnpkg /usr/local/bin/yarnpkg \
   && rm yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz
-
-ENV PATH="/app/node_modules/.bin:${PATH}"
 
 EXPOSE 3000
 

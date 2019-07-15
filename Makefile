@@ -22,8 +22,8 @@ prepare:
 	hostname > marshall/marshall_build_host
 
 cleanup:
-	docker rmi $(docker image ls | grep gone/php | sed 's/ \+ /\t/g' | cut -d$'\t' -f2 | grep -v "<none>" | xargs -n1 echo "gone/php:" | sed 's/ //g')
-	docker rmi $(docker image ls | grep gone/node | sed 's/ \+ /\t/g' | cut -d$'\t' -f2 | grep -v "<none>" | xargs -n1 echo "gone/node:" | sed 's/ //g')
+	-docker rmi $(docker image ls | grep gone/php | sed 's/ \+ /\t/g' | cut -d$'\t' -f2 | grep -v "<none>" | xargs -n1 echo "gone/php:" | sed 's/ //g')
+	-docker rmi $(docker image ls | grep gone/node | sed 's/ \+ /\t/g' | cut -d$'\t' -f2 | grep -v "<none>" | xargs -n1 echo "gone/node:" | sed 's/ //g')
 
 build-base: prepare build-marshall
 

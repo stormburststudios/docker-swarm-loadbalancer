@@ -9,4 +9,5 @@ $APT_GET \
     wget \
     unzip \
     git \
-    ca-certificates \
+    openssh-client \
+    ca-certificates

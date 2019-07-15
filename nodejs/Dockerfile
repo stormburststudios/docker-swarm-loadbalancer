@@ -77,7 +77,7 @@ EXPOSE 3000
 
 ONBUILD ADD ./ /app
 
-ONBUILD RUN npm install && \
-    #npm run build && \
-    mkdir "/app/tmp" -p
+#ONBUILD RUN npm install && \
+#    #npm run build && \
+#    mkdir "/app/tmp" -p
 

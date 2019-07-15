@@ -289,55 +289,79 @@ build-php-7.3: build-base build-php-core-7.3 build-php-cli-7.3 build-php-apache-
 
 build-node-8:
 	cp ./nodejs/Dockerfile ./nodejs/Dockerfile.node8
+	cp ./nodejs/Dockerfile.withBuildTools ./nodejs/Dockerfile.node8.withBuildTools
 	sed -i 's/{{NODE_VERSION}}/8\.16\.0/g' ./nodejs/Dockerfile.node8
 	sed -i 's/{{YARN_VERSION}}/1\.15\.2/g' ./nodejs/Dockerfile.node8
+	sed -i 's/{{NODE_WITHOUT_BUILD_TOOLS}}/gone\/node\:8/g' ./nodejs/Dockerfile.node8.withBuildTools
 	docker build --pull -t gone/node:8 -f ./nodejs/Dockerfile.node8 ./nodejs
-	rm ./nodejs/Dockerfile.node8
+	docker build --pull -t gone/node:8-gcc -f ./nodejs/Dockerfile.node8.withBuildTools ./nodejs
+	rm ./nodejs/Dockerfile.node8 ./nodejs/Dockerfile.node8.withBuildTools
 
 build-node-10:
 	cp ./nodejs/Dockerfile ./nodejs/Dockerfile.node10
+	cp ./nodejs/Dockerfile.withBuildTools ./nodejs/Dockerfile.node10.withBuildTools
 	sed -i 's/{{NODE_VERSION}}/10\.16\.0/g' ./nodejs/Dockerfile.node10
 	sed -i 's/{{YARN_VERSION}}/1\.16\.0/g' ./nodejs/Dockerfile.node10
+	sed -i 's/{{NODE_WITHOUT_BUILD_TOOLS}}/gone\/node\:10/g' ./nodejs/Dockerfile.node10.withBuildTools
 	docker build --pull -t gone/node:10 -f ./nodejs/Dockerfile.node10 ./nodejs
-	rm ./nodejs/Dockerfile.node10
+	docker build --pull -t gone/node:10-gcc -f ./nodejs/Dockerfile.node10.withBuildTools ./nodejs
+	rm ./nodejs/Dockerfile.node10 ./nodejs/Dockerfile.node10.withBuildTools
 
 build-node-11:
 	cp ./nodejs/Dockerfile ./nodejs/Dockerfile.node11
+	cp ./nodejs/Dockerfile.withBuildTools ./nodejs/Dockerfile.node11.withBuildTools
 	sed -i 's/{{NODE_VERSION}}/11\.15\.0/g' ./nodejs/Dockerfile.node11
 	sed -i 's/{{YARN_VERSION}}/1\.16\.0/g' ./nodejs/Dockerfile.node11
+	sed -i 's/{{NODE_WITHOUT_BUILD_TOOLS}}/gone\/node\:11/g' ./nodejs/Dockerfile.node11.withBuildTools
 	docker build --pull -t gone/node:11 -f ./nodejs/Dockerfile.node11 ./nodejs
-	rm ./nodejs/Dockerfile.node11
+	docker build --pull -t gone/node:11-gcc -f ./nodejs/Dockerfile.node11.withBuildTools ./nodejs
+	rm ./nodejs/Dockerfile.node11 ./nodejs/Dockerfile.node11.withBuildTools
 
 build-node-12:
 	cp ./nodejs/Dockerfile ./nodejs/Dockerfile.node12
+	cp ./nodejs/Dockerfile.withBuildTools ./nodejs/Dockerfile.node12.withBuildTools
 	sed -i 's/{{NODE_VERSION}}/12\.3\.1/g' ./nodejs/Dockerfile.node12
 	sed -i 's/{{YARN_VERSION}}/1\.16\.0/g' ./nodejs/Dockerfile.node12
+	sed -i 's/{{NODE_WITHOUT_BUILD_TOOLS}}/gone\/node\:12/g' ./nodejs/Dockerfile.node12.withBuildTools
 	docker build --pull -t gone/node:12 -f ./nodejs/Dockerfile.node12 ./nodejs
-	rm ./nodejs/Dockerfile.node12
+	docker build --pull -t gone/node:12-gcc -f ./nodejs/Dockerfile.node12.withBuildTools ./nodejs
+	rm ./nodejs/Dockerfile.node12 ./nodejs/Dockerfile.node12.withBuildTools
 
 build-node: build-node-8 build-node-10 build-node-11 build-node-12
 
 tag-node: tag-node-8 tag-node-10 tag-node-11 tag-node-12
 
 tag-node-8:
-	docker tag gone/node:8  gone/node:8-$(DATE)
-	docker tag gone/node:8  gone/node:8-$(ARCH)-$(DATE)
-	docker tag gone/node:8  gone/node:8-$(ARCH)
+	docker tag gone/node:8     gone/node:8-$(DATE)
+	docker tag gone/node:8     gone/node:8-$(ARCH)-$(DATE)
+	docker tag gone/node:8 	   gone/node:8-$(ARCH)
+	docker tag gone/node:8-gcc gone/node:8-gcc-$(DATE)
+	docker tag gone/node:8-gcc gone/node:8-gcc-$(ARCH)-$(DATE)
+	docker tag gone/node:8-gcc gone/node:8-gcc-$(ARCH)
 
 tag-node-10:
-	docker tag gone/node:10 gone/node:10-$(DATE)
-	docker tag gone/node:10 gone/node:10-$(ARCH)-$(DATE)
-	docker tag gone/node:10 gone/node:10-$(ARCH)
+	docker tag gone/node:10     gone/node:10-$(DATE)
+	docker tag gone/node:10     gone/node:10-$(ARCH)-$(DATE)
+	docker tag gone/node:10     gone/node:10-$(ARCH)
+	docker tag gone/node:10-gcc gone/node:10-gcc-$(DATE)
+	docker tag gone/node:10-gcc gone/node:10-gcc-$(ARCH)-$(DATE)
+	docker tag gone/node:10-gcc gone/node:10-gcc-$(ARCH)
 
 tag-node-11:
-	docker tag gone/node:11 gone/node:11-$(DATE)
-	docker tag gone/node:11 gone/node:11-$(ARCH)-$(DATE)
-	docker tag gone/node:11 gone/node:11-$(ARCH)
+	docker tag gone/node:11     gone/node:11-$(DATE)
+	docker tag gone/node:11     gone/node:11-$(ARCH)-$(DATE)
+	docker tag gone/node:11     gone/node:11-$(ARCH)
+	docker tag gone/node:11-gcc gone/node:11-gcc-$(DATE)
+	docker tag gone/node:11-gcc gone/node:11-gcc-$(ARCH)-$(DATE)
+	docker tag gone/node:11-gcc gone/node:11-gcc-$(ARCH)
 
 tag-node-12:
-	docker tag gone/node:12 gone/node:12-$(DATE)
-	docker tag gone/node:12 gone/node:12-$(ARCH)-$(DATE)
-	docker tag gone/node:12 gone/node:12-$(ARCH)
+	docker tag gone/node:12     gone/node:12-$(DATE)
+	docker tag gone/node:12     gone/node:12-$(ARCH)-$(DATE)
+	docker tag gone/node:12     gone/node:12-$(ARCH)
+	docker tag gone/node:12-gcc gone/node:12-gcc-$(DATE)
+	docker tag gone/node:12-gcc gone/node:12-gcc-$(ARCH)-$(DATE)
+	docker tag gone/node:12-gcc gone/node:12-gcc-$(ARCH)
 
 build:
 	$(MAKE) prepare
@@ -460,24 +484,40 @@ push-node-8:
 	docker push gone/node:8-$(DATE)
 	docker push gone/node:8-$(ARCH)-$(DATE)
 	docker push gone/node:8-$(ARCH)
+	docker push gone/node:8-gcc
+	docker push gone/node:8-gcc-$(DATE)
+	docker push gone/node:8-gcc-$(ARCH)-$(DATE)
+	docker push gone/node:8-gcc-$(ARCH)
 
 push-node-10:
 	docker push gone/node:10
 	docker push gone/node:10-$(DATE)
 	docker push gone/node:10-$(ARCH)-$(DATE)
 	docker push gone/node:10-$(ARCH)
+	docker push gone/node:10-gcc
+	docker push gone/node:10-gcc-$(DATE)
+	docker push gone/node:10-gcc-$(ARCH)-$(DATE)
+	docker push gone/node:10-gcc-$(ARCH)
 
 push-node-11:
 	docker push gone/node:11
 	docker push gone/node:11-$(DATE)
 	docker push gone/node:11-$(ARCH)-$(DATE)
 	docker push gone/node:11-$(ARCH)
+	docker push gone/node:11-gcc
+	docker push gone/node:11-gcc-$(DATE)
+	docker push gone/node:11-gcc-$(ARCH)-$(DATE)
+	docker push gone/node:11-gcc-$(ARCH)
 
 push-node-12:
 	docker push gone/node:12
 	docker push gone/node:12-$(DATE)
 	docker push gone/node:12-$(ARCH)-$(DATE)
 	docker push gone/node:12-$(ARCH)
+	docker push gone/node:12-gcc
+	docker push gone/node:12-gcc-$(DATE)
+	docker push gone/node:12-gcc-$(ARCH)-$(DATE)
+	docker push gone/node:12-gcc-$(ARCH)
 
 push-core: push-core-5.6 push-core-7.0 push-core-7.1 push-core-7.2 push-core-7.3
 push-cli: push-cli-5.6 push-cli-7.0 push-cli-7.1 push-cli-7.2 push-cli-7.3

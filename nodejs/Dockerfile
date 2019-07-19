@@ -1,4 +1,4 @@
-FROM gone/marshall:latest
+FROM gone/marshall:latest AS nodejs
 
 #RUN groupadd --gid 1000 node \
 #  && useradd --uid 1000 --gid node --shell /bin/bash --create-home node
@@ -76,14 +76,25 @@ RUN mkdir ~/.gnupg && \
           /tmp/* \
           /var/tmp/*
 
-#EXPOSE 3000
+FROM nodejs AS nodejs-compiler
 
-#HEALTHCHECK --interval=30s --timeout=10s \
-#  CMD curl -f http://localhost:3000/ || exit 1
+RUN apt-get -qq update && \
+    apt-get -yq install --no-install-recommends \
+        python \
+        build-essential \
+        && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf \
+        /var/lib/apt/lists/* \
+        /tmp/* \
+        /var/tmp/*
+
+FROM nodejs AS nodejs-onbuild
 
 ONBUILD ADD ./ /app
 
-#ONBUILD RUN npm install && \
-#    #npm run build && \
-#    mkdir "/app/tmp" -p
+FROM nodejs-compiler AS nodejs-compiler-onbuild
+
+ONBUILD ADD ./ /app
 

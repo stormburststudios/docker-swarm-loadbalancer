@@ -31,8 +31,8 @@ RUN rm -fr /var/www/html && \
     mv apache2.conf /etc/apache2/ && \
     mkdir /etc/service/apache && \
     mkdir /etc/service/show_logs && \
-    mv run.apache.sh /etc/service/apache/run && \
-    mv run.show_logs.sh /etc/service/show_logs/run && \
+    mv apache.runit /etc/service/apache/run && \
+    mv show_logs.runit /etc/service/show_logs/run && \
     chmod +x /etc/service/*/run && \
     rm /app/* && \
     a2enmod rewrite

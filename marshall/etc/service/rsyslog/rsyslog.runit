@@ -1,4 +1,3 @@
 #!/bin/sh
 service rsyslog start;
-sleep 5;
-tail -f /var/log/syslog
+sleep infinity

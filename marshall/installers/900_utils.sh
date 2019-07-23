@@ -10,4 +10,5 @@ $APT_GET \
     unzip \
     git \
     openssh-client \
-    ca-certificates
+    ca-certificates \
+    jq

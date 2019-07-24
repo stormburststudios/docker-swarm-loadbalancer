@@ -4,5 +4,5 @@ sleep 3;
 /usr/sbin/nginx
 sleep 3;
 tail -f /var/log/nginx/error.log &
-tail -f /var/log/nginx/access.log | sed --unbuffered 's|.*\[.*\] |[NGINX] |g'
+tail -f /var/log/nginx/access.log | sed --unbuffered 's|.*\[.*\] |[NGINX] |g' | grep -v /v1/ping
 

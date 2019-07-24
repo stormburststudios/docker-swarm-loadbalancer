@@ -1,4 +1,7 @@
 FROM gone/php:core-build
+
+ENV PHPFPM_MAX_CHILDREN=5
+
 RUN apt-get -qq update && \
     apt-get -yq install --no-install-recommends \
         lsb-core \
@@ -44,7 +47,11 @@ RUN bash /app/configure-nginx.php{{PHPVERSION}}.sh && \
     chmod +x /etc/service/*/run && \
     rm /app/* && \
     sed -i "s/{{PHP}}/{{PHPVERSION}}/g" /etc/nginx/sites-enabled/default && \
-    sed -i "s/{{PHP}}/{{PHPVERSION}}/g" /etc/service/php-fpm/run
+    sed -i "s/{{PHP}}/{{PHPVERSION}}/g" /etc/service/php-fpm/run && \
+    # Enable status panel
+    sed -i -e "s/;pm.status_path/pm.status_path/g" /etc/php/7.3/fpm/pool.d/www.conf && \
+    # Using environment variables in config files works, it would seem. Neat!
+    sed -i -e "s/pm.max_children = 5/pm.max_children = \${PHPFPM_MAX_CHILDREN}/g" /etc/php/7.3/fpm/pool.d/www.conf
 
 # On build, add anything in with Dockerfile into /app
 ONBUILD ADD ./ /app

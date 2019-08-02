@@ -4,6 +4,9 @@ RUN apt-get -qq update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# Enable pcntl for cli
+RUN sed -i 's|disable_functions|#disabled_functions|g' /etc/php/*/cli/php.ini
+
 # Install a funky cool repl.
 RUN composer global require -q psy/psysh:@stable && \
     ln -s /root/.composer/vendor/psy/psysh/bin/psysh /usr/local/bin/repl && \

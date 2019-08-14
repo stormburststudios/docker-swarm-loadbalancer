@@ -1,7 +1,7 @@
 #!/bin/bash
-source /app/installers/config
+source /installers/config
 $APT_GET rsyslog
 
-mkdir /etc/service/rsyslog
-mv /app/etc/service/rsyslog/rsyslog.runit /etc/service/rsyslog/run
+mkdir -p /etc/service/rsyslog
+mv /etc/service/rsyslog/rsyslog.runit /etc/service/rsyslog/run
 chmod +x /etc/service/rsyslog/run

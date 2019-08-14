@@ -1,0 +1,91 @@
+language: bash
+
+before_script:
+  - 'docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD $DOCKER_REGISTRY'
+  - 'sudo rm /usr/local/bin/docker-compose'
+  - 'curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-`uname -s`-`uname -m` > docker-compose'
+  - 'chmod +x docker-compose'
+  - 'sudo mv docker-compose /usr/local/bin'
+  - 'git rev-parse --short HEAD > marshall/marshall_version'
+  - 'date +%Y-%m-%d\ %H:%M:%S > marshall/marshall_build_date'
+  - 'hostname > marshall/marshall_build_host'
+
+script:
+  - 'docker-compose -f build.yml build $IMAGE'
+
+after_script:
+  - 'docker-compose -f build.yml push $IMAGE'
+
+notifications:
+  email:
+    - matthew@baggett.me
+
+deploy:
+  project_name: Gone.io Base Images
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  keep_history: true
+  on:
+    branch: master
+  committer_from_gh: true
+
+env:
+  - IMAGE=marshall
+  - IMAGE=node-8
+  - IMAGE=node-8-onbuild
+  - IMAGE=node-8-compiler
+  - IMAGE=node-8-compiler-onbuild
+  - IMAGE=node-10
+  - IMAGE=node-10-onbuild
+  - IMAGE=node-10-compiler
+  - IMAGE=node-10-compiler-onbuild
+  - IMAGE=node-11
+  - IMAGE=node-11-onbuild
+  - IMAGE=node-11-compiler
+  - IMAGE=node-11-compiler-onbuild
+  - IMAGE=node-12
+  - IMAGE=node-12-onbuild
+  - IMAGE=node-12-compiler
+  - IMAGE=node-12-compiler-onbuild
+  - IMAGE=php-core-56
+  - IMAGE=php-core-70
+  - IMAGE=php-core-71
+  - IMAGE=php-core-72
+  - IMAGE=php-core-73
+  - IMAGE=php-cli-56
+  - IMAGE=php-cli-56-onbuild
+  - IMAGE=php-cli-70
+  - IMAGE=php-cli-70-onbuild
+  - IMAGE=php-cli-71
+  - IMAGE=php-cli-71-onbuild
+  - IMAGE=php-cli-72
+  - IMAGE=php-cli-72-onbuild
+  - IMAGE=php-cli-73
+  - IMAGE=php-cli-73-onbuild
+  - IMAGE=php-apache-56
+  - IMAGE=php-apache-56-onbuild
+  - IMAGE=php-apache-70
+  - IMAGE=php-apache-70-onbuild
+  - IMAGE=php-apache-71
+  - IMAGE=php-apache-71-onbuild
+  - IMAGE=php-apache-72
+  - IMAGE=php-apache-72-onbuild
+  - IMAGE=php-apache-73
+  - IMAGE=php-apache-73-onbuild
+  - IMAGE=php-nginx-56
+  - IMAGE=php-nginx-56-onbuild
+  - IMAGE=php-nginx-70
+  - IMAGE=php-nginx-70-onbuild
+  - IMAGE=php-nginx-71
+  - IMAGE=php-nginx-71-onbuild
+  - IMAGE=php-nginx-72
+  - IMAGE=php-nginx-72-onbuild
+  - IMAGE=php-nginx-73
+  - IMAGE=php-nginx-73-onbuild
+  - IMAGE=php-cli-latest
+  - IMAGE=php-cli-onbuild-latest
+  - IMAGE=php-apache-latest
+  - IMAGE=php-apache-onbuild-latest
+  - IMAGE=php-nginx-latest
+  - IMAGE=php-nginx-onbuild-latest

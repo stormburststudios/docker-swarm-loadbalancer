@@ -1,0 +1,9 @@
+doc/
+test-app/
+tester/
+build.yml
+Dockerfile
+.travis-ci.yml
+.gitlab-ci.yml
+Makefile*
+test.yml

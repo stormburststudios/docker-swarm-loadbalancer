@@ -11,4 +11,4 @@ apt-get -qq update
 apt-get -yq upgrade
 
 # Install apt-utils to prevent some screaming.
-$APT_GET apt-utils
+$APT_GET apt apt-utils

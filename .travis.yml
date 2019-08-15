@@ -23,6 +23,9 @@ notifications:
   email:
     - matthew@baggett.me
 
+matrix:
+  fast_finish: true
+
 env:
   matrix:
     - BUILD=gone/marshall

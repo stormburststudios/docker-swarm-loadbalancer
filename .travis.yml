@@ -37,12 +37,12 @@ matrix:
 
 env:
   matrix:
-    - BUILD=gone/php:cli-latest
-    - BUILD=gone/php:cli-latest-onbuild
-    - BUILD=gone/php:apache-latest
-    - BUILD=gone/php:apache-latest-onbuild
-    - BUILD=gone/php:nginx-latest
-    - BUILD=gone/php:nginx-latest-onbuild
+    - BUILD=gone/php:cli
+    - BUILD=gone/php:cli-onbuild
+    - BUILD=gone/php:apache
+    - BUILD=gone/php:apache-onbuild
+    - BUILD=gone/php:nginx
+    - BUILD=gone/php:nginx-onbuild
     - BUILD=gone/marshall
     - BUILD=gone/php:core-5.6
     - BUILD=gone/php:core-7.0

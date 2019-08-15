@@ -323,17 +323,17 @@ gone/node\:12-compiler-onbuild:
 #      ░  ░     ░  ░           ░  ░      ░               ░         ░      ░      ░  ░   ░          ░
 #                                                             ░                       ░
 
-gone/php\:cli-latest:
+gone/php\:cli:
 	$(CMD_BUILD) -t gone/php:cli 					--target=php-cli 			--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
-gone/php\:cli-latest-onbuild:
+gone/php\:cli-onbuild:
 	$(CMD_BUILD) -t gone/php:cli-onbuild 			--target=php-cli-onbuild 	--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
 gone/php\:apache-latest:
 	$(CMD_BUILD) -t gone/php:apache 				--target=php-apache 		--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
-gone/php\:apache-latest-onbuild:
+gone/php\:apache-onbuild:
 	$(CMD_BUILD) -t gone/php:apache-onbuild 		--target=php-apache-onbuild --build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
-gone/php\:nginx-latest:
+gone/php\:nginx:
 	$(CMD_BUILD) -t gone/php:nginx 					--target=php-nginx 			--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
-gone/php\:nginx-latest-onbuild:
+gone/php\:nginx-onbuild:
 	$(CMD_BUILD) -t gone/php:nginx-onbuild 			--target=php-nginx-onbuild 	--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
 gone/node\:latest:
 	$(CMD_BUILD) -t gone/node			 			--target=nodejs 			--build-arg NODE_VERSION=12.3.1	--build-arg YARN_VERSION=1.16.0 .

@@ -8,11 +8,11 @@ before_script:
   - sudo mv docker-compose /usr/local/bin
 
 script:
-  - make $(BUILD)
+  - make $BUILD
 
 deploy:
   provider: script
-  script: docker push $(BUILD)
+  script: docker push $BUILD
   on:
     branch: master
 
@@ -21,61 +21,62 @@ notifications:
     - matthew@baggett.me
 
 env:
-  - BUILD=gone/marshall
-  - BUILD=gone/node:8
-  - BUILD=gone/node:8-onbuild
-  - BUILD=gone/node:8-compiler
-  - BUILD=gone/node:8-compiler-onbuild
-  - BUILD=gone/node:10
-  - BUILD=gone/node:10-onbuild
-  - BUILD=gone/node:10-compiler
-  - BUILD=gone/node:10-compiler-onbuild
-  - BUILD=gone/node:11
-  - BUILD=gone/node:11-onbuild
-  - BUILD=gone/node:11-compiler
-  - BUILD=gone/node:11-compiler-onbuild
-  - BUILD=gone/node:12
-  - BUILD=gone/node:12-onbuild
-  - BUILD=gone/node:12-compiler
-  - BUILD=gone/node:12-compiler-onbuild
-  - BUILD=gone/php:core-56
-  - BUILD=gone/php:core-70
-  - BUILD=gone/php:core-71
-  - BUILD=gone/php:core-72
-  - BUILD=gone/php:core-73
-  - BUILD=gone/php:cli-56
-  - BUILD=gone/php:cli-56-onbuild
-  - BUILD=gone/php:cli-70
-  - BUILD=gone/php:cli-70-onbuild
-  - BUILD=gone/php:cli-71
-  - BUILD=gone/php:cli-71-onbuild
-  - BUILD=gone/php:cli-72
-  - BUILD=gone/php:cli-72-onbuild
-  - BUILD=gone/php:cli-73
-  - BUILD=gone/php:cli-73-onbuild
-  - BUILD=gone/php:apache-56
-  - BUILD=gone/php:apache-56-onbuild
-  - BUILD=gone/php:apache-70
-  - BUILD=gone/php:apache-70-onbuild
-  - BUILD=gone/php:apache-71
-  - BUILD=gone/php:apache-71-onbuild
-  - BUILD=gone/php:apache-72
-  - BUILD=gone/php:apache-72-onbuild
-  - BUILD=gone/php:apache-73
-  - BUILD=gone/php:apache-73-onbuild
-  - BUILD=gone/php:nginx-56
-  - BUILD=gone/php:nginx-56-onbuild
-  - BUILD=gone/php:nginx-70
-  - BUILD=gone/php:nginx-70-onbuild
-  - BUILD=gone/php:nginx-71
-  - BUILD=gone/php:nginx-71-onbuild
-  - BUILD=gone/php:nginx-72
-  - BUILD=gone/php:nginx-72-onbuild
-  - BUILD=gone/php:nginx-73
-  - BUILD=gone/php:nginx-73-onbuild
-  - BUILD=gone/php:cli-latest
-  - BUILD=gone/php:cli-onbuild-latest
-  - BUILD=gone/php:apache-latest
-  - BUILD=gone/php:apache-onbuild-latest
-  - BUILD=gone/php:nginx-latest
-  - BUILD=gone/php:nginx-onbuild-latest
+  matrix:
+    - BUILD=gone/marshall
+    - BUILD=gone/node:8
+    - BUILD=gone/node:8-onbuild
+    - BUILD=gone/node:8-compiler
+    - BUILD=gone/node:8-compiler-onbuild
+    - BUILD=gone/node:10
+    - BUILD=gone/node:10-onbuild
+    - BUILD=gone/node:10-compiler
+    - BUILD=gone/node:10-compiler-onbuild
+    - BUILD=gone/node:11
+    - BUILD=gone/node:11-onbuild
+    - BUILD=gone/node:11-compiler
+    - BUILD=gone/node:11-compiler-onbuild
+    - BUILD=gone/node:12
+    - BUILD=gone/node:12-onbuild
+    - BUILD=gone/node:12-compiler
+    - BUILD=gone/node:12-compiler-onbuild
+    - BUILD=gone/php:core-56
+    - BUILD=gone/php:core-70
+    - BUILD=gone/php:core-71
+    - BUILD=gone/php:core-72
+    - BUILD=gone/php:core-73
+    - BUILD=gone/php:cli-56
+    - BUILD=gone/php:cli-56-onbuild
+    - BUILD=gone/php:cli-70
+    - BUILD=gone/php:cli-70-onbuild
+    - BUILD=gone/php:cli-71
+    - BUILD=gone/php:cli-71-onbuild
+    - BUILD=gone/php:cli-72
+    - BUILD=gone/php:cli-72-onbuild
+    - BUILD=gone/php:cli-73
+    - BUILD=gone/php:cli-73-onbuild
+    - BUILD=gone/php:apache-56
+    - BUILD=gone/php:apache-56-onbuild
+    - BUILD=gone/php:apache-70
+    - BUILD=gone/php:apache-70-onbuild
+    - BUILD=gone/php:apache-71
+    - BUILD=gone/php:apache-71-onbuild
+    - BUILD=gone/php:apache-72
+    - BUILD=gone/php:apache-72-onbuild
+    - BUILD=gone/php:apache-73
+    - BUILD=gone/php:apache-73-onbuild
+    - BUILD=gone/php:nginx-56
+    - BUILD=gone/php:nginx-56-onbuild
+    - BUILD=gone/php:nginx-70
+    - BUILD=gone/php:nginx-70-onbuild
+    - BUILD=gone/php:nginx-71
+    - BUILD=gone/php:nginx-71-onbuild
+    - BUILD=gone/php:nginx-72
+    - BUILD=gone/php:nginx-72-onbuild
+    - BUILD=gone/php:nginx-73
+    - BUILD=gone/php:nginx-73-onbuild
+    - BUILD=gone/php:cli-latest
+    - BUILD=gone/php:cli-onbuild-latest
+    - BUILD=gone/php:apache-latest
+    - BUILD=gone/php:apache-onbuild-latest
+    - BUILD=gone/php:nginx-latest
+    - BUILD=gone/php:nginx-onbuild-latest

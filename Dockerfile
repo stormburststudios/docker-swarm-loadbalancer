@@ -151,6 +151,7 @@ ONBUILD RUN composer dumpautoload -o; exit 0
 ONBUILD RUN /usr/bin/install-report
 
 FROM php-core AS php-apache
+ARG PHP_VERSION
 RUN apt-get -qq update && \
     apt-get -yqq install --no-install-recommends \
         apache2 \

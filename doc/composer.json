@@ -1,5 +1,5 @@
 {
-    "name": "gone/base-image-doc-gen",
+    "name": "gone/docker-tag-tracker",
     "type": "project",
     "authors": [
         {
@@ -8,8 +8,9 @@
         }
     ],
     "require": {
+        "php": ">=7.1",
+        "guzzlehttp/guzzle": "^6.3",
         "kint-php/kint": "^3.2",
-        "adambrett/shell-wrapper": "dev-master",
-        "react/child-process": "^0.6.1"
+        "maddhatter/markdown-table": "^1.0"
     }
 }

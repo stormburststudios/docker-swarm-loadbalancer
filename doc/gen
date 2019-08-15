@@ -1,131 +1,57 @@
 #!/usr/bin/php
 <?php
-require_once(__DIR__ . "/vendor/autoload.php");
+chdir(__DIR__);
+require_once __DIR__ . "/vendor/autoload.php";
 
-$versionedPhpImages = [
-    'gone/php:cli-php%php_version%',
-    'gone/php:apache-php%php_version%',
-    'gone/php:nginx-php%php_version%',
-];
+use \GuzzleHttp\Client as Guzzle;
+use \MaddHatter\MarkdownTable\Builder as TableBuilder;
 
-$phpVersions = ['5.6', '7.0', '7.1', '7.2', '7.3', ];
-$nodeVariants = ['', '-gcc', '-onbuild', '-onbuild-gcc'];
-$nodeVersionsMajor = ['8', '10', '11', '12'];
+$client = new Guzzle();
+$images = ['gone/php', 'gone/node', 'gone/marshall', ];
+$results = [];
+foreach($images as $image) {
+    $results[$image] = [];
+    $url = "https://hub.docker.com/v2/repositories/{$image}/tags/";
+    $allLoaded = false;
+    while ($allLoaded == false) {
+        $data = $client->get($url)->getBody()->getContents();
+        $json = json_decode($data, true);
 
-$images = [
-    'gone/marshall:latest',
-    'gone/php:cli',
-    'gone/php:apache',
-    'gone/php:nginx',
-];
-
-foreach($nodeVersionsMajor as $majorVersion){
-    foreach($nodeVariants as $variant){
-        $nodeVersions[] = $majorVersion . $variant;
+        $results[$image] = array_merge($results[$image], $json['results']);
+        if ($json['next']) {
+            $url = $json['next'];
+        } else {
+            $allLoaded = true;
+        }
     }
 }
 
-foreach($versionedPhpImages as $versionedImage){
-    foreach($phpVersions as $phpVersion){
-        $images[] = str_replace("%php_version%", $phpVersion, $versionedImage);
+$tableBuilder = new TableBuilder();
+
+$tableBuilder->headers(['Name', 'Architecture', 'Size', 'Last Updated', 'Microbadger']);
+$tableBuilder->align(['L','L', 'R','R','C']);
+
+foreach($results as $image => $variants){
+    foreach($variants as $variant) {
+        $megabytes = number_format($variant['full_size'] / 1024 / 1024, 2);
+            //[![Layers](https://img.shields.io/badge/Layers-13-green.svg)](https://hub.docker.com/r/gone/marshall)
+        $sizeColour = 'green';
+        $arches = [];
+        foreach($variant['images'] as $archSpecificImage){
+            $arches[] = $variant['architecture'];
+        }
+        $tableBuilder->row([
+            $image . ":" . $variant['name'],
+            strtoupper(implode(", ", $arches)),
+            "[![Layers](https://img.shields.io/badge/{$megabytes}MB-{$sizeColour}.svg)](https://hub.docker.com/r/{$image})",
+            date("Y-m-d H:i:s", strtotime($variant['last_updated'])),
+            "[![](https://images.microbadger.com/badges/image/gone/marshall:latest.svg)](https://microbadger.com/images/gone/marshall:latest \"Get your own image badge on microbadger.com\")",
+        ]);
     }
 }
 
-foreach($nodeVersions as $nodeVersion){
-    $images[] = "gone/node:{$nodeVersion}";
-}
+$readme = file_get_contents(__DIR__ ."/../README.template");
 
-sort($images);
+$readme = str_replace("{{TABLE}}", $tableBuilder->render(), $readme);
 
-use AdamBrett\ShellWrapper\Runners;
-use AdamBrett\ShellWrapper\Command;
-use React\EventLoop\Factory as LoopFactory;
-use React\ChildProcess\Process;
-
-shuffle($images);
-$images = array_slice($images, 0,2);
-\Kint::dump($images);
-
-$loop = LoopFactory::create();
-
-// Iterate and pull images
-foreach($images as $image) {
-    $shell = new Runners\ShellExec();
-    $command = new Command("docker");
-    $command->addSubCommand(new Command\SubCommand("pull"));
-    $command->addParam(new Command\Param($image));
-    echo sprintf(
-            'Running: "%s"' . PHP_EOL,
-            (string) $command
-    );
-    $process = new Process((string) $command);
-    $process->start($loop);
-
-    $process->stdout->on('data', function($chunk){
-        #echo $chunk;
-    });
-    $process->stderr->on('data', function($chunk){
-        echo $chunk;
-    });
-    $process->on('exit', function($exitCode, $termSignal) use ($command) {
-        if($exitCode == 0){
-            echo sprintf(
-                'Process "%s", succeeded!' . PHP_EOL,
-                (string) $command
-            );
-        }else{
-            echo sprintf(
-                    'Process "%s", exited with code %d' . PHP_EOL,
-                (string) $command,
-                $exitCode
-            );
-            echo "\n\n";
-            exit(255);
-        }
-    });
-}
-
-$loop->run();
-
-// Iterate and weigh images.
-$weights = [];
-foreach($images as $image) {
-    $shell = new Runners\ShellExec();
-    $command = new Command("docker");
-    $command->addSubCommand(new Command\SubCommand("images"));
-    $command->addParam(new Command\Param($image));
-    $command->addFlag(new Command\Flag("format", "{{json .}}"));
-    echo sprintf(
-        'Running: "%s"' . PHP_EOL,
-        (string) $command
-    );
-    $process = new Process((string) $command);
-    $process->start($loop);
-
-    $process->stdout->on('data', function($chunk) use ($weights){
-        \Kint::dump(
-                json_decode($chunk)
-        );
-    });
-    $process->stderr->on('data', function($chunk){
-        echo $chunk;
-    });
-    $process->on('exit', function($exitCode, $termSignal) use ($command) {
-        if($exitCode == 0){
-            echo sprintf(
-                'Process "%s", succeeded!' . PHP_EOL,
-                (string) $command
-            );
-        }else{
-            echo sprintf(
-                'Process "%s", exited with code %d' . PHP_EOL,
-                (string) $command,
-                $exitCode
-            );
-            echo "\n\n";
-            exit(255);
-        }
-    });
-}
-
-$loop->run();
+file_put_contents(__DIR__ . "/../README.md", $readme);

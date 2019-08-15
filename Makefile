@@ -1,4 +1,4 @@
-CMD_BUILD=DOCKER_BUILDKIT=1 docker build --progress=plain
+CMD_BUILD=DOCKER_BUILDKIT=1 docker build
 PHP_PACKAGES_56=mysql-client \
 					 php-apcu \
 					 php-xdebug \

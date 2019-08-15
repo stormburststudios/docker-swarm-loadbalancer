@@ -1,11 +1,11 @@
 #!/bin/bash
-source /app/installers/config
+source /installers/config
 $APT_GET cron
 
 chmod 600 /etc/crontab
 
-mkdir /etc/service/cron
-mv /app/etc/service/cron/cron.runit /etc/service/cron/run
+mkdir -p /etc/service/cron
+mv /etc/service/cron/cron.runit /etc/service/cron/run
 chmod +x /etc/service/cron/run
 # Fix cron issues in 0.9.19, see also #345: https://github.com/phusion/baseimage-docker/issues/345
 sed -i 's/^\s*session\s\+required\s\+pam_loginuid.so/# &/' /etc/pam.d/cron

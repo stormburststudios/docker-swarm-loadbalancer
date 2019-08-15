@@ -1,5 +1,5 @@
 #!/bin/bash
-source /app/installers/config
+source /installers/config
 cd /
 apt-get autoremove -y
 apt-get clean

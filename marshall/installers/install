@@ -2,7 +2,7 @@
 
 set -e
 
-for file in /app/installers/*.sh
+for file in /installers/*.sh
 do
   
   /bin/bash $file

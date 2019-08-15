@@ -147,9 +147,6 @@ PHP_PACKAGES_73=mysql-client \
 #  ░      ░     ░   ▒     ░░   ░ ░  ░  ░   ░  ░░ ░  ░   ▒     ░ ░     ░ ░
 #         ░         ░  ░   ░           ░   ░  ░  ░      ░  ░    ░  ░    ░  ░
 gone/marshall:
-	git rev-parse --short HEAD > marshall/marshall_version
-	date +%Y-%m-%d\ %H:%M:%S > marshall/marshall_build_date
-	hostname > marshall/marshall_build_host
 	$(CMD_BUILD) -t gone/marshall:latest --target=marshall .
 
 #   ██▓███   ██░ ██  ██▓███      ▄████▄   ▒█████   ██▀███  ▓█████

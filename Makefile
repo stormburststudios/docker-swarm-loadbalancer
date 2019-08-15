@@ -186,6 +186,13 @@ gone/php\:core-7.2: setup
 gone/php\:core-7.3: setup
 	$(CMD_BUILD) -t gone/php:core-7.3 				--target=php-core 			--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
 
+core:
+	$(MAKE) gone/php\:core-5.6
+	$(MAKE) gone/php\:core-7.0
+	$(MAKE) gone/php\:core-7.1
+	$(MAKE) gone/php\:core-7.2
+	$(MAKE) gone/php\:core-7.3
+
 #   ██▓███   ██░ ██  ██▓███      ▄████▄   ██▓     ██▓
 #  ▓██░  ██▒▓██░ ██▒▓██░  ██▒   ▒██▀ ▀█  ▓██▒    ▓██▒
 #  ▓██░ ██▓▒▒██▀▀██░▓██░ ██▓▒   ▒▓█    ▄ ▒██░    ▒██▒
@@ -216,6 +223,18 @@ gone/php\:cli-7.3: setup
 	$(CMD_BUILD) -t gone/php:cli-7.3 				--target=php-cli 			--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
 gone/php\:cli-7.3-onbuild: setup
 	$(CMD_BUILD) -t gone/php:cli-7.3-onbuild 		--target=php-cli-onbuild 	--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
+
+php-cli:
+	$(MAKE) gone/php\:cli-5.6
+	$(MAKE) gone/php\:cli-5.6-onbuild
+	$(MAKE) gone/php\:cli-7.0
+	$(MAKE) gone/php\:cli-7.0-onbuild
+	$(MAKE) gone/php\:cli-7.1
+	$(MAKE) gone/php\:cli-7.1-onbuild
+	$(MAKE) gone/php\:cli-7.2
+	$(MAKE) gone/php\:cli-7.2-onbuild
+	$(MAKE) gone/php\:cli-7.3
+	$(MAKE) gone/php\:cli-7.3-onbuild
 
 #   ██▓███   ██░ ██  ██▓███      ███▄    █   ▄████  ██▓ ███▄    █ ▒██   ██▒
 #  ▓██░  ██▒▓██░ ██▒▓██░  ██▒    ██ ▀█   █  ██▒ ▀█▒▓██▒ ██ ▀█   █ ▒▒ █ █ ▒░
@@ -248,6 +267,18 @@ gone/php\:nginx-7.3: setup
 gone/php\:nginx-7.3-onbuild: setup
 	$(CMD_BUILD) -t gone/php:nginx-7.3-onbuild 		--target=php-nginx-onbuild 	--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
 
+php-nginx:
+	$(MAKE) gone/php\:nginx-5.6
+	$(MAKE) gone/php\:nginx-5.6-onbuild
+	$(MAKE) gone/php\:nginx-7.0
+	$(MAKE) gone/php\:nginx-7.0-onbuild
+	$(MAKE) gone/php\:nginx-7.1
+	$(MAKE) gone/php\:nginx-7.1-onbuild
+	$(MAKE) gone/php\:nginx-7.2
+	$(MAKE) gone/php\:nginx-7.2-onbuild
+	$(MAKE) gone/php\:nginx-7.3
+	$(MAKE) gone/php\:nginx-7.3-onbuild
+	
 #   ██▓███   ██░ ██  ██▓███      ▄▄▄       ██▓███   ▄▄▄       ▄████▄   ██░ ██ ▓█████
 #  ▓██░  ██▒▓██░ ██▒▓██░  ██▒   ▒████▄    ▓██░  ██▒▒████▄    ▒██▀ ▀█  ▓██░ ██▒▓█   ▀
 #  ▓██░ ██▓▒▒██▀▀██░▓██░ ██▓▒   ▒██  ▀█▄  ▓██░ ██▓▒▒██  ▀█▄  ▒▓█    ▄ ▒██▀▀██░▒███
@@ -279,6 +310,18 @@ gone/php\:apache-7.3: setup
 gone/php\:apache-7.3-onbuild: setup
 	$(CMD_BUILD) -t gone/php:apache-7.3-onbuild 	--target=php-apache-onbuild --build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
 
+php-apache:
+	$(MAKE) gone/php\:apache-5.6
+	$(MAKE) gone/php\:apache-5.6-onbuild
+	$(MAKE) gone/php\:apache-7.0
+	$(MAKE) gone/php\:apache-7.0-onbuild
+	$(MAKE) gone/php\:apache-7.1
+	$(MAKE) gone/php\:apache-7.1-onbuild
+	$(MAKE) gone/php\:apache-7.2
+	$(MAKE) gone/php\:apache-7.2-onbuild
+	$(MAKE) gone/php\:apache-7.3
+	$(MAKE) gone/php\:apache-7.3-onbuild
+	
 # ███▄    █  ▒█████  ▓█████▄ ▓█████     ▄▄▄██▀▀▀██████
 # ██ ▀█   █ ▒██▒  ██▒▒██▀ ██▌▓█   ▀       ▒██ ▒██    ▒
 #▓██  ▀█ ██▒▒██░  ██▒░██   █▌▒███         ░██ ░ ▓██▄
@@ -325,6 +368,24 @@ gone/node\:12-compiler: setup
 gone/node\:12-compiler-onbuild: setup
 	$(CMD_BUILD) -t gone/node:12-compiler-onbuild 	--target=nodejs-compiler-onbuild 	--build-arg NODE_VERSION=12.3.1 	--build-arg YARN_VERSION=1.16.0 .
 
+node:
+	$(MAKE) gone/node\:8
+	$(MAKE) gone/node\:8-onbuild
+	$(MAKE) gone/node\:8-compiler
+	$(MAKE) gone/node\:8-compiler-onbuild
+	$(MAKE) gone/node\:10
+	$(MAKE) gone/node\:10-onbuild
+	$(MAKE) gone/node\:10-compiler
+	$(MAKE) gone/node\:10-compiler-onbuild
+	$(MAKE) gone/node\:11
+	$(MAKE) gone/node\:11-onbuild
+	$(MAKE) gone/node\:11-compiler
+	$(MAKE) gone/node\:11-compiler-onbuild
+	$(MAKE) gone/node\:12
+	$(MAKE) gone/node\:12-onbuild
+	$(MAKE) gone/node\:12-compiler
+	$(MAKE) gone/node\:12-compiler-onbuild
+
 #   ██▓    ▄▄▄     ▄▄▄█████▓▓█████   ██████ ▄▄▄█████▓    ▄▄▄▄    █    ██  ██▓ ██▓    ▓█████▄   ██████
 #  ▓██▒   ▒████▄   ▓  ██▒ ▓▒▓█   ▀ ▒██    ▒ ▓  ██▒ ▓▒   ▓█████▄  ██  ▓██▒▓██▒▓██▒    ▒██▀ ██▌▒██    ▒
 #  ▒██░   ▒██  ▀█▄ ▒ ▓██░ ▒░▒███   ░ ▓██▄   ▒ ▓██░ ▒░   ▒██▒ ▄██▓██  ▒██░▒██▒▒██░    ░██   █▌░ ▓██▄
@@ -347,5 +408,17 @@ gone/php\:nginx: setup
 	$(CMD_BUILD) -t gone/php:nginx 					--target=php-nginx 			--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
 gone/php\:nginx-onbuild: setup
 	$(CMD_BUILD) -t gone/php:nginx-onbuild 			--target=php-nginx-onbuild 	--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
-gone/node\:latest: setup
+gone/node: setup
 	$(CMD_BUILD) -t gone/node			 			--target=nodejs 			--build-arg NODE_VERSION=12.3.1	--build-arg YARN_VERSION=1.16.0 .
+gone/node:onbuild: setup
+	$(CMD_BUILD) -t gone/node-onbuild	 			--target=nodejs-onbuild		--build-arg NODE_VERSION=12.3.1	--build-arg YARN_VERSION=1.16.0 .
+
+latest:
+	$(MAKE) gone/php\:cli
+	$(MAKE) gone/php\:cli-onbuild
+	$(MAKE) gone/php\:apache
+	$(MAKE) gone/php\:apache-onbuild
+	$(MAKE) gone/php\:nginx
+	$(MAKE) gone/php\:nginx-onbuild
+	$(MAKE) gone/node
+	$(MAKE) gone/node:onbuild

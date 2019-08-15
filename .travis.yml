@@ -17,11 +17,11 @@ before_script:
   - hostname > marshall/marshall_build_host
 
 script:
-  - make $BUILD
+  - travis_retry make $BUILD
 
 deploy:
   provider: script
-  script: docker push $BUILD
+  script: travis_retry docker push $BUILD
   on:
     branch: master
 
@@ -35,22 +35,6 @@ matrix:
 env:
   matrix:
     - BUILD=gone/marshall
-    - BUILD=gone/node:8
-    - BUILD=gone/node:8-onbuild
-    - BUILD=gone/node:8-compiler
-    - BUILD=gone/node:8-compiler-onbuild
-    - BUILD=gone/node:10
-    - BUILD=gone/node:10-onbuild
-    - BUILD=gone/node:10-compiler
-    - BUILD=gone/node:10-compiler-onbuild
-    - BUILD=gone/node:11
-    - BUILD=gone/node:11-onbuild
-    - BUILD=gone/node:11-compiler
-    - BUILD=gone/node:11-compiler-onbuild
-    - BUILD=gone/node:12
-    - BUILD=gone/node:12-onbuild
-    - BUILD=gone/node:12-compiler
-    - BUILD=gone/node:12-compiler-onbuild
     - BUILD=gone/php:core-56
     - BUILD=gone/php:core-70
     - BUILD=gone/php:core-71
@@ -92,3 +76,19 @@ env:
     - BUILD=gone/php:apache-onbuild-latest
     - BUILD=gone/php:nginx-latest
     - BUILD=gone/php:nginx-onbuild-latest
+    - BUILD=gone/node:8
+    - BUILD=gone/node:8-onbuild
+    - BUILD=gone/node:8-compiler
+    - BUILD=gone/node:8-compiler-onbuild
+    - BUILD=gone/node:10
+    - BUILD=gone/node:10-onbuild
+    - BUILD=gone/node:10-compiler
+    - BUILD=gone/node:10-compiler-onbuild
+    - BUILD=gone/node:11
+    - BUILD=gone/node:11-onbuild
+    - BUILD=gone/node:11-compiler
+    - BUILD=gone/node:11-compiler-onbuild
+    - BUILD=gone/node:12
+    - BUILD=gone/node:12-onbuild
+    - BUILD=gone/node:12-compiler
+    - BUILD=gone/node:12-compiler-onbuild

@@ -34,6 +34,7 @@ matrix:
 
 env:
   matrix:
+    # Images that people probably actually care about
     - BUILD=gone/php:cli
     - BUILD=gone/php:cli-onbuild
     - BUILD=gone/php:apache
@@ -43,6 +44,7 @@ env:
     - BUILD=gone/node
     - BUILD=gone/node:onbuild
     - BUILD=gone/marshall
+    # Other, locked-version images
     - BUILD=gone/php:cli-5.6
     - BUILD=gone/php:cli-5.6-onbuild
     - BUILD=gone/php:cli-7.0

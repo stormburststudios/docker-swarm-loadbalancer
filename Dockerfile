@@ -25,20 +25,20 @@ FROM marshall AS php-core
 ARG PHP_PACKAGES
 COPY php-core/install-report.sh /usr/bin/install-report
 RUN apt-get -qq update && \
-    apt-get -yq install --no-install-recommends \
+    apt-get -yqq install --no-install-recommends \
         python3-software-properties \
         software-properties-common \
         && \
     add-apt-repository -y ppa:ondrej/php && \
     apt-get -qq update && \
-    apt-get -yq install --no-install-recommends $PHP_PACKAGES  &&\
-    apt-get remove -yq \
+    apt-get -yqq install --no-install-recommends $PHP_PACKAGES  &&\
+    apt-get remove -yqq \
         software-properties-common \
         python-apt-common \
         python3-software-properties \
         python3.5 python3.5-minimal libpython3.5-minimal \
         && \
-    apt-get autoremove -y && \
+    apt-get autoremove -yqq && \
     rm -rf \
         /usr/bin/mysqlslap \
         /usr/bin/mysqldump \
@@ -93,7 +93,7 @@ RUN apt-get -qq update && \
         nginx \
         php$PHP_VERSION-fpm \
         && \
-    apt-get remove -yq \
+    apt-get remove -yqq \
         lsb-core \
         cups-common \
         software-properties-common \
@@ -101,7 +101,7 @@ RUN apt-get -qq update && \
         python3-software-properties \
         python3.5 python3.5-minimal libpython3.5-minimal \
         && \
-    apt-get autoremove -y && \
+    apt-get autoremove -yqq && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     sed -i "s/cgi.fix_pathinfo.*/cgi.fix_pathinfo=0/g" /etc/php/$PHP_VERSION/fpm/php.ini && \
@@ -152,7 +152,7 @@ ONBUILD RUN /usr/bin/install-report
 
 FROM php-core AS php-apache
 RUN apt-get -qq update && \
-    apt-get -yq install --no-install-recommends \
+    apt-get -yqq install --no-install-recommends \
         apache2 \
         libapache2-mod-php$PHP_VERSION \
         && \
@@ -207,7 +207,7 @@ ARG PATH="/app/node_modules/.bin:${PATH}"
 RUN mkdir ~/.gnupg && \
     echo "disable-ipv6" >> ~/.gnupg/dirmngr.conf && \
     apt-get -qq update && \
-    apt-get -yq install --no-install-recommends \
+    apt-get -yqq install --no-install-recommends \
         lsb-core \
         gnupg \
     && \
@@ -276,7 +276,7 @@ RUN mkdir ~/.gnupg && \
 FROM nodejs AS nodejs-compiler
 
 RUN apt-get -qq update && \
-    apt-get -yq install --no-install-recommends \
+    apt-get -yqq install --no-install-recommends \
         python \
         build-essential \
         && \

@@ -137,6 +137,11 @@ PHP_PACKAGES_73=mysql-client \
 					 php7.3-zip \
 					 postgresql-client
 
+setup:
+	git rev-parse --short HEAD > marshall/marshall_version
+	date +%Y-%m-%d\ %H:%M:%S > marshall/marshall_build_date
+	hostname > marshall/marshall_build_host
+
 #   ███▄ ▄███▓ ▄▄▄       ██▀███    ██████  ██░ ██  ▄▄▄       ██▓     ██▓
 #  ▓██▒▀█▀ ██▒▒████▄    ▓██ ▒ ██▒▒██    ▒ ▓██░ ██▒▒████▄    ▓██▒    ▓██▒
 #  ▓██    ▓██░▒██  ▀█▄  ▓██ ░▄█ ▒░ ▓██▄   ▒██▀▀██░▒██  ▀█▄  ▒██░    ▒██░
@@ -146,7 +151,8 @@ PHP_PACKAGES_73=mysql-client \
 #  ░  ░      ░  ▒   ▒▒ ░  ░▒ ░ ▒░░ ░▒  ░ ░ ▒ ░▒░ ░  ▒   ▒▒ ░░ ░ ▒  ░░ ░ ▒  ░
 #  ░      ░     ░   ▒     ░░   ░ ░  ░  ░   ░  ░░ ░  ░   ▒     ░ ░     ░ ░
 #         ░         ░  ░   ░           ░   ░  ░  ░      ░  ░    ░  ░    ░  ░
-gone/marshall:
+
+gone/marshall: setup
 	$(CMD_BUILD) -t gone/marshall:latest --target=marshall .
 
 #   ██▓███   ██░ ██  ██▓███      ▄████▄   ▒█████   ██▀███  ▓█████
@@ -158,16 +164,16 @@ gone/marshall:
 #  ░▒ ░      ▒ ░▒░ ░░▒ ░          ░  ▒     ░ ▒ ▒░   ░▒ ░ ▒░ ░ ░  ░
 #  ░░        ░  ░░ ░░░          ░        ░ ░ ░ ▒    ░░   ░    ░
 #            ░  ░  ░            ░ ░          ░ ░     ░        ░  ░
-#                               ░
-gone/php\:core-5.6:
+
+gone/php\:core-5.6: setup
 	$(CMD_BUILD) -t gone/php:core-5.6 				--target=php-core 			--build-arg "PHP_VERSION=5.6" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_56)" .
-gone/php\:core-7.0:
+gone/php\:core-7.0: setup
 	$(CMD_BUILD) -t gone/php:core-7.0 				--target=php-core 			--build-arg "PHP_VERSION=7.0" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_70)" .
-gone/php\:core-7.1:
+gone/php\:core-7.1: setup
 	$(CMD_BUILD) -t gone/php:core-7.1 				--target=php-core 			--build-arg "PHP_VERSION=7.1" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_71)" .
-gone/php\:core-7.2:
+gone/php\:core-7.2: setup
 	$(CMD_BUILD) -t gone/php:core-7.2 				--target=php-core 			--build-arg "PHP_VERSION=7.2" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_72)" .
-gone/php\:core-7.3:
+gone/php\:core-7.3: setup
 	$(CMD_BUILD) -t gone/php:core-7.3 				--target=php-core 			--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
 
 #   ██▓███   ██░ ██  ██▓███      ▄████▄   ██▓     ██▓
@@ -179,27 +185,26 @@ gone/php\:core-7.3:
 #  ░▒ ░      ▒ ░▒░ ░░▒ ░          ░  ▒   ░ ░ ▒  ░ ▒ ░
 #  ░░        ░  ░░ ░░░          ░          ░ ░    ▒ ░
 #            ░  ░  ░            ░ ░          ░  ░ ░
-#                               ░
 
-gone/php\:cli-5.6:
+gone/php\:cli-5.6: setup
 	$(CMD_BUILD) -t gone/php:cli-5.6 				--target=php-cli 			--build-arg "PHP_VERSION=5.6" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_56)" .
-gone/php\:cli-5.6-onbuild:
+gone/php\:cli-5.6-onbuild: setup
 	$(CMD_BUILD) -t gone/php:cli-5.6-onbuild 		--target=php-cli-onbuild 	--build-arg "PHP_VERSION=5.6" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_56)" .
-gone/php\:cli-7.0:
+gone/php\:cli-7.0: setup
 	$(CMD_BUILD) -t gone/php:cli-7.0 				--target=php-cli 			--build-arg "PHP_VERSION=7.0" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_70)" .
-gone/php\:cli-7.0-onbuild:
+gone/php\:cli-7.0-onbuild: setup
 	$(CMD_BUILD) -t gone/php:cli-7.0-onbuild 		--target=php-cli-onbuild 	--build-arg "PHP_VERSION=7.0" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_70)" .
-gone/php\:cli-7.1:
+gone/php\:cli-7.1: setup
 	$(CMD_BUILD) -t gone/php:cli-7.1 				--target=php-cli 			--build-arg "PHP_VERSION=7.1" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_71)" .
-gone/php\:cli-7.1-onbuild:
+gone/php\:cli-7.1-onbuild: setup
 	$(CMD_BUILD) -t gone/php:cli-7.1-onbuild 		--target=php-cli-onbuild 	--build-arg "PHP_VERSION=7.1" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_71)" .
-gone/php\:cli-7.2:
+gone/php\:cli-7.2: setup
 	$(CMD_BUILD) -t gone/php:cli-7.2 				--target=php-cli 			--build-arg "PHP_VERSION=7.2" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_72)" .
-gone/php\:cli-7.2-onbuild:
+gone/php\:cli-7.2-onbuild: setup
 	$(CMD_BUILD) -t gone/php:cli-7.2-onbuild 		--target=php-cli-onbuild 	--build-arg "PHP_VERSION=7.2" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_72)" .
-gone/php\:cli-7.3:
+gone/php\:cli-7.3: setup
 	$(CMD_BUILD) -t gone/php:cli-7.3 				--target=php-cli 			--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
-gone/php\:cli-7.3-onbuild:
+gone/php\:cli-7.3-onbuild: setup
 	$(CMD_BUILD) -t gone/php:cli-7.3-onbuild 		--target=php-cli-onbuild 	--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
 
 #   ██▓███   ██░ ██  ██▓███      ███▄    █   ▄████  ██▓ ███▄    █ ▒██   ██▒
@@ -212,25 +217,25 @@ gone/php\:cli-7.3-onbuild:
 #  ░░        ░  ░░ ░░░             ░   ░ ░ ░ ░   ░  ▒ ░   ░   ░ ░  ░    ░
 #            ░  ░  ░                     ░       ░  ░           ░  ░    ░
 
-gone/php\:nginx-5.6:
+gone/php\:nginx-5.6: setup
 	$(CMD_BUILD) -t gone/php:nginx-5.6 				--target=php-nginx 			--build-arg "PHP_VERSION=5.6" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_56)" .
-gone/php\:nginx-5.6-onbuild:
+gone/php\:nginx-5.6-onbuild: setup
 	$(CMD_BUILD) -t gone/php:nginx-5.6-onbuild 		--target=php-nginx-onbuild 	--build-arg "PHP_VERSION=5.6" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_56)" .
-gone/php\:nginx-7.0:
+gone/php\:nginx-7.0: setup
 	$(CMD_BUILD) -t gone/php:nginx-7.0 				--target=php-nginx 			--build-arg "PHP_VERSION=7.0" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_70)" .
-gone/php\:nginx-7.0-onbuild:
+gone/php\:nginx-7.0-onbuild: setup
 	$(CMD_BUILD) -t gone/php:nginx-7.0-onbuild 		--target=php-nginx-onbuild 	--build-arg "PHP_VERSION=7.0" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_70)" .
-gone/php\:nginx-7.1:
+gone/php\:nginx-7.1: setup
 	$(CMD_BUILD) -t gone/php:nginx-7.1 				--target=php-nginx 			--build-arg "PHP_VERSION=7.1" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_71)" .
-gone/php\:nginx-7.1-onbuild:
+gone/php\:nginx-7.1-onbuild: setup
 	$(CMD_BUILD) -t gone/php:nginx-7.1-onbuild 		--target=php-nginx-onbuild 	--build-arg "PHP_VERSION=7.1" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_71)" .
-gone/php\:nginx-7.2:
+gone/php\:nginx-7.2: setup
 	$(CMD_BUILD) -t gone/php:nginx-7.2 				--target=php-nginx 			--build-arg "PHP_VERSION=7.2" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_72)" .
-gone/php\:nginx-7.2-onbuild:
+gone/php\:nginx-7.2-onbuild: setup
 	$(CMD_BUILD) -t gone/php:nginx-7.2-onbuild 		--target=php-nginx-onbuild 	--build-arg "PHP_VERSION=7.2" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_72)" .
-gone/php\:nginx-7.3:
+gone/php\:nginx-7.3: setup
 	$(CMD_BUILD) -t gone/php:nginx-7.3 				--target=php-nginx 			--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
-gone/php\:nginx-7.3-onbuild:
+gone/php\:nginx-7.3-onbuild: setup
 	$(CMD_BUILD) -t gone/php:nginx-7.3-onbuild 		--target=php-nginx-onbuild 	--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
 
 #   ██▓███   ██░ ██  ██▓███      ▄▄▄       ██▓███   ▄▄▄       ▄████▄   ██░ ██ ▓█████
@@ -242,27 +247,26 @@ gone/php\:nginx-7.3-onbuild:
 #  ░▒ ░      ▒ ░▒░ ░░▒ ░          ▒   ▒▒ ░░▒ ░       ▒   ▒▒ ░  ░  ▒    ▒ ░▒░ ░ ░ ░  ░
 #  ░░        ░  ░░ ░░░            ░   ▒   ░░         ░   ▒   ░         ░  ░░ ░   ░
 #            ░  ░  ░                  ░  ░               ░  ░░ ░       ░  ░  ░   ░  ░
-#                                                            ░
 
-gone/php\:apache-5.6:
+gone/php\:apache-5.6: setup
 	$(CMD_BUILD) -t gone/php:apache-5.6 			--target=php-apache 		--build-arg "PHP_VERSION=5.6" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_56)" .
-gone/php\:apache-5.6-onbuild:
+gone/php\:apache-5.6-onbuild: setup
 	$(CMD_BUILD) -t gone/php:apache-5.6-onbuild 	--target=php-apache-onbuild --build-arg "PHP_VERSION=5.6" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_56)" .
-gone/php\:apache-7.0:
+gone/php\:apache-7.0: setup
 	$(CMD_BUILD) -t gone/php:apache-7.0 			--target=php-apache 		--build-arg "PHP_VERSION=7.0" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_70)" .
-gone/php\:apache-7.0-onbuild:
+gone/php\:apache-7.0-onbuild: setup
 	$(CMD_BUILD) -t gone/php:apache-7.0-onbuild 	--target=php-apache-onbuild --build-arg "PHP_VERSION=7.0" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_70)" .
-gone/php\:apache-7.1:
+gone/php\:apache-7.1: setup
 	$(CMD_BUILD) -t gone/php:apache-7.1 			--target=php-apache 		--build-arg "PHP_VERSION=7.1" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_71)" .
-gone/php\:apache-7.1-onbuild:
+gone/php\:apache-7.1-onbuild: setup
 	$(CMD_BUILD) -t gone/php:apache-7.1-onbuild 	--target=php-apache-onbuild --build-arg "PHP_VERSION=7.1" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_71)" .
-gone/php\:apache-7.2:
+gone/php\:apache-7.2: setup
 	$(CMD_BUILD) -t gone/php:apache-7.2 			--target=php-apache 		--build-arg "PHP_VERSION=7.2" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_72)" .
-gone/php\:apache-7.2-onbuild:
+gone/php\:apache-7.2-onbuild: setup
 	$(CMD_BUILD) -t gone/php:apache-7.2-onbuild 	--target=php-apache-onbuild --build-arg "PHP_VERSION=7.2" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_72)" .
-gone/php\:apache-7.3:
+gone/php\:apache-7.3: setup
 	$(CMD_BUILD) -t gone/php:apache-7.3 			--target=php-apache 		--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
-gone/php\:apache-7.3-onbuild:
+gone/php\:apache-7.3-onbuild: setup
 	$(CMD_BUILD) -t gone/php:apache-7.3-onbuild 	--target=php-apache-onbuild --build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
 
 # ███▄    █  ▒█████  ▓█████▄ ▓█████     ▄▄▄██▀▀▀██████
@@ -274,42 +278,41 @@ gone/php\:apache-7.3-onbuild:
 #░ ░░   ░ ▒░  ░ ▒ ▒░  ░ ▒  ▒  ░ ░  ░    ▒ ░▒░ ░ ░▒  ░ ░
 #   ░   ░ ░ ░ ░ ░ ▒   ░ ░  ░    ░       ░ ░ ░ ░  ░  ░
 #         ░     ░ ░     ░       ░  ░    ░   ░       ░
-#                     ░
 
-gone/node\:8:
+gone/node\:8: setup
 	$(CMD_BUILD) -t gone/node:8 					--target=nodejs 					--build-arg NODE_VERSION=8.16.0 	--build-arg YARN_VERSION=1.15.2 .
-gone/node\:8-onbuild:
+gone/node\:8-onbuild: setup
 	$(CMD_BUILD) -t gone/node:8-onbuild 			--target=nodejs-onbuild 			--build-arg NODE_VERSION=8.16.0 	--build-arg YARN_VERSION=1.15.2 .
-gone/node\:8-compiler:
+gone/node\:8-compiler: setup
 	$(CMD_BUILD) -t gone/node:8-compiler 			--target=nodejs-compiler 			--build-arg NODE_VERSION=8.16.0 	--build-arg YARN_VERSION=1.15.2 .
-gone/node\:8-compiler-onbuild:
+gone/node\:8-compiler-onbuild: setup
 	$(CMD_BUILD) -t gone/node:8-compiler-onbuild 	--target=nodejs-compiler-onbuild 	--build-arg NODE_VERSION=8.16.0 	--build-arg YARN_VERSION=1.15.2 .
 
-gone/node\:10:
+gone/node\:10: setup
 	$(CMD_BUILD) -t gone/node:10 					--target=nodejs 					--build-arg NODE_VERSION=10.16.0 	--build-arg YARN_VERSION=1.16.0 .
-gone/node\:10-onbuild:
+gone/node\:10-onbuild: setup
 	$(CMD_BUILD) -t gone/node:10-onbuild 			--target=nodejs-onbuild 			--build-arg NODE_VERSION=10.16.0 	--build-arg YARN_VERSION=1.16.0 .
-gone/node\:10-compiler:
+gone/node\:10-compiler: setup
 	$(CMD_BUILD) -t gone/node:10-compiler 			--target=nodejs-compiler 			--build-arg NODE_VERSION=10.16.0 	--build-arg YARN_VERSION=1.16.0 .
-gone/node\:10-compiler-onbuild:
+gone/node\:10-compiler-onbuild: setup
 	$(CMD_BUILD) -t gone/node:10-compiler-onbuild 	--target=nodejs-compiler-onbuild 	--build-arg NODE_VERSION=10.16.0 	--build-arg YARN_VERSION=1.16.0 .
 
-gone/node\:11:
+gone/node\:11: setup
 	$(CMD_BUILD) -t gone/node:11 					--target=nodejs 					--build-arg NODE_VERSION=11.15.0 	--build-arg YARN_VERSION=1.16.0 .
-gone/node\:11-onbuild:
+gone/node\:11-onbuild: setup
 	$(CMD_BUILD) -t gone/node:11-onbuild 			--target=nodejs-onbuild 			--build-arg NODE_VERSION=11.15.0 	--build-arg YARN_VERSION=1.16.0 .
-gone/node\:11-compiler:
+gone/node\:11-compiler: setup
 	$(CMD_BUILD) -t gone/node:11-compiler 			--target=nodejs-compiler 			--build-arg NODE_VERSION=11.15.0 	--build-arg YARN_VERSION=1.16.0 .
-gone/node\:11-compiler-onbuild:
+gone/node\:11-compiler-onbuild: setup
 	$(CMD_BUILD) -t gone/node:11-compiler-onbuild 	--target=nodejs-compiler-onbuild 	--build-arg NODE_VERSION=11.15.0 	--build-arg YARN_VERSION=1.16.0 .
 
-gone/node\:12:
+gone/node\:12: setup
 	$(CMD_BUILD) -t gone/node:12 					--target=nodejs 					--build-arg NODE_VERSION=12.3.1 	--build-arg YARN_VERSION=1.16.0 .
-gone/node\:12-onbuild:
+gone/node\:12-onbuild: setup
 	$(CMD_BUILD) -t gone/node:12-onbuild			--target=nodejs-onbuild 			--build-arg NODE_VERSION=12.3.1 	--build-arg YARN_VERSION=1.16.0 .
-gone/node\:12-compiler:
+gone/node\:12-compiler: setup
 	$(CMD_BUILD) -t gone/node:12-compiler 			--target=nodejs-compiler 			--build-arg NODE_VERSION=12.3.1 	--build-arg YARN_VERSION=1.16.0 .
-gone/node\:12-compiler-onbuild:
+gone/node\:12-compiler-onbuild: setup
 	$(CMD_BUILD) -t gone/node:12-compiler-onbuild 	--target=nodejs-compiler-onbuild 	--build-arg NODE_VERSION=12.3.1 	--build-arg YARN_VERSION=1.16.0 .
 
 #   ██▓    ▄▄▄     ▄▄▄█████▓▓█████   ██████ ▄▄▄█████▓    ▄▄▄▄    █    ██  ██▓ ██▓    ▓█████▄   ██████
@@ -321,19 +324,18 @@ gone/node\:12-compiler-onbuild:
 #  ░ ░ ▒  ░ ▒   ▒▒ ░   ░     ░ ░  ░░ ░▒  ░ ░    ░       ▒░▒   ░ ░░▒░ ░ ░  ▒ ░░ ░ ▒  ░ ░ ▒  ▒ ░ ░▒  ░ ░
 #    ░ ░    ░   ▒    ░         ░   ░  ░  ░    ░          ░    ░  ░░░ ░ ░  ▒ ░  ░ ░    ░ ░  ░ ░  ░  ░
 #      ░  ░     ░  ░           ░  ░      ░               ░         ░      ░      ░  ░   ░          ░
-#                                                             ░                       ░
 
-gone/php\:cli:
+gone/php\:cli: setup
 	$(CMD_BUILD) -t gone/php:cli 					--target=php-cli 			--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
-gone/php\:cli-onbuild:
+gone/php\:cli-onbuild: setup
 	$(CMD_BUILD) -t gone/php:cli-onbuild 			--target=php-cli-onbuild 	--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
-gone/php\:apache:
+gone/php\:apache: setup
 	$(CMD_BUILD) -t gone/php:apache 				--target=php-apache 		--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
-gone/php\:apache-onbuild:
+gone/php\:apache-onbuild: setup
 	$(CMD_BUILD) -t gone/php:apache-onbuild 		--target=php-apache-onbuild --build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
-gone/php\:nginx:
+gone/php\:nginx: setup
 	$(CMD_BUILD) -t gone/php:nginx 					--target=php-nginx 			--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
-gone/php\:nginx-onbuild:
+gone/php\:nginx-onbuild: setup
 	$(CMD_BUILD) -t gone/php:nginx-onbuild 			--target=php-nginx-onbuild 	--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
-gone/node\:latest:
+gone/node\:latest: setup
 	$(CMD_BUILD) -t gone/node			 			--target=nodejs 			--build-arg NODE_VERSION=12.3.1	--build-arg YARN_VERSION=1.16.0 .

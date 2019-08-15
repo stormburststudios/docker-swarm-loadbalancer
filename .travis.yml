@@ -12,9 +12,6 @@ before_install:
 
 before_script:
   - docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD $DOCKER_REGISTRY
-  - git rev-parse --short HEAD > marshall/marshall_version
-  - date +%Y-%m-%d\ %H:%M:%S > marshall/marshall_build_date
-  - hostname > marshall/marshall_build_host
 
 script:
   - travis_retry make $BUILD

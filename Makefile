@@ -327,7 +327,7 @@ gone/php\:cli:
 	$(CMD_BUILD) -t gone/php:cli 					--target=php-cli 			--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
 gone/php\:cli-onbuild:
 	$(CMD_BUILD) -t gone/php:cli-onbuild 			--target=php-cli-onbuild 	--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
-gone/php\:apache-latest:
+gone/php\:apache:
 	$(CMD_BUILD) -t gone/php:apache 				--target=php-apache 		--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
 gone/php\:apache-onbuild:
 	$(CMD_BUILD) -t gone/php:apache-onbuild 		--target=php-apache-onbuild --build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .

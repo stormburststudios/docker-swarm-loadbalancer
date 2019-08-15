@@ -19,11 +19,14 @@ before_script:
 script:
   - travis_retry make $BUILD
 
-deploy:
-  provider: script
-  script: travis_retry docker push $BUILD
-  on:
-    branch: master
+after_success:
+  - travis_retry docker push $BUILD
+
+#deploy:
+#  provider: script
+#  script: travis_retry docker push $BUILD
+#  on:
+#    branch: master
 
 notifications:
   email:

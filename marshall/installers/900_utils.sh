@@ -1,5 +1,5 @@
 #!/bin/bash
-source /app/installers/config
+source /installers/config
 
 $APT_GET \
     inetutils-ping \

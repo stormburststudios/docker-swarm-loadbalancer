@@ -1,1 +1,0 @@
-FROM gone/php:nginx-php5.6

@@ -187,7 +187,7 @@ RUN rm -fr /var/www/html && \
     mv /conf/apache.runit /etc/service/apache/run && \
     mv /conf/show_logs.runit /etc/service/show_logs/run && \
     chmod +x /etc/service/*/run && \
-    rm /conf && \
+    rm -Rf /conf && \
     a2enmod rewrite
 
 FROM php-apache AS php-apache-onbuild

@@ -1,34 +1,27 @@
 language: bash
 
 before_script:
-  - 'docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD $DOCKER_REGISTRY'
-  - 'sudo rm /usr/local/bin/docker-compose'
-  - 'curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-`uname -s`-`uname -m` > docker-compose'
-  - 'chmod +x docker-compose'
-  - 'sudo mv docker-compose /usr/local/bin'
-  - 'git rev-parse --short HEAD > marshall/marshall_version'
-  - 'date +%Y-%m-%d\ %H:%M:%S > marshall/marshall_build_date'
-  - 'hostname > marshall/marshall_build_host'
+  - docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD $DOCKER_REGISTRY
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  - git rev-parse --short HEAD > marshall/marshall_version
+  - date +%Y-%m-%d\ %H:%M:%S > marshall/marshall_build_date
+  - hostname > marshall/marshall_build_host
 
 script:
-  - 'docker-compose -f build.yml build $IMAGE'
+  - docker-compose -f build.yml build $IMAGE
 
-after_script:
-  - 'docker-compose -f build.yml push $IMAGE'
+deploy:
+  provider: script
+  script: docker-compose -f build.yml push $IMAGE
+  on:
+    branch: master
 
 notifications:
   email:
     - matthew@baggett.me
-
-deploy:
-  project_name: Gone.io Base Images
-  provider: pages
-  skip_cleanup: true
-  github_token: $GITHUB_TOKEN
-  keep_history: true
-  on:
-    branch: master
-  committer_from_gh: true
 
 env:
   - IMAGE=marshall

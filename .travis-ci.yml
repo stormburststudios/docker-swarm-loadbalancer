@@ -1,4 +1,4 @@
-language: bash
+language: sh
 
 before_script:
   - docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD $DOCKER_REGISTRY

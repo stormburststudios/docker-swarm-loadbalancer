@@ -38,7 +38,7 @@ foreach($results as $image => $variants){
         $sizeColour = 'green';
         $arches = [];
         foreach($variant['images'] as $archSpecificImage){
-            $arches[] = $variant['architecture'];
+            $arches[] = $archSpecificImage['architecture'];
         }
         $tableBuilder->row([
             $image . ":" . $variant['name'],

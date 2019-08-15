@@ -1,3 +1,20 @@
+#    ▄████  ▒█████   ███▄    █ ▓█████       ██▓ ▒█████
+#   ██▒ ▀█▒▒██▒  ██▒ ██ ▀█   █ ▓█   ▀      ▓██▒▒██▒  ██▒
+#  ▒██░▄▄▄░▒██░  ██▒▓██  ▀█ ██▒▒███        ▒██▒▒██░  ██▒
+#  ░▓█  ██▓▒██   ██░▓██▒  ▐▌██▒▒▓█  ▄      ░██░▒██   ██░
+#  ░▒▓███▀▒░ ████▓▒░▒██░   ▓██░░▒████▒ ██▓ ░██░░ ████▓▒░
+#   ░▒   ▒ ░ ▒░▒░▒░ ░ ▒░   ▒ ▒ ░░ ▒░ ░ ▒▓▒ ░▓  ░ ▒░▒░▒░
+#  ░▄▄▄▄ ░ ░▄▄▄░ ▒░ ░ ░██████░▓█████ ░ ░ ██▓ ███▄░▄███▓ ▄▄▄        ▄████ ▓█████
+#  ▓█████▄ ▒████▄░   ▒██    ▒░▓█   ▀ ░  ▓██▒▓██▒▀█▀ ██▒▒████▄     ██▒ ▀█▒▓█   ▀
+#  ▒██▒ ▄██▒██  ▀█▄  ░ ▓██▄   ▒███      ▒██▒▓██    ▓██░▒██  ▀█▄  ▒██░▄▄▄░▒███
+#  ▒██░█▀  ░██▄▄▄▄██   ▒   ██▒▒▓█  ▄    ░██░▒██    ▒██ ░██▄▄▄▄██ ░▓█  ██▓▒▓█  ▄
+#  ░▓█  ▀█▓ ▓█   ▓██▒▒██████▒▒░▒████▒   ░██░▒██▒   ░██▒ ▓█   ▓██▒░▒▓███▀▒░▒████▒
+#  ░▒▓███▀▒ ▒▒   ▓▒█░▒ ▒▓▒ ▒ ░░░ ▒░ ░   ░▓  ░ ▒░   ░  ░ ▒▒   ▓▒█░ ░▒   ▒ ░░ ▒░ ░
+#  ▒░▒   ░   ▒   ▒▒ ░░ ░▒  ░ ░ ░ ░  ░    ▒ ░░  ░      ░  ▒   ▒▒ ░  ░   ░  ░ ░  ░
+#   ░    ░   ░   ▒   ░  ░  ░     ░       ▒ ░░      ░     ░   ▒   ░ ░   ░    ░
+#   ░            ░  ░      ░     ░  ░    ░         ░         ░  ░      ░    ░  ░
+
+# Prettyprinting: http://patorjk.com/software/taag/#p=display&c=bash&f=Bloody&t=Example
 CMD_BUILD=DOCKER_BUILDKIT=1 docker build
 PHP_PACKAGES_56=mysql-client \
 					 php-apcu \
@@ -161,7 +178,6 @@ setup:
 #  ░  ░      ░  ▒   ▒▒ ░  ░▒ ░ ▒░░ ░▒  ░ ░ ▒ ░▒░ ░  ▒   ▒▒ ░░ ░ ▒  ░░ ░ ▒  ░
 #  ░      ░     ░   ▒     ░░   ░ ░  ░  ░   ░  ░░ ░  ░   ▒     ░ ░     ░ ░
 #         ░         ░  ░   ░           ░   ░  ░  ░      ░  ░    ░  ░    ░  ░
-
 gone/marshall: setup
 	$(CMD_BUILD) -t gone/marshall:latest --target=marshall .
 
@@ -410,7 +426,7 @@ gone/php\:nginx-onbuild: setup
 	$(CMD_BUILD) -t gone/php:nginx-onbuild 			--target=php-nginx-onbuild 	--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
 gone/node: setup
 	$(CMD_BUILD) -t gone/node			 			--target=nodejs 			--build-arg NODE_VERSION=12.3.1	--build-arg YARN_VERSION=1.16.0 .
-gone/node:onbuild: setup
+gone/node\:onbuild: setup
 	$(CMD_BUILD) -t gone/node-onbuild	 			--target=nodejs-onbuild		--build-arg NODE_VERSION=12.3.1	--build-arg YARN_VERSION=1.16.0 .
 
 latest:
@@ -422,3 +438,11 @@ latest:
 	$(MAKE) gone/php\:nginx-onbuild
 	$(MAKE) gone/node
 	$(MAKE) gone/node:onbuild
+
+all:
+	$(MAKE) gone/marshall
+	#$(MAKE) php-core # Nobody actually uses the core as-is, everything is baked off of cli & nginx honestly.
+	$(MAKE) php-cli
+	$(MAKE) php-nginx
+	$(MAKE) php-apache
+	$(MAKE) latest

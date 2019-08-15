@@ -8,11 +8,11 @@ before_script:
   - sudo mv docker-compose /usr/local/bin
 
 script:
-  - make $BUILD
+  - make $(BUILD)
 
 deploy:
   provider: script
-  script: docker push $BUILD
+  script: docker push $(BUILD)
   on:
     branch: master
 

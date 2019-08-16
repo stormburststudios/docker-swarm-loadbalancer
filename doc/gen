@@ -33,19 +33,26 @@ $tableBuilder->align(['L','L', 'R','R','C']);
 
 foreach($results as $image => $variants){
     foreach($variants as $variant) {
+        $fullImageName = $image . ":" . $variant['name'];
         $megabytes = number_format($variant['full_size'] / 1024 / 1024, 2);
-            //[![Layers](https://img.shields.io/badge/Layers-13-green.svg)](https://hub.docker.com/r/gone/marshall)
         $sizeColour = 'green';
+        if($megabytes > 150){
+            $sizeColour = 'orange';
+        }
+        if($megabytes > 180){
+            $sizeColour = 'red';
+        }
+
         $arches = [];
         foreach($variant['images'] as $archSpecificImage){
             $arches[] = $archSpecificImage['architecture'];
         }
         $tableBuilder->row([
-            $image . ":" . $variant['name'],
+            $fullImageName,
             strtoupper(implode(", ", $arches)),
             "[![Layers](https://img.shields.io/badge/{$megabytes}MB-{$sizeColour}.svg)](https://hub.docker.com/r/{$image})",
             date("Y-m-d H:i:s", strtotime($variant['last_updated'])),
-            "[![](https://images.microbadger.com/badges/image/gone/marshall:latest.svg)](https://microbadger.com/images/gone/marshall:latest \"Get your own image badge on microbadger.com\")",
+            "[![](https://images.microbadger.com/badges/image/{$fullImageName}.svg)](https://microbadger.com/images/{$fullImageName} \"Get your own image badge on microbadger.com\")",
         ]);
     }
 }

@@ -24,6 +24,7 @@ RUN chmod +x /installers/install && \
 FROM marshall AS php-core
 ARG PHP_PACKAGES
 COPY php-core/install-report.sh /usr/bin/install-report
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN apt-get -qq update && \
     apt-get -yqq install --no-install-recommends \
         python3-software-properties \
@@ -204,6 +205,7 @@ ARG NODE_VERSION
 ARG YARN_VERSION
 ARG PATH="/app/node_modules/.bin:${PATH}"
 
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN mkdir ~/.gnupg && \
     echo "disable-ipv6" >> ~/.gnupg/dirmngr.conf && \
     apt-get -qq update && \

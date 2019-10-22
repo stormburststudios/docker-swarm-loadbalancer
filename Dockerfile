@@ -1,4 +1,4 @@
-FROM ubuntu:latest AS marshall
+FROM ubuntu:bionic AS marshall
 
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>"
 

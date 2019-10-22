@@ -68,7 +68,7 @@ COPY php+cli/psysh-config.php /root/.config/psysh/config.php
 
 FROM php-cli AS php-cli-onbuild
 # On build, add anything in with Dockerfile into /app
-ONBUILD ADD ./ /app
+ONBUILD COPY ./ /app
 
 # If composer.json/composer.lock exist, do a composer install.
 ONBUILD RUN composer install; exit 0
@@ -143,7 +143,7 @@ HEALTHCHECK --interval=30s --timeout=3s \
 
 FROM php-nginx AS php-nginx-onbuild
 # On build, add anything in with Dockerfile into /app
-ONBUILD ADD ./ /app
+ONBUILD COPY ./ /app
 
 # If composer.json/composer.lock exist, do a composer install.
 ONBUILD RUN composer install; exit 0
@@ -192,7 +192,7 @@ RUN rm -fr /var/www/html && \
 
 FROM php-apache AS php-apache-onbuild
 # On build, add anything in with Dockerfile into /app
-ONBUILD ADD ./ /app
+ONBUILD COPY ./ /app
 
 # If composer.json/composer.lock exist, do a composer install.
 ONBUILD RUN composer install --ignore-platform-reqs; exit 0
@@ -290,9 +290,9 @@ RUN apt-get -qq update && \
 
 FROM nodejs AS nodejs-onbuild
 
-ONBUILD ADD ./ /app
+ONBUILD COPY ./ /app
 
 FROM nodejs-compiler AS nodejs-compiler-onbuild
 
-ONBUILD ADD ./ /app
+ONBUILD COPY ./ /app
 

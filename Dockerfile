@@ -1,6 +1,6 @@
 FROM ubuntu:latest AS marshall
 
-MAINTAINER Matthew Baggett <hello@gone.io>
+LABEL maintainer="Matthew Baggett <matthew@baggett.me>"
 
 ENV DEBIAN_FRONTEND="teletype" \
     TERM=xterm-256color \

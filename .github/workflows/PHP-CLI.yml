@@ -27,3 +27,99 @@ jobs:
         run: |
           docker push gone/php:cli-5.6
           docker push gone/php:cli-5.6 docker.pkg.github.com/goneio/base-image/php:cli-5.6
+  PHP_70:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Login to registries
+        run: |
+          docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p  ${{ secrets.DOCKER_HUB_PASSWORD }}
+          docker login docker.pkg.github.com -u ${{ secrets.DOCKER_GITHUB_USERNAME }} -p  ${{ secrets.DOCKER_GITHUB_PASSWORD }}
+      - name: Setup
+        run: |
+          git rev-parse --short HEAD > marshall/marshall_version
+          date '+%Y-%m-%d %H:%M:%S' > marshall/marshall_build_date
+          hostname > marshall/marshall_build_host
+      - name: Build Image
+        run: docker build -t gone/php:cli-7.0 --target=php-cli --build-arg "PHP_VERSION=7.0" --build-arg "PHP_PACKAGES=$(PHP_PACKAGES_70)" .
+        env:
+          PHP_PACKAGES_70: mysql-client php-apcu php-xdebug php7.0-bcmath php7.0-bz2 php7.0-cli php7.0-curl php7.0-gd php7.0-imap php7.0-intl php7.0-json php7.0-ldap php7.0-mbstring php7.0-mcrypt php7.0-memcache php7.0-memcached php7.0-mongodb php7.0-mysql php7.0-opcache php7.0-pgsql php7.0-pspell php7.0-redis php7.0-soap php7.0-sqlite php7.0-xml php7.0-zip postgresql-client
+      - name: Tag Image
+        run: |
+          docker tag gone/php:cli-7.0 docker.pkg.github.com/goneio/base-image/php:cli-7.0
+      - name: Publish Image to Registries
+        run: |
+          docker push gone/php:cli-7.0
+          docker push gone/php:cli-7.0 docker.pkg.github.com/goneio/base-image/php:cli-7.0
+  PHP_71:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Login to registries
+        run: |
+          docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p  ${{ secrets.DOCKER_HUB_PASSWORD }}
+          docker login docker.pkg.github.com -u ${{ secrets.DOCKER_GITHUB_USERNAME }} -p  ${{ secrets.DOCKER_GITHUB_PASSWORD }}
+      - name: Setup
+        run: |
+          git rev-parse --short HEAD > marshall/marshall_version
+          date '+%Y-%m-%d %H:%M:%S' > marshall/marshall_build_date
+          hostname > marshall/marshall_build_host
+      - name: Build Image
+        run: docker build -t gone/php:cli-7.1 --target=php-cli --build-arg "PHP_VERSION=7.1" --build-arg "PHP_PACKAGES=$(PHP_PACKAGES_71)" .
+        env:
+          PHP_PACKAGES_71: mysql-client php-apcu php-xdebug php7.1-bcmath php7.1-bz2 php7.1-cli php7.1-curl php7.1-gd php7.1-imap php7.1-intl php7.1-json php7.1-ldap php7.1-mbstring php7.1-mcrypt php7.1-memcache php7.1-memcached php7.1-mongodb php7.1-mysql php7.1-opcache php7.1-pgsql php7.1-pspell php7.1-redis php7.1-soap php7.1-sqlite php7.1-xml php7.1-zip postgresql-client
+      - name: Tag Image
+        run: |
+          docker tag gone/php:cli-7.1 docker.pkg.github.com/goneio/base-image/php:cli-7.1
+      - name: Publish Image to Registries
+        run: |
+          docker push gone/php:cli-7.1
+          docker push gone/php:cli-7.1 docker.pkg.github.com/goneio/base-image/php:cli-7.1
+  PHP_72:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Login to registries
+        run: |
+          docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p  ${{ secrets.DOCKER_HUB_PASSWORD }}
+          docker login docker.pkg.github.com -u ${{ secrets.DOCKER_GITHUB_USERNAME }} -p  ${{ secrets.DOCKER_GITHUB_PASSWORD }}
+      - name: Setup
+        run: |
+          git rev-parse --short HEAD > marshall/marshall_version
+          date '+%Y-%m-%d %H:%M:%S' > marshall/marshall_build_date
+          hostname > marshall/marshall_build_host
+      - name: Build Image
+        run: docker build -t gone/php:cli-7.2 --target=php-cli --build-arg "PHP_VERSION=7.2" --build-arg "PHP_PACKAGES=$(PHP_PACKAGES_72)" .
+        env:
+          PHP_PACKAGES_72: mysql-client php-apcu php-xdebug php7.2-bcmath php7.2-bz2 php7.2-cli php7.2-curl php7.2-gd php7.2-imap php7.2-intl php7.2-json php7.2-ldap php7.2-mbstring php7.2-memcache php7.2-memcached php7.2-mongodb php7.2-mysql php7.2-opcache php7.2-pgsql php7.2-pspell php7.2-redis php7.2-soap php7.2-sqlite php7.2-xml php7.2-zip postgresql-client
+      - name: Tag Image
+        run: |
+          docker tag gone/php:cli-7.2 docker.pkg.github.com/goneio/base-image/php:cli-7.2
+      - name: Publish Image to Registries
+        run: |
+          docker push gone/php:cli-7.2
+          docker push gone/php:cli-7.2 docker.pkg.github.com/goneio/base-image/php:cli-7.2
+  PHP_73:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Login to registries
+        run: |
+          docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p  ${{ secrets.DOCKER_HUB_PASSWORD }}
+          docker login docker.pkg.github.com -u ${{ secrets.DOCKER_GITHUB_USERNAME }} -p  ${{ secrets.DOCKER_GITHUB_PASSWORD }}
+      - name: Setup
+        run: |
+          git rev-parse --short HEAD > marshall/marshall_version
+          date '+%Y-%m-%d %H:%M:%S' > marshall/marshall_build_date
+          hostname > marshall/marshall_build_host
+      - name: Build Image
+        run: docker build -t gone/php:cli-7.3 --target=php-cli --build-arg "PHP_VERSION=7.3" --build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
+        env:
+          PHP_PACKAGES_73: mysql-client php-apcu php-xdebug php7.3-bcmath php7.3-bz3 php7.3-cli php7.3-curl php7.3-gd php7.3-imap php7.3-intl php7.3-json php7.3-ldap php7.3-mbstring php7.3-memcache php7.3-memcached php7.3-mongodb php7.3-mysql php7.3-opcache php7.3-pgsql php7.3-pspell php7.3-redis php7.3-soap php7.3-sqlite php7.3-xml php7.3-zip postgresql-client
+      - name: Tag Image
+        run: |
+          docker tag gone/php:cli-7.3 docker.pkg.github.com/goneio/base-image/php:cli-7.3
+      - name: Publish Image to Registries
+        run: |
+          docker push gone/php:cli-7.3
+          docker push gone/php:cli-7.3 docker.pkg.github.com/goneio/base-image/php:cli-7.3

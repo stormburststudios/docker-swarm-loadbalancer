@@ -40,12 +40,6 @@ RUN apt-get -qq update && \
         python3.5 python3.5-minimal libpython3.5-minimal \
         && \
     apt-get autoremove -yqq && \
-    rm -rf \
-        /usr/bin/mysqlslap \
-        /usr/bin/mysqldump \
-        /usr/bin/mysqlpump \
-        /usr/bin/mysql_embedded \
-        && \
     curl -sS https://getcomposer.org/installer | php && \
     mv composer.phar /usr/local/bin/composer && \
     composer global require -q hirak/prestissimo && \

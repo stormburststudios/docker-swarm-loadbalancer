@@ -115,7 +115,7 @@ jobs:
       - name: Build Image
         run: docker build -t gone/php:cli-7.3 --target=php-cli --build-arg "PHP_VERSION=7.3" --build-arg "PHP_PACKAGES=$PHP_PACKAGES_73" .
         env:
-          PHP_PACKAGES_73: mysql-client php-apcu php-xdebug php7.3-bcmath php7.3-bz3 php7.3-cli php7.3-curl php7.3-gd php7.3-imap php7.3-intl php7.3-json php7.3-ldap php7.3-mbstring php7.3-memcache php7.3-memcached php7.3-mongodb php7.3-mysql php7.3-opcache php7.3-pgsql php7.3-pspell php7.3-redis php7.3-soap php7.3-sqlite php7.3-xml php7.3-zip postgresql-client
+          PHP_PACKAGES_73: mysql-client php-apcu php-xdebug php7.3-bcmath php7.3-bz2 php7.3-cli php7.3-curl php7.3-gd php7.3-imap php7.3-intl php7.3-json php7.3-ldap php7.3-mbstring php7.3-memcache php7.3-memcached php7.3-mongodb php7.3-mysql php7.3-opcache php7.3-pgsql php7.3-pspell php7.3-redis php7.3-soap php7.3-sqlite php7.3-xml php7.3-zip postgresql-client
       - name: Tag Image
         run: |
           docker tag gone/php:cli-7.3 docker.pkg.github.com/goneio/base-image/php:cli-7.3

@@ -55,7 +55,6 @@ RUN apt-get -qq update && \
 
 FROM php-core AS php-cli
 RUN apt-get -qq update && \
-    apt-get -qy upgrade && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 

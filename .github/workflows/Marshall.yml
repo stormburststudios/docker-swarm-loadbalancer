@@ -14,7 +14,7 @@ jobs:
     - name: Setup
       run: |
         git rev-parse --short HEAD > marshall/marshall_version
-        date +%Y-%m-%d\ %H:%M:%S > marshall/marshall_build_date
+        date '+%Y-%m-%d %H:%M:%S' > marshall/marshall_build_date
         hostname > marshall/marshall_build_host
     - name: Build Image
       run: docker build -t marshall --target=marshall .

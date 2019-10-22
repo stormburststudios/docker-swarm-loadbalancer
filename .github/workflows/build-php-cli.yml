@@ -26,7 +26,7 @@ jobs:
       - name: Publish Image to Registries
         run: |
           docker push gone/php:cli-5.6
-          docker push gone/php:cli-5.6 docker.pkg.github.com/goneio/base-image/php:cli-5.6
+          docker push docker.pkg.github.com/goneio/base-image/php:cli-5.6
   PHP_70:
     runs-on: ubuntu-latest
     steps:
@@ -50,7 +50,7 @@ jobs:
       - name: Publish Image to Registries
         run: |
           docker push gone/php:cli-7.0
-          docker push gone/php:cli-7.0 docker.pkg.github.com/goneio/base-image/php:cli-7.0
+          docker push docker.pkg.github.com/goneio/base-image/php:cli-7.0
   PHP_71:
     runs-on: ubuntu-latest
     steps:
@@ -74,7 +74,7 @@ jobs:
       - name: Publish Image to Registries
         run: |
           docker push gone/php:cli-7.1
-          docker push gone/php:cli-7.1 docker.pkg.github.com/goneio/base-image/php:cli-7.1
+          docker push docker.pkg.github.com/goneio/base-image/php:cli-7.1
   PHP_72:
     runs-on: ubuntu-latest
     steps:
@@ -98,7 +98,7 @@ jobs:
       - name: Publish Image to Registries
         run: |
           docker push gone/php:cli-7.2
-          docker push gone/php:cli-7.2 docker.pkg.github.com/goneio/base-image/php:cli-7.2
+          docker push docker.pkg.github.com/goneio/base-image/php:cli-7.2
   PHP_73:
     runs-on: ubuntu-latest
     steps:
@@ -122,4 +122,4 @@ jobs:
       - name: Publish Image to Registries
         run: |
           docker push gone/php:cli-7.3
-          docker push gone/php:cli-7.3 docker.pkg.github.com/goneio/base-image/php:cli-7.3
+          docker push docker.pkg.github.com/goneio/base-image/php:cli-7.3

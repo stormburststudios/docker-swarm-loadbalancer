@@ -114,19 +114,25 @@ RUN apt-get -qq update && \
     mkdir /run/php && \
     rm -fr /var/www/html && \
     ln -s /app /var/www/html && \
+    # Move nginx configuration into place
     mv /conf/NginxDefault /etc/nginx/sites-enabled/default && \
-    mkdir /etc/service/nginx && \
-    mkdir /etc/service/php-fpm && \
-    mkdir /etc/service/logs-nginx-access && \
-    mkdir /etc/service/logs-nginx-error && \
-    mkdir /etc/service/logs-phpfpm-error && \
+    # Create runit service directories
+    mkdir /etc/service/nginx \
+          /etc/service/php-fpm \
+          /etc/service/logs-nginx-access \
+          /etc/service/logs-nginx-error \
+          /etc/service/logs-phpfpm-error && \
+    # Copy our new service runits into location
     mv /conf/nginx.runit /etc/service/nginx/run && \
     mv /conf/php-fpm.runit /etc/service/php-fpm/run && \
     mv /conf/logs-nginx-access.runit /etc/service/logs-nginx-access/run && \
     mv /conf/logs-nginx-error.runit /etc/service/logs-nginx-error/run && \
     mv /conf/logs-phpfpm-error.runit /etc/service/logs-phpfpm-error/run && \
+    # Make sure all our new services are executable
     chmod +x /etc/service/*/run && \
+    # Cleanup the /conf dir
     rm -R /conf && \
+    # Write the PHP version into some template locations
     sed -i "s/{{PHP}}/$PHP_VERSION/g" /etc/nginx/sites-enabled/default && \
     sed -i "s/{{PHP}}/$PHP_VERSION/g" /etc/service/php-fpm/run && \
     # Enable PHP-FPM status & PHP-FPM ping

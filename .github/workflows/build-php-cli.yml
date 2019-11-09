@@ -8,6 +8,7 @@ on:
       - 'marshall/**'
       - 'Dockerfile'
       - '.dockerignore'
+      - '.github/workflows/build-php-cli.yml'
 
 jobs:
   PHP_56:

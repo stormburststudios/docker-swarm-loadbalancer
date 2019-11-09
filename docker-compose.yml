@@ -1,0 +1,15 @@
+version: "2.3"
+
+services:
+  test-nginx-7.3:
+    image: gone/php:nginx-7.3
+    volumes:
+      - ./test-webapp/php:/app/public
+    ports:
+      - 127.0.0.73:80:80
+  test-nginx-7.4:
+    image: gone/php:nginx-7.4
+    volumes:
+      - ./test-webapp/php:/app/public
+    ports:
+      - 127.0.0.74:80:80

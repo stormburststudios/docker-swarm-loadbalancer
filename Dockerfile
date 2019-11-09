@@ -130,8 +130,8 @@ RUN apt-get -qq update && \
     sed -i "s/{{PHP}}/$PHP_VERSION/g" /etc/nginx/sites-enabled/default && \
     sed -i "s/{{PHP}}/$PHP_VERSION/g" /etc/service/php-fpm/run && \
     # Enable PHP-FPM status & PHP-FPM ping
-    sed -i -e "s|;pm.status_path =.*|pm.status_path = /status|g" /etc/php/*/fpm/pool.d/www.conf && \
-    sed -i -e "s|;ping.path =.*|ping.path = /ping|g" /etc/php/*/fpm/pool.d/www.conf && \
+    sed -i -e "s|;pm.status_path =.*|pm.status_path = /fpm-status|g" /etc/php/*/fpm/pool.d/www.conf && \
+    sed -i -e "s|;ping.path =.*|ping.path = /fpm-ping|g" /etc/php/*/fpm/pool.d/www.conf && \
     # Using environment variables in config files works, it would seem. Neat!
     sed -i -e "s|pm.max_children = 5|pm.max_children = \${PHPFPM_MAX_CHILDREN}|g" /etc/php/*/fpm/pool.d/www.conf && \
     # Disable daemonising in nginx

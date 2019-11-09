@@ -17,7 +17,7 @@ server {
         }
 
         # Pass thru status and ping requests to PHP-FPM
-        location = /status {
+        location = /fpm-status {
                 access_log off;
                 allow 127.0.0.1;
                 allow 10.0.0.0/8;
@@ -30,7 +30,7 @@ server {
                 include fastcgi_params;
         }
 
-        location = /ping {
+        location = /fpm-ping {
                 access_log off;
                 allow 127.0.0.1;
                 allow 10.0.0.0/8;

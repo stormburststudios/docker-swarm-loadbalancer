@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+if [[ -f /var/log/php*-fpm.log ]]; then
+    tail -f /var/log/php*-fpm.log
+else
+    sleep 1
+fi

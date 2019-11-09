@@ -117,8 +117,14 @@ RUN apt-get -qq update && \
     mv /conf/NginxDefault /etc/nginx/sites-enabled/default && \
     mkdir /etc/service/nginx && \
     mkdir /etc/service/php-fpm && \
+    mkdir /etc/service/logs-nginx-access && \
+    mkdir /etc/service/logs-nginx-error && \
+    mkdir /etc/service/logs-phpfpm-error && \
     mv /conf/nginx.runit /etc/service/nginx/run && \
     mv /conf/php-fpm.runit /etc/service/php-fpm/run && \
+    mv /conf/logs-nginx-access.runit /etc/service/logs-nginx-access/run && \
+    mv /conf/logs-nginx-error.runit /etc/service/logs-nginx-error/run && \
+    mv /conf/logs-phpfpm-error.runit /etc/service/logs-phpfpm-error/run && \
     chmod +x /etc/service/*/run && \
     rm -R /conf && \
     sed -i "s/{{PHP}}/$PHP_VERSION/g" /etc/nginx/sites-enabled/default && \
@@ -126,7 +132,9 @@ RUN apt-get -qq update && \
     # Enable status panel
     sed -i -e "s|;pm.status_path|pm.status_path|g" /etc/php/*/fpm/pool.d/www.conf && \
     # Using environment variables in config files works, it would seem. Neat!
-    sed -i -e "s|pm.max_children = 5|pm.max_children = \${PHPFPM_MAX_CHILDREN}|g" /etc/php/*/fpm/pool.d/www.conf
+    sed -i -e "s|pm.max_children = 5|pm.max_children = \${PHPFPM_MAX_CHILDREN}|g" /etc/php/*/fpm/pool.d/www.conf && \
+    # Disable daemonising in nginx
+    sed -i '1s;^;daemon off\;\n;' /etc/nginx/nginx.conf
 
 # Expose ports.
 EXPOSE 80

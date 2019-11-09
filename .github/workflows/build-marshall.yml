@@ -1,6 +1,11 @@
 name: Marshall
 
-on: [push]
+on:
+  push:
+    paths:
+      - 'marshall/**'
+      - 'Dockerfile'
+      - '.dockerignore'
 
 jobs:
   Marshall:

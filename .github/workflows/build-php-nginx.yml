@@ -1,6 +1,13 @@
 name: PHP + Nginx
 
-on: [push]
+on:
+  push:
+    paths:
+      - 'php+nginx/**'
+      - 'php-core/**'
+      - 'marshall/**'
+      - 'Dockerfile'
+      - '.dockerignore'
 
 jobs:
   PHP_56:

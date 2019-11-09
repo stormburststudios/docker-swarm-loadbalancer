@@ -1,6 +1,13 @@
 name: PHP CLI
 
-on: [push]
+on:
+  push:
+    paths:
+      - 'php+cli/**'
+      - 'php-core/**'
+      - 'marshall/**'
+      - 'Dockerfile'
+      - '.dockerignore'
 
 jobs:
   PHP_56:

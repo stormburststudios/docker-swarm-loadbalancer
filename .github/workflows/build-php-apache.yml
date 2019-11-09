@@ -1,6 +1,13 @@
 name: PHP + Apache
 
-on: [push]
+on:
+  push:
+    paths:
+      - 'php+apache/**'
+      - 'php-core/**'
+      - 'marshall/**'
+      - 'Dockerfile'
+      - '.dockerignore'
 
 jobs:
   PHP_56:

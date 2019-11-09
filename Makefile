@@ -153,6 +153,33 @@ PHP_PACKAGES_73=mysql-client \
 					 php7.3-xml \
 					 php7.3-zip \
 					 postgresql-client
+					 
+PHP_PACKAGES_74=mysql-client \
+					 php-apcu \
+					 php-xdebug \
+					 php7.4-bcmath \
+					 php7.4-bz2 \
+					 php7.4-cli \
+					 php7.4-curl \
+					 php7.4-gd \
+					 php7.4-imap \
+					 php7.4-intl \
+					 php7.4-json \
+					 php7.4-ldap \
+					 php7.4-mbstring \
+					 php7.4-memcache \
+#					 php7.4-memcached \
+					 php7.4-mongodb \
+					 php7.4-mysql \
+					 php7.4-opcache \
+					 php7.4-pgsql \
+					 php7.4-pspell \
+#					 php7.4-redis \
+					 php7.4-soap \
+					 php7.4-sqlite \
+					 php7.4-xml \
+					 php7.4-zip \
+					 postgresql-client
 
 #    ██████ ▓█████▄▄▄█████▓ █    ██  ██▓███
 #  ▒██    ▒ ▓█   ▀▓  ██▒ ▓▒ ██  ▓██▒▓██░  ██▒
@@ -201,6 +228,8 @@ gone/php\:core-7.2: setup
 	$(CMD_BUILD) -t gone/php:core-7.2 				--target=php-core 			--build-arg "PHP_VERSION=7.2" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_72)" .
 gone/php\:core-7.3: setup
 	$(CMD_BUILD) -t gone/php:core-7.3 				--target=php-core 			--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
+gone/php\:core-7.4: setup
+	$(CMD_BUILD) -t gone/php:core-7.4 				--target=php-core 			--build-arg "PHP_VERSION=7.4" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_74)" .
 
 core:
 	$(MAKE) gone/php\:core-5.6
@@ -208,6 +237,7 @@ core:
 	$(MAKE) gone/php\:core-7.1
 	$(MAKE) gone/php\:core-7.2
 	$(MAKE) gone/php\:core-7.3
+	$(MAKE) gone/php\:core-7.4
 
 #   ██▓███   ██░ ██  ██▓███      ▄████▄   ██▓     ██▓
 #  ▓██░  ██▒▓██░ ██▒▓██░  ██▒   ▒██▀ ▀█  ▓██▒    ▓██▒
@@ -239,6 +269,10 @@ gone/php\:cli-7.3: setup
 	$(CMD_BUILD) -t gone/php:cli-7.3 				--target=php-cli 			--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
 gone/php\:cli-7.3-onbuild: setup
 	$(CMD_BUILD) -t gone/php:cli-7.3-onbuild 		--target=php-cli-onbuild 	--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
+gone/php\:cli-7.4: setup
+	$(CMD_BUILD) -t gone/php:cli-7.4 				--target=php-cli 			--build-arg "PHP_VERSION=7.4" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_74)" .
+gone/php\:cli-7.4-onbuild: setup
+	$(CMD_BUILD) -t gone/php:cli-7.4-onbuild 		--target=php-cli-onbuild 	--build-arg "PHP_VERSION=7.4" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_74)" .
 
 php-cli:
 	$(MAKE) gone/php\:cli-5.6
@@ -251,6 +285,8 @@ php-cli:
 	$(MAKE) gone/php\:cli-7.2-onbuild
 	$(MAKE) gone/php\:cli-7.3
 	$(MAKE) gone/php\:cli-7.3-onbuild
+	$(MAKE) gone/php\:cli-7.4
+	$(MAKE) gone/php\:cli-7.4-onbuild
 
 #   ██▓███   ██░ ██  ██▓███      ███▄    █   ▄████  ██▓ ███▄    █ ▒██   ██▒
 #  ▓██░  ██▒▓██░ ██▒▓██░  ██▒    ██ ▀█   █  ██▒ ▀█▒▓██▒ ██ ▀█   █ ▒▒ █ █ ▒░
@@ -282,6 +318,10 @@ gone/php\:nginx-7.3: setup
 	$(CMD_BUILD) -t gone/php:nginx-7.3 				--target=php-nginx 			--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
 gone/php\:nginx-7.3-onbuild: setup
 	$(CMD_BUILD) -t gone/php:nginx-7.3-onbuild 		--target=php-nginx-onbuild 	--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
+gone/php\:nginx-7.4: setup
+	$(CMD_BUILD) -t gone/php:nginx-7.4 				--target=php-nginx 			--build-arg "PHP_VERSION=7.4" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_74)" .
+gone/php\:nginx-7.4-onbuild: setup
+	$(CMD_BUILD) -t gone/php:nginx-7.4-onbuild 		--target=php-nginx-onbuild 	--build-arg "PHP_VERSION=7.4" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_74)" .
 
 php-nginx:
 	$(MAKE) gone/php\:nginx-5.6
@@ -294,6 +334,8 @@ php-nginx:
 	$(MAKE) gone/php\:nginx-7.2-onbuild
 	$(MAKE) gone/php\:nginx-7.3
 	$(MAKE) gone/php\:nginx-7.3-onbuild
+	$(MAKE) gone/php\:nginx-7.4
+	$(MAKE) gone/php\:nginx-7.4-onbuild
 	
 #   ██▓███   ██░ ██  ██▓███      ▄▄▄       ██▓███   ▄▄▄       ▄████▄   ██░ ██ ▓█████
 #  ▓██░  ██▒▓██░ ██▒▓██░  ██▒   ▒████▄    ▓██░  ██▒▒████▄    ▒██▀ ▀█  ▓██░ ██▒▓█   ▀
@@ -325,6 +367,10 @@ gone/php\:apache-7.3: setup
 	$(CMD_BUILD) -t gone/php:apache-7.3 			--target=php-apache 		--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
 gone/php\:apache-7.3-onbuild: setup
 	$(CMD_BUILD) -t gone/php:apache-7.3-onbuild 	--target=php-apache-onbuild --build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
+gone/php\:apache-7.4: setup
+	$(CMD_BUILD) -t gone/php:apache-7.4 			--target=php-apache 		--build-arg "PHP_VERSION=7.4" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_74)" .
+gone/php\:apache-7.4-onbuild: setup
+	$(CMD_BUILD) -t gone/php:apache-7.4-onbuild 	--target=php-apache-onbuild --build-arg "PHP_VERSION=7.4" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_74)" .
 
 php-apache:
 	$(MAKE) gone/php\:apache-5.6
@@ -337,6 +383,8 @@ php-apache:
 	$(MAKE) gone/php\:apache-7.2-onbuild
 	$(MAKE) gone/php\:apache-7.3
 	$(MAKE) gone/php\:apache-7.3-onbuild
+	$(MAKE) gone/php\:apache-7.4
+	$(MAKE) gone/php\:apache-7.4-onbuild
 	
 # ███▄    █  ▒█████  ▓█████▄ ▓█████     ▄▄▄██▀▀▀██████
 # ██ ▀█   █ ▒██▒  ██▒▒██▀ ██▌▓█   ▀       ▒██ ▒██    ▒

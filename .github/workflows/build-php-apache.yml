@@ -9,6 +9,8 @@ on:
       - 'Dockerfile'
       - '.dockerignore'
       - '.github/workflows/build-php-apache.yml'
+  schedule:
+    - cron '0 4 * * TUE'
 
 jobs:
   PHP_56:

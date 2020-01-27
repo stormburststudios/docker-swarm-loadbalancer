@@ -7,7 +7,7 @@ on:
       - 'Dockerfile'
       - '.dockerignore'
   schedule:
-    - cron '0 4 * * TUE'
+    - cron: '0 4 * * TUE'
 
 jobs:
   Marshall:

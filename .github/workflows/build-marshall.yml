@@ -17,6 +17,7 @@ jobs:
     - name: Login to registries
       run: |
         docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p  ${{ secrets.DOCKER_HUB_PASSWORD }}
+        docker login docker.pkg.github.com -u ${{ secrets.DOCKER_GITHUB_USERNAME }} -p  ${{ secrets.DOCKER_GITHUB_PASSWORD }}
     - name: Setup
       run: |
         git rev-parse --short HEAD > marshall/marshall_version
@@ -27,6 +28,8 @@ jobs:
     - name: Tag Image
       run: |
         docker tag marshall gone/marshall:latest
+        docker tag marshall docker.pkg.github.com/goneio/base-image/marshall:latest
     - name: Publish Image to Registries
       run: |
         docker push gone/marshall:latest
+        docker push docker.pkg.github.com/goneio/base-image/marshall:latest

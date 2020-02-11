@@ -16,7 +16,7 @@
 
 # Prettyprinting: http://patorjk.com/software/taag/#p=display&c=bash&f=Bloody&t=Example
 CMD_BUILD=DOCKER_BUILDKIT=1 docker build
-PHP_PACKAGES_56=mysql-client \
+PHP_PACKAGES_56=mariadb-client \
 					 php-apcu \
 					 php-xdebug \
 					 php5.6-bcmath \
@@ -44,7 +44,7 @@ PHP_PACKAGES_56=mysql-client \
 					 php5.6-zip \
 					 postgresql-client
 
-PHP_PACKAGES_70=mysql-client \
+PHP_PACKAGES_70=mariadb-client \
 					 php-apcu \
 					 php-xdebug \
 					 php7.0-bcmath \
@@ -72,7 +72,7 @@ PHP_PACKAGES_70=mysql-client \
 					 php7.0-zip \
 					 postgresql-client
 
-PHP_PACKAGES_71=mysql-client \
+PHP_PACKAGES_71=mariadb-client \
 					 php-apcu \
 					 php-xdebug \
 					 php7.1-bcmath \
@@ -100,7 +100,7 @@ PHP_PACKAGES_71=mysql-client \
 					 php7.1-zip \
 					 postgresql-client
 
-PHP_PACKAGES_72=mysql-client \
+PHP_PACKAGES_72=mariadb-client \
 					 php-apcu \
 					 php-xdebug \
 					 php7.2-bcmath \
@@ -127,7 +127,7 @@ PHP_PACKAGES_72=mysql-client \
 					 php7.2-zip \
 					 postgresql-client
 
-PHP_PACKAGES_73=mysql-client \
+PHP_PACKAGES_73=mariadb-client \
 					 php-apcu \
 					 php-xdebug \
 					 php7.3-bcmath \
@@ -154,7 +154,7 @@ PHP_PACKAGES_73=mysql-client \
 					 php7.3-zip \
 					 postgresql-client
 					 
-PHP_PACKAGES_74=mysql-client \
+PHP_PACKAGES_74=mariadb-client \
 					 php-apcu \
 					 php-xdebug \
 					 php7.4-bcmath \

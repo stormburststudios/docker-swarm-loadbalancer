@@ -111,17 +111,17 @@ RUN apt-get -qq update && \
         echo "clear_env=no" >> /etc/php/$PHP_VERSION/fpm/php-fpm.conf; \
         echo "clear_env=no" >> /etc/php/$PHP_VERSION/fpm/pool.d/www.ini; \
     fi && \
-    mkdir /run/php && \
+    mkdir -p /run/php && \
     rm -fr /var/www/html && \
     ln -s /app /var/www/html && \
     # Move nginx configuration into place
     mv /conf/NginxDefault /etc/nginx/sites-enabled/default && \
     # Create runit service directories
-    mkdir /etc/service/nginx \
-          /etc/service/php-fpm \
-          /etc/service/logs-nginx-access \
-          /etc/service/logs-nginx-error \
-          /etc/service/logs-phpfpm-error && \
+    mkdir -p /etc/service/nginx \
+             /etc/service/php-fpm \
+             /etc/service/logs-nginx-access \
+             /etc/service/logs-nginx-error \
+             /etc/service/logs-phpfpm-error && \
     # Copy our new service runits into location
     mv /conf/nginx.runit /etc/service/nginx/run && \
     mv /conf/php-fpm.runit /etc/service/php-fpm/run && \

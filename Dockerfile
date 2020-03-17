@@ -71,7 +71,7 @@ ONBUILD RUN /usr/bin/install-report
 
 FROM php-core AS php-nginx
 ARG PHP_VERSION
-ARG PHP_MEMORY_LIMIT=512M
+ARG PHP_MEMORY_LIMIT=128M
 ENV PHPFPM_MAX_CHILDREN=25
 COPY php+nginx /conf
 

@@ -71,6 +71,7 @@ ONBUILD RUN /usr/bin/install-report
 
 FROM php-core AS php-nginx
 ARG PHP_VERSION
+ARG PHP_MEMORY_LIMIT=512M
 ENV PHPFPM_MAX_CHILDREN=25
 COPY php+nginx /conf
 
@@ -99,11 +100,19 @@ RUN apt-get -qq update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     sed -i "s/cgi.fix_pathinfo.*/cgi.fix_pathinfo=0/g" /etc/php/$PHP_VERSION/fpm/php.ini && \
+    sed -i "s|memory_limit.*|memory_limit = $PHP_MEMORY_LIMIT|g" /etc/php/$PHP_VERSION/fpm/php.ini && \
     sed -i "s/upload_max_filesize.*/upload_max_filesize = 1024M/g" /etc/php/$PHP_VERSION/fpm/php.ini && \
     sed -i "s/post_max_size.*/post_max_size = 1024M/g" /etc/php/$PHP_VERSION/fpm/php.ini  && \
     sed -i "s/max_execution_time.*/max_execution_time = 0/g" /etc/php/$PHP_VERSION/fpm/php.ini && \
     sed -i "s/variables_order.*/variables_order = \"EGPCS\"/g" /etc/php/$PHP_VERSION/fpm/php.ini  && \
     sed -i "s/error_reporting.*/error_reporting = E_ALL \& \~E_DEPRECATED \& \~E_STRICT \& \~E_CORE_WARNING/g" /etc/php/$PHP_VERSION/fpm/php.ini && \
+    # FPM logging to file
+    sed -i "s|;catch_workers_output.*|catch_workers_output = yes|g" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf && \
+    sed -i "s|;php_flag\[display_errors\].*|php_flag\[display_errors\] = on|g" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf && \
+    sed -i "s|;php_admin_value\[error_log\].*|php_admin_value\[error_log\] = /var/log/fpm-php.log|g" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf && \
+    sed -i "s|;php_admin_flag\[log_errors\].*|php_admin_flag\[log_errors\] = on|g" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf && \
+    sed -i "s|;php_admin_value\[memory_limit\].*|php_admin_value\[memory_limit\] = $PHP_MEMORY_LIMIT|g" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
+    # Copy fpm config to cli
     cp /etc/php/$PHP_VERSION/fpm/php.ini /etc/php/$PHP_VERSION/cli/php.ini  && \
     if test "$PHP_VERSION" = "5.6"  ; then \
         echo "Skipping clear_env"; \

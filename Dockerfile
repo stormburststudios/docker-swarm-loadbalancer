@@ -111,7 +111,7 @@ RUN apt-get -qq update && \
     sed -i "s|;php_flag\[display_errors\].*|php_flag\[display_errors\] = on|g" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf && \
     sed -i "s|;php_admin_value\[error_log\].*|php_admin_value\[error_log\] = /var/log/fpm-php.log|g" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf && \
     sed -i "s|;php_admin_flag\[log_errors\].*|php_admin_flag\[log_errors\] = on|g" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf && \
-    sed -i "s|;php_admin_value\[memory_limit\].*|php_admin_value\[memory_limit\] = $PHP_MEMORY_LIMIT|g" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
+    sed -i "s|;php_admin_value\[memory_limit\].*|php_admin_value\[memory_limit\] = $PHP_MEMORY_LIMIT|g" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf && \
     # Copy fpm config to cli
     cp /etc/php/$PHP_VERSION/fpm/php.ini /etc/php/$PHP_VERSION/cli/php.ini  && \
     if test "$PHP_VERSION" = "5.6"  ; then \

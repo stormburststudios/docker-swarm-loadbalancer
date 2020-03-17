@@ -137,6 +137,8 @@ RUN apt-get -qq update && \
     mv /conf/logs-nginx-access.runit /etc/service/logs-nginx-access/run && \
     mv /conf/logs-nginx-error.runit /etc/service/logs-nginx-error/run && \
     mv /conf/logs-phpfpm-error.runit /etc/service/logs-phpfpm-error/run && \
+    # Make sure all our new services are using unix line endings
+    dos2unix /etc/service/*/run && \
     # Make sure all our new services are executable
     chmod +x /etc/service/*/run && \
     # Cleanup the /conf dir

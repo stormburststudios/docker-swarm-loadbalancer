@@ -514,3 +514,6 @@ all:
 docs:
 	composer install -d doc/
 	./doc/gen
+
+gen-transmute:
+	cat .github/workflows/build-x86_64-php.yml | sed 's|x86_64|arm64v8|g' > .github/workflows/build-arm64v8-php.yml

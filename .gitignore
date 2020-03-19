@@ -1,3 +1,5 @@
 .idea
 marshall/marshall_*
 Makefile.working
+Dockerfile.*
+qemu-*-static*

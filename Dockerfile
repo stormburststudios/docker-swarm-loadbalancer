@@ -73,6 +73,7 @@ ONBUILD RUN /usr/bin/install-report
 FROM php-core AS php-nginx
 ARG PHP_VERSION
 ARG PHP_MEMORY_LIMIT=128M
+ARG PHP_DATA_MAX_SIZE=1024M
 ENV PHPFPM_MAX_CHILDREN=25
 COPY php+nginx /conf
 
@@ -102,8 +103,8 @@ RUN apt-get -qq update && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     sed -i "s/cgi.fix_pathinfo.*/cgi.fix_pathinfo=0/g" /etc/php/$PHP_VERSION/fpm/php.ini && \
     sed -i "s|memory_limit.*|memory_limit = $PHP_MEMORY_LIMIT|g" /etc/php/$PHP_VERSION/fpm/php.ini && \
-    sed -i "s/upload_max_filesize.*/upload_max_filesize = 1024M/g" /etc/php/$PHP_VERSION/fpm/php.ini && \
-    sed -i "s/post_max_size.*/post_max_size = 1024M/g" /etc/php/$PHP_VERSION/fpm/php.ini  && \
+    sed -i "s/upload_max_filesize.*/upload_max_filesize = $PHP_DATA_MAX_SIZE/g" /etc/php/$PHP_VERSION/fpm/php.ini && \
+    sed -i "s/post_max_size.*/post_max_size = $PHP_DATA_MAX_SIZE/g" /etc/php/$PHP_VERSION/fpm/php.ini  && \
     sed -i "s/max_execution_time.*/max_execution_time = 0/g" /etc/php/$PHP_VERSION/fpm/php.ini && \
     sed -i "s/variables_order.*/variables_order = \"EGPCS\"/g" /etc/php/$PHP_VERSION/fpm/php.ini  && \
     sed -i "s/error_reporting.*/error_reporting = E_ALL \& \~E_DEPRECATED \& \~E_STRICT \& \~E_CORE_WARNING/g" /etc/php/$PHP_VERSION/fpm/php.ini && \
@@ -181,8 +182,8 @@ RUN apt-get -qq update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     \
-    sed -i "s/upload_max_filesize.*/upload_max_filesize = 1024M/g" /etc/php/$PHP_VERSION/apache2/php.ini && \
-    sed -i "s/post_max_size.*/post_max_size = 1024M/g" /etc/php/$PHP_VERSION/apache2/php.ini && \
+    sed -i "s/upload_max_filesize.*/upload_max_filesize = $PHP_DATA_MAX_SIZE/g" /etc/php/$PHP_VERSION/apache2/php.ini && \
+    sed -i "s/post_max_size.*/post_max_size = $PHP_DATA_MAX_SIZE/g" /etc/php/$PHP_VERSION/apache2/php.ini && \
     sed -i "s/max_execution_time.*/max_execution_time = 0/g" /etc/php/$PHP_VERSION/apache2/php.ini && \
     sed -i "s/variables_order.*/variables_order = \"EGPCS\"/g" /etc/php/$PHP_VERSION/apache2/php.ini && \
     sed -i "s/error_reporting.*/error_reporting = E_ALL \& \~E_DEPRECATED \& \~E_STRICT \& \~E_CORE_WARNING/g" /etc/php/$PHP_VERSION/apache2/php.ini && \

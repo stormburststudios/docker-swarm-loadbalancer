@@ -6,6 +6,8 @@ on:
       - 'marshall/**'
       - 'Dockerfile'
       - '.dockerignore'
+      - '.github/workflows/build-x86_64-marshall.yml'
+      - '.github/workflows/lint-dockerfiles.yml'
   schedule:
     - cron: '0 4 * * TUE'
 

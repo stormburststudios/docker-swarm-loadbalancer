@@ -10,9 +10,9 @@ on:
       - 'marshall/**'
       - 'Dockerfile'
       - '.dockerignore'
-      - '.github/workflows/build-php-apache.yml'
-      - '.github/workflows/build-php-nginx.yml'
-      - '.github/workflows/build-php-cli.yml'
+      - '.github/workflows/build-x86_64-marshall.yml'
+      - '.github/workflows/build-x86_64-php.yml'
+      - '.github/workflows/lint-dockerfiles.yml'
   schedule:
     - cron: '0 4 * * TUE'
 

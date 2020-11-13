@@ -181,6 +181,31 @@ PHP_PACKAGES_74=mariadb-client \
 					 php7.4-zip \
 					 postgresql-client
 
+PHP_PACKAGES_80=mariadb-client \
+					 php-apcu \
+					 php-xdebug \
+					 php8.0-bcmath \
+					 php8.0-bz2 \
+					 php8.0-cli \
+					 php8.0-curl \
+					 php8.0-gd \
+					 php8.0-imap \
+					 php8.0-intl \
+					 php8.0-ldap \
+					 php8.0-mbstring \
+					 php8.0-memcache \
+					 php8.0-memcached \
+					 php8.0-mysql \
+					 php8.0-opcache \
+					 php8.0-pgsql \
+					 php8.0-pspell \
+					 php8.0-redis \
+					 php8.0-soap \
+					 php8.0-sqlite \
+					 php8.0-xml \
+					 php8.0-zip \
+					 postgresql-client
+
 #    ██████ ▓█████▄▄▄█████▓ █    ██  ██▓███
 #  ▒██    ▒ ▓█   ▀▓  ██▒ ▓▒ ██  ▓██▒▓██░  ██▒
 #  ░ ▓██▄   ▒███  ▒ ▓██░ ▒░▓██  ▒██░▓██░ ██▓▒
@@ -230,6 +255,8 @@ gone/php\:core-7.3: setup
 	$(CMD_BUILD) -t gone/php:core-7.3 				--target=php-core 			--build-arg "PHP_VERSION=7.3" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_73)" .
 gone/php\:core-7.4: setup
 	$(CMD_BUILD) -t gone/php:core-7.4 				--target=php-core 			--build-arg "PHP_VERSION=7.4" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_74)" .
+gone/php\:core-8.0: setup
+	$(CMD_BUILD) -t gone/php:core-7.4 				--target=php-core 			--build-arg "PHP_VERSION=8.4" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_80)" .
 
 core:
 	$(MAKE) gone/php\:core-5.6
@@ -273,6 +300,10 @@ gone/php\:cli-7.4: setup
 	$(CMD_BUILD) -t gone/php:cli-7.4 				--target=php-cli 			--build-arg "PHP_VERSION=7.4" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_74)" .
 gone/php\:cli-7.4-onbuild: setup
 	$(CMD_BUILD) -t gone/php:cli-7.4-onbuild 		--target=php-cli-onbuild 	--build-arg "PHP_VERSION=7.4" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_74)" .
+gone/php\:cli-8.0: setup
+	$(CMD_BUILD) -t gone/php:cli-8.0 				--target=php-cli 			--build-arg "PHP_VERSION=8.0" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_80)" .
+gone/php\:cli-8.0-onbuild: setup
+	$(CMD_BUILD) -t gone/php:cli-8.0-onbuild 		--target=php-cli-onbuild 	--build-arg "PHP_VERSION=8.0" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_80)" .
 
 php-cli:
 	$(MAKE) gone/php\:cli-5.6
@@ -287,6 +318,8 @@ php-cli:
 	$(MAKE) gone/php\:cli-7.3-onbuild
 	$(MAKE) gone/php\:cli-7.4
 	$(MAKE) gone/php\:cli-7.4-onbuild
+	$(MAKE) gone/php\:cli-8.0
+	$(MAKE) gone/php\:cli-8.0-onbuild
 
 #   ██▓███   ██░ ██  ██▓███      ███▄    █   ▄████  ██▓ ███▄    █ ▒██   ██▒
 #  ▓██░  ██▒▓██░ ██▒▓██░  ██▒    ██ ▀█   █  ██▒ ▀█▒▓██▒ ██ ▀█   █ ▒▒ █ █ ▒░
@@ -322,6 +355,10 @@ gone/php\:nginx-7.4: setup
 	$(CMD_BUILD) -t gone/php:nginx-7.4 				--target=php-nginx 			--build-arg "PHP_VERSION=7.4" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_74)" .
 gone/php\:nginx-7.4-onbuild: setup
 	$(CMD_BUILD) -t gone/php:nginx-7.4-onbuild 		--target=php-nginx-onbuild 	--build-arg "PHP_VERSION=7.4" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_74)" .
+gone/php\:nginx-8.0: setup
+	$(CMD_BUILD) -t gone/php:nginx-8.0 				--target=php-nginx 			--build-arg "PHP_VERSION=8.0" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_80)" .
+gone/php\:nginx-8.0-onbuild: setup
+	$(CMD_BUILD) -t gone/php:nginx-8.0-onbuild 		--target=php-nginx-onbuild 	--build-arg "PHP_VERSION=8.0" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_80)" .
 
 php-nginx:
 	$(MAKE) gone/php\:nginx-5.6
@@ -336,6 +373,8 @@ php-nginx:
 	$(MAKE) gone/php\:nginx-7.3-onbuild
 	$(MAKE) gone/php\:nginx-7.4
 	$(MAKE) gone/php\:nginx-7.4-onbuild
+	$(MAKE) gone/php\:nginx-8.0
+	$(MAKE) gone/php\:nginx-8.0-onbuild
 	
 #   ██▓███   ██░ ██  ██▓███      ▄▄▄       ██▓███   ▄▄▄       ▄████▄   ██░ ██ ▓█████
 #  ▓██░  ██▒▓██░ ██▒▓██░  ██▒   ▒████▄    ▓██░  ██▒▒████▄    ▒██▀ ▀█  ▓██░ ██▒▓█   ▀
@@ -371,6 +410,10 @@ gone/php\:apache-7.4: setup
 	$(CMD_BUILD) -t gone/php:apache-7.4 			--target=php-apache 		--build-arg "PHP_VERSION=7.4" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_74)" .
 gone/php\:apache-7.4-onbuild: setup
 	$(CMD_BUILD) -t gone/php:apache-7.4-onbuild 	--target=php-apache-onbuild --build-arg "PHP_VERSION=7.4" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_74)" .
+gone/php\:apache-8.0: setup
+	$(CMD_BUILD) -t gone/php:apache-8.0 			--target=php-apache 		--build-arg "PHP_VERSION=8.0" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_74)" .
+gone/php\:apache-8.0-onbuild: setup
+	$(CMD_BUILD) -t gone/php:apache-8.0-onbuild 	--target=php-apache-onbuild --build-arg "PHP_VERSION=8.0" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_74)" .
 
 php-apache:
 	$(MAKE) gone/php\:apache-5.6
@@ -385,6 +428,8 @@ php-apache:
 	$(MAKE) gone/php\:apache-7.3-onbuild
 	$(MAKE) gone/php\:apache-7.4
 	$(MAKE) gone/php\:apache-7.4-onbuild
+	$(MAKE) gone/php\:apache-8.0
+	$(MAKE) gone/php\:apache-8.0-onbuild
 	
 # ███▄    █  ▒█████  ▓█████▄ ▓█████     ▄▄▄██▀▀▀██████
 # ██ ▀█   █ ▒██▒  ██▒▒██▀ ██▌▓█   ▀       ▒██ ▒██    ▒

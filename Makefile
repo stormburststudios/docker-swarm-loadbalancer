@@ -33,7 +33,6 @@ PHP_PACKAGES_56=mariadb-client \
 					 php5.6-mcrypt \
 					 php5.6-memcache \
 					 php5.6-memcached \
-					 php5.6-mongodb \
 					 php5.6-mysql \
 					 php5.6-opcache \
 					 php5.6-pgsql \

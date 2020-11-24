@@ -43,7 +43,7 @@ RUN echo "APT::Acquire::Retries \"5\";" > /etc/apt/apt.conf.d/80-retries && \
     apt-get autoremove -yqq && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    wget -O /usr/local/bin/composer https://getcomposer.org/composer-stable.phar && \
+    curl https://getcomposer.org/composer-stable.phar --output /usr/local/bin/composer && \
     chmod +x /usr/local/bin/composer /usr/bin/install-report && \
     /usr/local/bin/composer --version && \
     /usr/bin/install-report

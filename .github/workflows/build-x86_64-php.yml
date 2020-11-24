@@ -209,7 +209,7 @@ jobs:
           docker build -t gone/php:apache-8.0         --target=php-apache         --build-arg "PHP_VERSION=8.0" --build-arg "PHP_PACKAGES=$PHP_PACKAGES_80" .
           docker build -t gone/php:apache-8.0-onbuild --target=php-apache-onbuild --build-arg "PHP_VERSION=8.0" --build-arg "PHP_PACKAGES=$PHP_PACKAGES_80" .
         env:
-          PHP_PACKAGES_80: git mariadb-client php-cli php-redis php-apcu php-xdebug php8.0-bcmath php8.0-bz2 php8.0-cli php8.0-curl php8.0-gd php8.0-imap php8.0-imagick php8.0-intl php8.0-json php8.0-ldap php8.0-mbstring php8.0-memcache php8.0-mongodb php8.0-mysql php8.0-opcache php8.0-pgsql php8.0-phpdbg php8.0-pspell php8.0-soap php8.0-sqlite php8.0-xml php8.0-zip postgresql-client
+          PHP_PACKAGES_80: git mariadb-client php-cli php-redis php-apcu php-xdebug php8.0-bcmath php8.0-bz2 php8.0-cli php8.0-curl php8.0-gd php8.0-imap php8.0-imagick php8.0-intl php8.0-ldap php8.0-mbstring php8.0-memcache php8.0-mongodb php8.0-mysql php8.0-opcache php8.0-pgsql php8.0-phpdbg php8.0-pspell php8.0-soap php8.0-sqlite php8.0-xml php8.0-zip postgresql-client
       - name: Tag Image
         run: |
           docker tag gone/php:apache-8.0         docker.pkg.github.com/goneio/base-image/php:apache-8.0
@@ -413,7 +413,7 @@ jobs:
           docker build -t gone/php:nginx-8.0         --target=php-nginx         --build-arg "PHP_VERSION=8.0" --build-arg "PHP_PACKAGES=$PHP_PACKAGES_80" .
           docker build -t gone/php:nginx-8.0-onbuild --target=php-nginx-onbuild --build-arg "PHP_VERSION=8.0" --build-arg "PHP_PACKAGES=$PHP_PACKAGES_80" .
         env:
-          PHP_PACKAGES_80: git mariadb-client php-redis php-apcu php-xdebug php8.0-bcmath php8.0-bz2 php8.0-cli php8.0-curl php8.0-gd php8.0-imap php8.0-imagick php8.0-intl php8.0-json php8.0-ldap php8.0-mbstring php8.0-memcache php8.0-mongodb php8.0-mysql php8.0-opcache php8.0-pgsql php8.0-phpdbg php8.0-pspell php8.0-soap php8.0-sqlite php8.0-xml php8.0-zip postgresql-client
+          PHP_PACKAGES_80: git mariadb-client php-redis php-apcu php-xdebug php8.0-bcmath php8.0-bz2 php8.0-cli php8.0-curl php8.0-gd php8.0-imap php8.0-imagick php8.0-intl php8.0-ldap php8.0-mbstring php8.0-memcache php8.0-mongodb php8.0-mysql php8.0-opcache php8.0-pgsql php8.0-phpdbg php8.0-pspell php8.0-soap php8.0-sqlite php8.0-xml php8.0-zip postgresql-client
       - name: Tag Image
         run: |
           docker tag gone/php:nginx-8.0         docker.pkg.github.com/goneio/base-image/php:nginx-8.0
@@ -617,7 +617,7 @@ jobs:
           docker build -t gone/php:cli-8.0         --target=php-cli         --build-arg "PHP_VERSION=8.0" --build-arg "PHP_PACKAGES=$PHP_PACKAGES_80" .
           docker build -t gone/php:cli-8.0-onbuild --target=php-cli-onbuild --build-arg "PHP_VERSION=8.0" --build-arg "PHP_PACKAGES=$PHP_PACKAGES_80" .
         env:
-          PHP_PACKAGES_80: git mariadb-client php-redis php-apcu php-xdebug php8.0-bcmath php8.0-bz2 php8.0-cli php8.0-curl php8.0-gd php8.0-imap php8.0-imagick php8.0-intl php8.0-json php8.0-ldap php8.0-mbstring php8.0-memcache php8.0-mongodb php8.0-mysql php8.0-opcache php8.0-pgsql php8.0-phpdbg php8.0-pspell php8.0-soap php8.0-sqlite php8.0-xml php8.0-zip postgresql-client
+          PHP_PACKAGES_80: git mariadb-client php-redis php-apcu php-xdebug php8.0-bcmath php8.0-bz2 php8.0-cli php8.0-curl php8.0-gd php8.0-imap php8.0-imagick php8.0-intl php8.0-ldap php8.0-mbstring php8.0-memcache php8.0-mongodb php8.0-mysql php8.0-opcache php8.0-pgsql php8.0-phpdbg php8.0-pspell php8.0-soap php8.0-sqlite php8.0-xml php8.0-zip postgresql-client
       - name: Tag Image
         run: |
           docker tag gone/php:cli-8.0         docker.pkg.github.com/goneio/base-image/php:cli-8.0

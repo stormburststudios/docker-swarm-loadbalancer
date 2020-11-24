@@ -41,11 +41,11 @@ RUN echo "APT::Acquire::Retries \"5\";" > /etc/apt/apt.conf.d/80-retries && \
         python3.5 python3.5-minimal libpython3.5-minimal \
         && \
     apt-get autoremove -yqq && \
-    curl -sS https://getcomposer.org/installer | php && \
-    mv composer.phar /usr/local/bin/composer && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    chmod +x /usr/bin/install-report && \
+    wget -O /usr/local/bin/composer https://getcomposer.org/composer-stable.phar && \
+    chmod +x /usr/local/bin/composer /usr/bin/install-report && \
+    /usr/local/bin/composer --version && \
     /usr/bin/install-report
 
 FROM php-core AS php-cli

@@ -25,6 +25,7 @@ PHP_PACKAGES_56=mariadb-client \
 					 php5.6-curl \
 					 php5.6-gd \
 					 php5.6-imap \
+					 php5.6-imagick \
 					 php5.6-intl \
 					 php5.6-json \
 					 php5.6-ldap \
@@ -53,6 +54,7 @@ PHP_PACKAGES_70=mariadb-client \
 					 php7.0-curl \
 					 php7.0-gd \
 					 php7.0-imap \
+					 php7.0-imagick \
 					 php7.0-intl \
 					 php7.0-json \
 					 php7.0-ldap \
@@ -81,6 +83,7 @@ PHP_PACKAGES_71=mariadb-client \
 					 php7.1-curl \
 					 php7.1-gd \
 					 php7.1-imap \
+					 php7.1-imagick \
 					 php7.1-intl \
 					 php7.1-json \
 					 php7.1-ldap \
@@ -109,6 +112,7 @@ PHP_PACKAGES_72=mariadb-client \
 					 php7.2-curl \
 					 php7.2-gd \
 					 php7.2-imap \
+					 php7.2-imagick \
 					 php7.2-intl \
 					 php7.2-json \
 					 php7.2-ldap \
@@ -136,6 +140,7 @@ PHP_PACKAGES_73=mariadb-client \
 					 php7.3-curl \
 					 php7.3-gd \
 					 php7.3-imap \
+					 php7.3-imagick \
 					 php7.3-intl \
 					 php7.3-json \
 					 php7.3-ldap \
@@ -163,6 +168,7 @@ PHP_PACKAGES_74=mariadb-client \
 					 php7.4-curl \
 					 php7.4-gd \
 					 php7.4-imap \
+					 php7.4-magick \
 					 php7.4-intl \
 					 php7.4-json \
 					 php7.4-ldap \
@@ -190,6 +196,7 @@ PHP_PACKAGES_80=mariadb-client \
 					 php8.0-curl \
 					 php8.0-gd \
 					 php8.0-imap \
+					 php8.0-imagick \
 					 php8.0-intl \
 					 php8.0-ldap \
 					 php8.0-mbstring \

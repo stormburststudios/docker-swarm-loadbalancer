@@ -628,3 +628,26 @@ jobs:
           docker push gone/php:cli-8.0-onbuild
           docker push docker.pkg.github.com/goneio/base-image/php:cli-8.0
           docker push docker.pkg.github.com/goneio/base-image/php:cli-8.0-onbuild
+
+  VANITY_VERSIONS:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to registries
+        run: |
+          docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p  ${{ secrets.DOCKER_HUB_PASSWORD }}
+          docker login docker.pkg.github.com -u ${{ secrets.DOCKER_GITHUB_USERNAME }} -p  ${{ secrets.DOCKER_GITHUB_PASSWORD }}
+      - name: Tag vanity versions
+        run: |
+          docker pull gone/php:apache-7.4
+          docker tag gone/php:apache-7.4 gone/php:apache
+          docker pull gone/php:cli-7.4
+          docker tag gone/php:cli-7.4 gone/php:cli
+          docker pull gone/php:nginx-7.4
+          docker tag gone/php:nginx-7.4 gone/php:nginx
+      - name: Push vanity versions
+        run: |
+          docker push gone/php:apache
+          docker push gone/php:cli
+          docker push gone/php:nginx
+
+

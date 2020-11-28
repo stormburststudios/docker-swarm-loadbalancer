@@ -1,4 +1,3 @@
 #!/bin/bash
 source /installers/config
-$APT_GET bash \
-         htop
+$APT_GET bash

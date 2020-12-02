@@ -10,6 +10,7 @@ ENV DEBIAN_FRONTEND="teletype" \
     COLOUR_NONE='\e[39m' \
     DEFAULT_TZ='Europe/London'
 
+
 CMD ["runsvdir", "-P", "/etc/service"]
 
 WORKDIR /app
@@ -31,6 +32,7 @@ RUN echo "APT::Acquire::Retries \"5\";" > /etc/apt/apt.conf.d/80-retries && \
         python3-software-properties \
         software-properties-common \
         && \
+    echo "PHP packages to install:" && echo $PHP_PACKAGES && \
     add-apt-repository -y ppa:ondrej/php && \
     apt-get -qq update && \
     apt-get -yqq install --no-install-recommends $PHP_PACKAGES  &&\
@@ -42,21 +44,37 @@ RUN echo "APT::Acquire::Retries \"5\";" > /etc/apt/apt.conf.d/80-retries && \
         && \
     apt-get autoremove -yqq && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     curl https://getcomposer.org/composer-stable.phar --output /usr/local/bin/composer && \
     chmod +x /usr/local/bin/composer /usr/bin/install-report && \
     /usr/local/bin/composer --version && \
-    /usr/bin/install-report
+    /usr/bin/install-report && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log && \
+    rm -rf  /usr/bin/mariabackup \
+            /usr/bin/mysql_embedded \
+            /usr/bin/mysql_find_rows \
+            /usr/bin/mysql_fix_extensions \
+            /usr/bin/mysql_waitpid \
+            /usr/bin/mysqlaccess \
+            /usr/bin/mysqladmin \
+            /usr/bin/mysqlanalyze \
+            /usr/bin/mysqlcheck \
+            /usr/bin/mysqldump \
+            /usr/bin/mysqldumpslow \
+            /usr/bin/mysqlimport \
+            /usr/bin/mysqloptimize \
+            /usr/bin/mysqlrepair \
+            /usr/bin/mysqlreport \
+            /usr/bin/mysqlshow \
+            /usr/bin/mysqlslap \
+            /usr/bin/mytop
 
 FROM php-core AS php-cli
-RUN apt-get -qq update && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install a funky cool repl.
 RUN composer global require -q psy/psysh:@stable && \
     ln -s /root/.composer/vendor/psy/psysh/bin/psysh /usr/local/bin/repl && \
-    /usr/local/bin/repl -v
+    /usr/local/bin/repl -v && \
+    composer clear-cache
 
 COPY php+cli/psysh-config.php /root/.config/psysh/config.php
 
@@ -99,7 +117,7 @@ RUN apt-get -qq update && \
         && \
     apt-get autoremove -yqq && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log && \
     # Configure FPM
     sed -i "s/cgi.fix_pathinfo.*/cgi.fix_pathinfo=0/g" /etc/php/$PHP_VERSION/fpm/php.ini && \
     sed -i "s|memory_limit.*|memory_limit = $PHP_MEMORY_LIMIT|g" /etc/php/$PHP_VERSION/fpm/php.ini && \
@@ -185,7 +203,7 @@ RUN apt-get -qq update && \
         libapache2-mod-php$PHP_VERSION \
         && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log && \
     \
     sed -i "s/upload_max_filesize.*/upload_max_filesize = $PHP_DATA_MAX_SIZE/g" /etc/php/$PHP_VERSION/apache2/php.ini && \
     sed -i "s/post_max_size.*/post_max_size = $PHP_DATA_MAX_SIZE/g" /etc/php/$PHP_VERSION/apache2/php.ini && \
@@ -297,10 +315,7 @@ RUN mkdir ~/.gnupg && \
   \
   && apt-get autoremove -y \
   && apt-get clean \
-  && rm -rf \
-          /var/lib/apt/lists/* \
-          /tmp/* \
-          /var/tmp/*
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log && \
 
 FROM nodejs AS nodejs-compiler
 
@@ -311,10 +326,7 @@ RUN apt-get -qq update && \
         && \
     apt-get autoremove -y && \
     apt-get clean && \
-    rm -rf \
-        /var/lib/apt/lists/* \
-        /tmp/* \
-        /var/tmp/*
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log && \
 
 FROM nodejs AS nodejs-onbuild
 

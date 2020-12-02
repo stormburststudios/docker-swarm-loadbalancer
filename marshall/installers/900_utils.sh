@@ -8,7 +8,5 @@ $APT_GET \
     curl \
     wget \
     unzip \
-    git \
-    openssh-client \
     ca-certificates \
     jq

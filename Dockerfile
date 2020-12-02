@@ -55,7 +55,6 @@ RUN echo "APT::Acquire::Retries \"5\";" > /etc/apt/apt.conf.d/80-retries && \
             /usr/bin/mysql_fix_extensions \
             /usr/bin/mysql_waitpid \
             /usr/bin/mysqlaccess \
-            /usr/bin/mysqladmin \
             /usr/bin/mysqlanalyze \
             /usr/bin/mysqlcheck \
             /usr/bin/mysqldump \

@@ -1,5 +1,25 @@
 #!/usr/bin/env bash
 
 env | sed "s/\(.*\)=\(.*\)/env[\1]='\2'/" > /etc/php/{{PHP}}/fpm/conf.d/env.conf
+
+if [ "${DEBUG_MODE,,}" = "on" ]; then
+    ENABLE_DEBUG_MODE=true
+else
+    ENABLE_DEBUG_MODE=false
+fi
+
+if [ $ENABLE_DEBUG_MODE = true ]; then
+    echo -e "#Controlled via DEBUG_MODE environment variable\nzend_extension=xdebug.so" > /etc/php/{{PHP}}/mods-available/xdebug.ini
+    sed -i "s|php_flag\[display_errors\].*|php_flag\[display_errors\] = on|g" /etc/php/{{PHP}}/fpm/pool.d/www.conf
+    echo -e "RUNNING IN \e[31mDEBUG MODE\e[0m\nError output will be VISIBLE."
+else
+    rm /etc/php/{{PHP}}/mods-available/xdebug.ini
+    touch /etc/php/{{PHP}}/mods-available/xdebug.ini
+    rm /etc/php/{{PHP}}/fpm/conf.d/*-xdebug.ini
+    sed -i "s|php_flag\[display_errors\].*|php_flag\[display_errors\] = off|g" /etc/php/{{PHP}}/fpm/pool.d/www.conf
+    echo -e "RUNNING IN \e[32mPRODUCTION MODE\e[0m\nError output will be suppressed."
+fi
+echo "To change this, change the value of DEBUG_MODE"
+
 /usr/sbin/php-fpm{{PHP}} -F -R
 

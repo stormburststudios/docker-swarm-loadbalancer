@@ -27,6 +27,8 @@ ARG PHP_PACKAGES
 COPY php-core/install-report.sh /usr/bin/install-report
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN echo "APT::Acquire::Retries \"5\";" > /etc/apt/apt.conf.d/80-retries && \
+    echo "Acquire::http::No-Cache=true;" > /etc/apt/apt.conf.d/80-no-cache && \
+    echo "Acquire::http::Pipeline-Depth=0;" > /etc/apt/apt.conf.d/80-no-pipeline && \
     apt-get -qq update && \
     apt-get -yqq install --no-install-recommends \
         python3-software-properties \

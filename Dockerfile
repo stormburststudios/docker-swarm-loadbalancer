@@ -14,6 +14,7 @@ ENV DEBIAN_FRONTEND="teletype" \
 CMD ["runsvdir", "-P", "/etc/service"]
 
 WORKDIR /app
+ENV PATH="/app:/app/bin:/app/vendor/bin:${PATH}"
 
 COPY ./marshall/ /
 

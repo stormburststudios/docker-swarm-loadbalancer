@@ -8,7 +8,7 @@ sed -i 's/http\:\/\/archive\.ubuntu\.com\/ubuntu\//mirror\:\/\/mirrors.ubuntu.co
 apt-get -qq update
 
 # System upgrade
-#apt-get -yq upgrade
+apt-get -yq upgrade
 
 # Install apt-utils & ca-certificates to prevent some screaming.
 $APT_GET apt apt-utils ca-certificates

@@ -569,7 +569,7 @@ all:
 #  ░ ░   ░    ░      ░   ░ ░    ░     ░░   ░   ░   ▒    ░      ░ ░ ░ ▒    ░░   ░
 .PHONY: docs
 docs:
-	composer install -d doc/
+	composer install -d doc/ --ignore-platform-reqs
 	./doc/gen
 
 gen-transmute:

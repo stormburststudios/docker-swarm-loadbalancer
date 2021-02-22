@@ -15,7 +15,7 @@
  ░    ░   ░   ▒   ░  ░  ░     ░       ▒ ░░      ░     ░   ▒   ░ ░   ░    ░
  ░            ░  ░      ░     ░  ░    ░         ░         ░  ░      ░    ░  ░ 
 ```
-[![Build Status](https://travis-ci.org/goneio/base-image.svg?branch=master)](https://travis-ci.org/goneio/base-image)
+[![Build](https://github.com/goneio/base-image/actions/workflows/build.yml/badge.svg)](https://github.com/goneio/base-image/actions/workflows/build.yml)
 
 Docker PHP Base kit based on lessons learned from phusion/baseimage using runit to allow for multiple processes, featuring multiple versions of PHP and NodeJS.
 

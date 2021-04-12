@@ -19,8 +19,7 @@
 CMD_BUILD=docker buildx build --platform linux/amd64
 BUILDX_OUTPUT=--load
 PHP_PACKAGES_70=mariadb-client \
-					 php-apcu \
-					 php-xdebug \
+					 php7.0-apcu \
 					 php7.0-bcmath \
 					 php7.0-bz2 \
 					 php7.0-cli \
@@ -43,13 +42,13 @@ PHP_PACKAGES_70=mariadb-client \
 					 php7.0-redis \
 					 php7.0-soap \
 					 php7.0-sqlite \
+					 php7.0-xdebug \
 					 php7.0-xml \
 					 php7.0-zip \
 					 postgresql-client
 
 PHP_PACKAGES_71=mariadb-client \
-					 php-apcu \
-					 php-xdebug \
+					 php7.1-apcu \
 					 php7.1-bcmath \
 					 php7.1-bz2 \
 					 php7.1-cli \
@@ -72,13 +71,13 @@ PHP_PACKAGES_71=mariadb-client \
 					 php7.1-redis \
 					 php7.1-soap \
 					 php7.1-sqlite \
+					 php7.1-xdebug \
 					 php7.1-xml \
 					 php7.1-zip \
 					 postgresql-client
 
 PHP_PACKAGES_72=mariadb-client \
-					 php-apcu \
-					 php-xdebug \
+					 php7.2-apcu \
 					 php7.2-bcmath \
 					 php7.2-bz2 \
 					 php7.2-cli \
@@ -100,13 +99,13 @@ PHP_PACKAGES_72=mariadb-client \
 					 php7.2-redis \
 					 php7.2-soap \
 					 php7.2-sqlite \
+					 php7.2-xdebug \
 					 php7.2-xml \
 					 php7.2-zip \
 					 postgresql-client
 
 PHP_PACKAGES_73=mariadb-client \
-					 php-apcu \
-					 php-xdebug \
+					 php7.3-apcu \
 					 php7.3-bcmath \
 					 php7.3-bz2 \
 					 php7.3-cli \
@@ -128,13 +127,13 @@ PHP_PACKAGES_73=mariadb-client \
 					 php7.3-redis \
 					 php7.3-soap \
 					 php7.3-sqlite \
+					 php7.3-xdebug \
 					 php7.3-xml \
 					 php7.3-zip \
 					 postgresql-client
 					 
 PHP_PACKAGES_74=mariadb-client \
-					 php-apcu \
-					 php-xdebug \
+					 php7.4-apcu \
 					 php7.4-bcmath \
 					 php7.4-bz2 \
 					 php7.4-cli \
@@ -156,13 +155,13 @@ PHP_PACKAGES_74=mariadb-client \
 					 php7.4-redis \
 					 php7.4-soap \
 					 php7.4-sqlite \
+					 php7.4-xdebug \
 					 php7.4-xml \
 					 php7.4-zip \
 					 postgresql-client
 
 PHP_PACKAGES_80=mariadb-client \
-					 php-apcu \
-					 php-xdebug \
+					 php8.0-apcu \
 					 php8.0-bcmath \
 					 php8.0-bz2 \
 					 php8.0-cli \
@@ -182,6 +181,7 @@ PHP_PACKAGES_80=mariadb-client \
 					 php8.0-redis \
 					 php8.0-soap \
 					 php8.0-sqlite \
+					 php8.0-xdebug \
 					 php8.0-xml \
 					 php8.0-zip \
 					 postgresql-client

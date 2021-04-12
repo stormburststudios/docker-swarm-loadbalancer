@@ -15,35 +15,9 @@
 #   ░            ░  ░      ░     ░  ░    ░         ░         ░  ░      ░    ░  ░
 
 # Prettyprinting: http://patorjk.com/software/taag/#p=display&c=bash&f=Bloody&t=Example
-CMD_BUILD=docker buildx build --platform linux/arm64,linux/amd64
-PHP_PACKAGES_56=mariadb-client \
-					 php-apcu \
-					 php-xdebug \
-					 php5.6-bcmath \
-					 php5.6-bz2 \
-					 php5.6-cli \
-					 php5.6-curl \
-					 php5.6-gd \
-					 php5.6-imap \
-					 php5.6-imagick \
-					 php5.6-intl \
-					 php5.6-json \
-					 php5.6-ldap \
-					 php5.6-mbstring \
-					 php5.6-mcrypt \
-					 php5.6-memcache \
-					 php5.6-memcached \
-					 php5.6-mysql \
-					 php5.6-opcache \
-					 php5.6-pgsql \
-					 php5.6-pspell \
-					 php5.6-redis \
-					 php5.6-soap \
-					 php5.6-sqlite \
-					 php5.6-xml \
-					 php5.6-zip \
-					 postgresql-client
-
+#CMD_BUILD=docker buildx build --platform linux/arm64,linux/amd64
+CMD_BUILD=docker buildx build --platform linux/amd64
+BUILDX_OUTPUT=--load
 PHP_PACKAGES_70=mariadb-client \
 					 php-apcu \
 					 php-xdebug \
@@ -255,8 +229,6 @@ gone/marshall: setup
 #  ░░        ░  ░░ ░░░          ░        ░ ░ ░ ▒    ░░   ░    ░
 #            ░  ░  ░            ░ ░          ░ ░     ░        ░  ░
 
-gone/php\:core-5.6: setup
-	$(CMD_BUILD) -t gone/php:core-5.6 				--target=php-core 			--build-arg "PHP_VERSION=5.6" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_56)" . --push
 gone/php\:core-7.0: setup
 	$(CMD_BUILD) -t gone/php:core-7.0 				--target=php-core 			--build-arg "PHP_VERSION=7.0" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_70)" . --push
 gone/php\:core-7.1: setup
@@ -271,7 +243,6 @@ gone/php\:core-8.0: setup
 	$(CMD_BUILD) -t gone/php:core-7.4 				--target=php-core 			--build-arg "PHP_VERSION=8.4" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_80)" . --push
 
 core:
-	$(MAKE) gone/php\:core-5.6
 	$(MAKE) gone/php\:core-7.0
 	$(MAKE) gone/php\:core-7.1
 	$(MAKE) gone/php\:core-7.2
@@ -288,10 +259,6 @@ core:
 #  ░░        ░  ░░ ░░░          ░          ░ ░    ▒ ░
 #            ░  ░  ░            ░ ░          ░  ░ ░
 
-gone/php\:cli-5.6: setup
-	$(CMD_BUILD) -t gone/php:cli-5.6 				--target=php-cli 			--build-arg "PHP_VERSION=5.6" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_56)" . --push
-gone/php\:cli-5.6-onbuild: setup
-	$(CMD_BUILD) -t gone/php:cli-5.6-onbuild 		--target=php-cli-onbuild 	--build-arg "PHP_VERSION=5.6" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_56)" . --push
 gone/php\:cli-7.0: setup
 	$(CMD_BUILD) -t gone/php:cli-7.0 				--target=php-cli 			--build-arg "PHP_VERSION=7.0" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_70)" . --push
 gone/php\:cli-7.0-onbuild: setup
@@ -318,8 +285,6 @@ gone/php\:cli-8.0-onbuild: setup
 	$(CMD_BUILD) -t gone/php:cli-8.0-onbuild 		--target=php-cli-onbuild 	--build-arg "PHP_VERSION=8.0" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_80)" . --push
 
 php-cli:
-	$(MAKE) gone/php\:cli-5.6
-	$(MAKE) gone/php\:cli-5.6-onbuild
 	$(MAKE) gone/php\:cli-7.0
 	$(MAKE) gone/php\:cli-7.0-onbuild
 	$(MAKE) gone/php\:cli-7.1
@@ -343,10 +308,6 @@ php-cli:
 #  ░░        ░  ░░ ░░░             ░   ░ ░ ░ ░   ░  ▒ ░   ░   ░ ░  ░    ░
 #            ░  ░  ░                     ░       ░  ░           ░  ░    ░
 
-gone/php\:nginx-5.6: setup
-	$(CMD_BUILD) -t gone/php:nginx-5.6 				--target=php-nginx 			--build-arg "PHP_VERSION=5.6" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_56)" . --push
-gone/php\:nginx-5.6-onbuild: setup
-	$(CMD_BUILD) -t gone/php:nginx-5.6-onbuild 		--target=php-nginx-onbuild 	--build-arg "PHP_VERSION=5.6" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_56)" . --push
 gone/php\:nginx-7.0: setup
 	$(CMD_BUILD) -t gone/php:nginx-7.0 				--target=php-nginx 			--build-arg "PHP_VERSION=7.0" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_70)" . --push
 gone/php\:nginx-7.0-onbuild: setup
@@ -373,8 +334,6 @@ gone/php\:nginx-8.0-onbuild: setup
 	$(CMD_BUILD) -t gone/php:nginx-8.0-onbuild 		--target=php-nginx-onbuild 	--build-arg "PHP_VERSION=8.0" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_80)" . --push
 
 php-nginx:
-	$(MAKE) gone/php\:nginx-5.6
-	$(MAKE) gone/php\:nginx-5.6-onbuild
 	$(MAKE) gone/php\:nginx-7.0
 	$(MAKE) gone/php\:nginx-7.0-onbuild
 	$(MAKE) gone/php\:nginx-7.1
@@ -398,10 +357,6 @@ php-nginx:
 #  ░░        ░  ░░ ░░░            ░   ▒   ░░         ░   ▒   ░         ░  ░░ ░   ░
 #            ░  ░  ░                  ░  ░               ░  ░░ ░       ░  ░  ░   ░  ░
 
-gone/php\:apache-5.6: setup
-	$(CMD_BUILD) -t gone/php:apache-5.6 			--target=php-apache 		--build-arg "PHP_VERSION=5.6" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_56)" . --push
-gone/php\:apache-5.6-onbuild: setup
-	$(CMD_BUILD) -t gone/php:apache-5.6-onbuild 	--target=php-apache-onbuild --build-arg "PHP_VERSION=5.6" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_56)" . --push
 gone/php\:apache-7.0: setup
 	$(CMD_BUILD) -t gone/php:apache-7.0 			--target=php-apache 		--build-arg "PHP_VERSION=7.0" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_70)" . --push
 gone/php\:apache-7.0-onbuild: setup
@@ -428,8 +383,6 @@ gone/php\:apache-8.0-onbuild: setup
 	$(CMD_BUILD) -t gone/php:apache-8.0-onbuild 	--target=php-apache-onbuild --build-arg "PHP_VERSION=8.0" 	--build-arg "PHP_PACKAGES=$(PHP_PACKAGES_74)" . --push
 
 php-apache:
-	$(MAKE) gone/php\:apache-5.6
-	$(MAKE) gone/php\:apache-5.6-onbuild
 	$(MAKE) gone/php\:apache-7.0
 	$(MAKE) gone/php\:apache-7.0-onbuild
 	$(MAKE) gone/php\:apache-7.1

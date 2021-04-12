@@ -135,16 +135,11 @@ RUN apt-get -qq update && \
     sed -i "s|;php_admin_flag\[log_errors\].*|php_admin_flag\[log_errors\] = on|g" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf && \
     sed -i "s|;php_admin_value\[memory_limit\].*|php_admin_value\[memory_limit\] = $PHP_MEMORY_LIMIT|g" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf && \
     # Symlink FPM config to CLI & PHPDBG
-    rm /etc/php/$PHP_VERSION/cli/php.ini /etc/php/$PHP_VERSION/phpdbg/php.ini && \
+    rm -f /etc/php/$PHP_VERSION/cli/php.ini  && \
     ln -s /etc/php/$PHP_VERSION/fpm/php.ini /etc/php/$PHP_VERSION/cli/php.ini && \
-    ln -s /etc/php/$PHP_VERSION/fpm/php.ini /etc/php/$PHP_VERSION/phpdbg/php.ini && \
-    # Configuration hack for PHP5.6
-    if test "$PHP_VERSION" = "5.6"  ; then \
-        echo "Skipping clear_env"; \
-    else \
-        echo "clear_env=no" >> /etc/php/$PHP_VERSION/fpm/php-fpm.conf; \
-        echo "clear_env=no" >> /etc/php/$PHP_VERSION/fpm/pool.d/www.ini; \
-    fi && \
+    # Configuration step for clear_env=no
+    echo "clear_env=no" >> /etc/php/$PHP_VERSION/fpm/php-fpm.conf; \
+    echo "clear_env=no" >> /etc/php/$PHP_VERSION/fpm/pool.d/www.ini; \
     # Create run lock dir for php
     mkdir -p /run/php && \
     # Destroy default html root, and link /app in its place.

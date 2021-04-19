@@ -4,9 +4,14 @@ env | sed "s/\(.*\)=\(.*\)/env[\1]='\2'/" > /etc/php/{{PHP}}/fpm/conf.d/env.conf
 
 if [ "${DEBUG_MODE,,}" = "on" ]; then
     ENABLE_DEBUG_MODE=true
+    PHP_MEMORY_LIMIT="${PHP_MEMORY_LIMIT:-1024M}"
 else
     ENABLE_DEBUG_MODE=false
+    PHP_MEMORY_LIMIT="${PHP_MEMORY_LIMIT:-128M}"
 fi
+
+sed -i "s|memory_limit = .*|memory_limit = ${PHP_MEMORY_LIMIT}|g" /etc/php/{{PHP}}/fpm/php.ini
+sed -i "s|\[memory_limit\] = .*|\[memory_limit\] = ${PHP_MEMORY_LIMIT}|g" /etc/php/{{PHP}}/fpm/pool.d/www.conf
 
 if [ $ENABLE_DEBUG_MODE = true ]; then
     echo -e "#Controlled via DEBUG_MODE environment variable\nzend_extension=xdebug.so\n[xdebug]\n\
@@ -15,8 +20,6 @@ if [ $ENABLE_DEBUG_MODE = true ]; then
     xdebug.client_host=172.17.0.1\n" > /etc/php/{{PHP}}/mods-available/xdebug.ini
     ln -s /etc/php/{{PHP}}/mods-available/xdebug.ini /etc/php/{{PHP}}/fpm/conf.d/20-xdebug.ini || true
     sed -i "s|php_flag\[display_errors\].*|php_flag\[display_errors\] = on|g" /etc/php/{{PHP}}/fpm/pool.d/www.conf
-    sed -i "s|memory_limit = .*|memory_limit = 1024M|g" /etc/php/{{PHP}}/fpm/php.ini
-    sed -i "s|\[memory_limit\] = .*|\[memory_limit\] = 1024M|g" /etc/php/{{PHP}}/fpm/pool.d/www.conf
     echo -e "RUNNING IN \e[31mDEBUG MODE\e[0m\nError output will be VISIBLE."
 else
     rm /etc/php/{{PHP}}/mods-available/xdebug.ini

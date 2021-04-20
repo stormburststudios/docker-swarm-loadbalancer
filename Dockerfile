@@ -147,6 +147,14 @@ RUN apt-get -qq update && \
     ln -s /app /var/www/html && \
     # Move nginx configuration into place
     mv /conf/NginxDefault /etc/nginx/sites-enabled/default && \
+    mv /conf/NginxSSL /etc/nginx/sites-enabled/default-ssl && \
+    # Generate self-signed certificates
+    mkdir /certs && \
+    openssl req -x509 -nodes -days 36500 -newkey rsa:2048 \
+        -subj "/C=US/ST=Florida/L=Miami/O=Example Group/CN=example.org" \
+        -keyout /certs/example.key \
+        -out /certs/example.crt \
+    && \
     # Create runit service directories
     mkdir -p /etc/service/nginx \
              /etc/service/php-fpm \
@@ -167,6 +175,7 @@ RUN apt-get -qq update && \
     rm -R /conf && \
     # Write the PHP version into some template locations
     sed -i "s/{{PHP}}/$PHP_VERSION/g" /etc/nginx/sites-enabled/default && \
+    sed -i "s/{{PHP}}/$PHP_VERSION/g" /etc/nginx/sites-enabled/default-ssl && \
     sed -i "s/{{PHP}}/$PHP_VERSION/g" /etc/service/php-fpm/run && \
     # Enable PHP-FPM status & PHP-FPM ping
     sed -i -e "s|;pm.status_path =.*|pm.status_path = /fpm-status|g" /etc/php/*/fpm/pool.d/www.conf && \
@@ -177,7 +186,8 @@ RUN apt-get -qq update && \
     sed -i '1s;^;daemon off\;\n;' /etc/nginx/nginx.conf
 
 # Expose ports.
-EXPOSE 80
+EXPOSE 80/tcp
+EXPOSE 443/tcp
 
 # Create a healthcheck that makes sure our httpd is up
 HEALTHCHECK --interval=30s --timeout=3s \

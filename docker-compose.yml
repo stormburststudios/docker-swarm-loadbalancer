@@ -7,12 +7,14 @@ services:
       - ./test-webapp/php:/app/public
     ports:
       - 127.0.0.73:80:80
+      - 127.0.0.73:443:443
   test-nginx-7.4:
     image: gone/php:nginx-7.4
     volumes:
       - ./test-webapp/php:/app/public
     ports:
       - 127.0.0.74:80:80
+      - 127.0.0.74:443:443
     environment:
       DEBUG_MODE: "on"
       XDEBUG_CONFIG: "client_host=172.17.0.1 log=/tmp/xdebug.log"

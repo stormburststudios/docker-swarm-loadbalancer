@@ -23,6 +23,7 @@ RUN chmod +x /installers/install && \
     /installers/install && \
     rm -rf /installers
 
+# hadolint ignore=DL3007
 FROM benzine/marshall:latest AS php-core
 ARG PHP_PACKAGES
 COPY php-core/install-report.sh /usr/bin/install-report
@@ -85,9 +86,9 @@ FROM php-cli AS php-cli-onbuild
 ONBUILD COPY ./ /app
 
 # If composer.json/composer.lock exist, do a composer install.
-ONBUILD RUN composer install; exit 0
-ONBUILD RUN composer dumpautoload -o; exit 0
-ONBUILD RUN /usr/bin/install-report
+ONBUILD RUN (composer install; exit 0) && \
+            (composer dumpautoload -o; exit 0) && \
+            /usr/bin/install-report
 
 FROM php-core AS php-nginx
 ARG PHP_VERSION
@@ -198,9 +199,9 @@ FROM php-nginx AS php-nginx-onbuild
 ONBUILD COPY ./ /app
 
 # If composer.json/composer.lock exist, do a composer install.
-ONBUILD RUN composer install; exit 0
-ONBUILD RUN composer dumpautoload -o; exit 0
-ONBUILD RUN /usr/bin/install-report
+ONBUILD RUN (composer install; exit 0) && \
+            (composer dumpautoload -o; exit 0) && \
+            /usr/bin/install-report
 
 FROM php-core AS php-apache
 ARG PHP_VERSION
@@ -247,9 +248,9 @@ FROM php-apache AS php-apache-onbuild
 ONBUILD COPY ./ /app
 
 # If composer.json/composer.lock exist, do a composer install.
-ONBUILD RUN composer install --ignore-platform-reqs; exit 0
-ONBUILD RUN composer dumpautoload -o; exit 0
-ONBUILD RUN /usr/bin/install-report
+ONBUILD RUN (composer install; exit 0) && \
+            (composer dumpautoload -o; exit 0) && \
+            /usr/bin/install-report
 
 FROM marshall AS nodejs
 
@@ -322,7 +323,7 @@ RUN mkdir ~/.gnupg && \
   \
   && apt-get autoremove -y \
   && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log && \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log
 
 FROM nodejs AS nodejs-compiler
 
@@ -333,7 +334,7 @@ RUN apt-get -qq update && \
         && \
     apt-get autoremove -y && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log
 
 FROM nodejs AS nodejs-onbuild
 

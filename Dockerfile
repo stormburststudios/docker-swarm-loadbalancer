@@ -23,7 +23,7 @@ RUN chmod +x /installers/install && \
     /installers/install && \
     rm -rf /installers
 
-FROM marshall AS php-core
+FROM benzine/marshall:latest AS php-core
 ARG PHP_PACKAGES
 COPY php-core/install-report.sh /usr/bin/install-report
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]

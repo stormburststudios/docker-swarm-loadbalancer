@@ -2,14 +2,14 @@ version: "2.3"
 
 services:
   test-nginx-7.3:
-    image: gone/php:nginx-7.3
+    image: benzine/php:nginx-7.3
     volumes:
       - ./test-webapp/php:/app/public
     ports:
       - 127.0.0.73:80:80
       - 127.0.0.73:443:443
   test-nginx-7.4:
-    image: gone/php:nginx-7.4
+    image: benzine/php:nginx-7.4
     volumes:
       - ./test-webapp/php:/app/public
     ports:

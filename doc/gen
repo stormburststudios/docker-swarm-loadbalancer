@@ -8,9 +8,9 @@ use \MaddHatter\MarkdownTable\Builder as TableBuilder;
 
 $client = new Guzzle();
 $images = [
-        'gone/php', 
-        #'gone/node', 
-        'gone/marshall', 
+        'benzine/php', 
+        #'benzine/node', 
+        'benzine/marshall', 
 ];
 $results = [];
 foreach($images as $image) {

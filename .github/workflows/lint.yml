@@ -1,0 +1,26 @@
+name: Lint Docker Files
+
+on:
+  schedule:
+    - cron: '0 4 * * TUE'
+
+jobs:
+  lint:
+    name: Lint Docker Files
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        dockerfile:
+          - marshall/Dockerfile
+          - php/Dockerfile.Core
+          - php/Dockerfile.Flavours
+          - node/Dockerfile
+          - mariadb/Dockerfile
+          - redis/Dockerfile
+          - octoprint/Dockerfile
+    steps:
+      - uses: actions/checkout@master
+      - uses: brpaz/hadolint-action@master
+        with:
+          dockerfile: ${{ matrix.dockerfile }}

@@ -1,6 +1,7 @@
 # hadolint ignore=DL3007
 FROM benzine/marshall:latest AS php-core
-LABEL maintainer="Matthew Baggett <matthew@baggett.me>"
+LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
+      org.label-schema.vcs-url="https://github.com/benzine-framework/docker"
 ARG PHP_PACKAGES
 COPY php-core/install-report.sh /usr/bin/install-report
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]

@@ -1,4 +1,6 @@
 FROM benzine/php:nginx
+LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
+      org.label-schema.vcs-url="https://github.com/benzine-framework/docker"
 COPY nginx.runit /etc/service/nginx/run
 RUN wget -O /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
     chmod +x /etc/service/nginx/run \

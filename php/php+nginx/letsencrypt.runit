@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+if [ -z "$LETSENCRYPT_DOMAINS" ]; then
+  echo "LetsEncrypt not enabled"
+  while true; do
+    sleep infinity
+  done
+fi
+
+if [ -z "$LETSENCRYPT_EMAIL" ]; then
+  echo "LetsEncrypt not enabled - You must set LETSENCRYPT_EMAIL"
+  while true; do
+    sleep infinity
+  done
+fi
+
+if [ "${LETSENCRYPT_MODE,,}" = "production" ]; then
+    echo "LetsEncrypt is running against the PRODUCTION servers."
+    LETSENCRYPT_MODE=
+else
+    echo "LetsEncrypt is running against the STAGING servers."
+    LETSENCRYPT_MODE=--test-cert
+fi
+
+echo "Certbot is running for ${LETSENCRYPT_EMAIL} / ${LETSENCRYPT_DOMAINS}..."
+certbot \
+  certonly \
+    --nginx \
+    $LETSENCRYPT_TEST_MODE \
+    -n \
+    -m $LETSENCRYPT_EMAIL \
+    --agree-tos \
+    -d $LETSENCRYPT_DOMAINS
+echo "Certbot complete!"
+sed -i     "s|ssl_certificate .*|ssl_certificate     /etc/letsencrypt/live/${LETSENCRYPT_DOMAINS}/fullchain.pem;|g" /etc/nginx/sites-enabled/default-ssl
+sed -i "s|ssl_certificate_key .*|ssl_certificate_key /etc/letsencrypt/live/${LETSENCRYPT_DOMAINS}/privkey.pem;|g" /etc/nginx/sites-enabled/default-ssl
+echo "Reloading Nginx"
+cat /etc/nginx/sites-enabled/default-ssl
+nginx -s reload
+# Sleep for 24 hours and try again tomorrow with a renewal, just in case.
+sleep 86400

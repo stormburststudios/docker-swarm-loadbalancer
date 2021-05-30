@@ -35,8 +35,11 @@ certbot \
     --agree-tos \
     -d $LETSENCRYPT_DOMAINS
 echo "Certbot complete!"
+
+# replace the self-certs with these lovely new certs.
 sed -i     "s|ssl_certificate .*|ssl_certificate     /etc/letsencrypt/live/${LETSENCRYPT_DOMAINS}/fullchain.pem;|g" /etc/nginx/sites-enabled/default-ssl
 sed -i "s|ssl_certificate_key .*|ssl_certificate_key /etc/letsencrypt/live/${LETSENCRYPT_DOMAINS}/privkey.pem;|g" /etc/nginx/sites-enabled/default-ssl
+
 echo "Reloading Nginx"
 nginx -s reload
 # Sleep for 24 hours and try again tomorrow with a renewal, just in case.

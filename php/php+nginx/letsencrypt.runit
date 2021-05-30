@@ -22,6 +22,8 @@ else
 fi
 echo -e "To change this, change the value of LETSENCRYPT_MODE"
 
+sleep 3;
+
 echo "Certbot is running for ${LETSENCRYPT_EMAIL} / ${LETSENCRYPT_DOMAINS}..."
 certbot \
   certonly \

@@ -10,7 +10,7 @@ RUN composer global require -q psy/psysh:@stable && \
     /usr/local/bin/repl -v && \
     composer clear-cache
 
-COPY php+cli/psysh-config.php /root/.config/psysh/config.php
+COPY cli/psysh-config.php /root/.config/psysh/config.php
 
 ARG PHP_CORE_VERSION
 FROM ${PHP_CORE_VERSION} AS php-nginx
@@ -20,7 +20,8 @@ ARG PHP_VERSION
 ARG PHP_MEMORY_LIMIT=128M
 ARG PHP_DATA_MAX_SIZE=1024M
 ENV PHPFPM_MAX_CHILDREN=25
-COPY php+nginx /conf
+COPY nginx /conf
+COPY self-signed-certificates /certs
 
 RUN apt-get -qq update && \
     # Install pre-dependencies to use apt-key.
@@ -76,12 +77,12 @@ RUN apt-get -qq update && \
     mv /conf/NginxDefault /etc/nginx/sites-enabled/default && \
     mv /conf/NginxSSL /etc/nginx/sites-enabled/default-ssl && \
     # Generate self-signed certificates
-    mkdir /certs && \
-    openssl req -x509 -nodes -days 36500 -newkey rsa:2048 \
-        -subj "/C=US/ST=Florida/L=Miami/O=Example Group/CN=example.org" \
-        -keyout /certs/example.key \
-        -out /certs/example.crt \
-    && \
+    #mkdir /certs && \
+    #openssl req -x509 -nodes -days 36500 -newkey rsa:2048 \
+    #    -subj "/C=US/ST=Florida/L=Miami/O=Example Group/CN=example.org" \
+    #    -keyout /certs/example.key \
+    #    -out /certs/example.crt \
+    #&& \
     # Create runit service directories
     mkdir -p /etc/service/nginx \
              /etc/service/php-fpm \
@@ -154,7 +155,7 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=3s \
     CMD curl -f http://localhost/ || exit 1
 
-COPY php+apache /conf
+COPY apache /conf
 RUN rm -fr /var/www/html && \
     ln -s /app /var/www/html && \
     mv /conf/ApacheConfig.conf /etc/apache2/sites-enabled/000-default.conf && \

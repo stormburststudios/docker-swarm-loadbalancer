@@ -7,14 +7,14 @@ on:
   workflow_run:
     workflows:
       - Build PHP Vanity Tags
-    branches: [master]
+    branches: [ 'master', 'feature/**' ]
     types:
       - completed
 
 jobs:
   wordpress-build:
     name: "Bake Wordpress Container"
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v1
       - uses: docker/setup-qemu-action@v1

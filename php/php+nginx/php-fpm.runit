@@ -22,9 +22,8 @@ if [ $ENABLE_DEBUG_MODE = true ]; then
     sed -i "s|php_flag\[display_errors\].*|php_flag\[display_errors\] = on|g" /etc/php/{{PHP}}/fpm/pool.d/www.conf
     echo -e "RUNNING IN \e[31mDEBUG MODE\e[0m\nError output will be VISIBLE."
 else
-    rm /etc/php/{{PHP}}/mods-available/xdebug.ini
+    rm -f /etc/php/{{PHP}}/mods-available/xdebug.ini /etc/php/{{PHP}}/fpm/conf.d/*-xdebug.ini
     touch /etc/php/{{PHP}}/mods-available/xdebug.ini
-    rm /etc/php/{{PHP}}/fpm/conf.d/*-xdebug.ini
     sed -i "s|php_flag\[display_errors\].*|php_flag\[display_errors\] = off|g" /etc/php/{{PHP}}/fpm/pool.d/www.conf
     echo -e "RUNNING IN \e[32mPRODUCTION MODE\e[0m\nError output will be suppressed."
 fi

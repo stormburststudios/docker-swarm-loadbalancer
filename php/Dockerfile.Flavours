@@ -32,14 +32,12 @@ RUN apt-get -qq update && \
     apt-get -yqq install --no-install-recommends \
         nginx \
         php$PHP_VERSION-fpm \
+        certbot \
+        python-certbot-nginx \
         && \
     apt-get remove -yqq \
         lsb-core \
         cups-common \
-        software-properties-common \
-        python-apt-common \
-        python3-software-properties \
-        python3.5 python3.5-minimal libpython3.5-minimal \
         && \
     apt-get autoremove -yqq && \
     apt-get clean && \
@@ -82,12 +80,14 @@ RUN apt-get -qq update && \
     # Create runit service directories
     mkdir -p /etc/service/nginx \
              /etc/service/php-fpm \
+             /etc/service/letsencrypt \
              /etc/service/logs-nginx-access \
              /etc/service/logs-nginx-error \
              /etc/service/logs-phpfpm-error && \
     # Copy our new service runits into location
     mv /conf/nginx.runit /etc/service/nginx/run && \
     mv /conf/php-fpm.runit /etc/service/php-fpm/run && \
+    mv /conf/letsencrypt.runit /etc/service/letsencrypt/run && \
     mv /conf/logs-nginx-access.runit /etc/service/logs-nginx-access/run && \
     mv /conf/logs-nginx-error.runit /etc/service/logs-nginx-error/run && \
     mv /conf/logs-phpfpm-error.runit /etc/service/logs-phpfpm-error/run && \
@@ -112,6 +112,9 @@ RUN apt-get -qq update && \
 # Expose ports.
 EXPOSE 80/tcp
 EXPOSE 443/tcp
+
+# Make a volume for letsencrypt certs
+VOLUME /etc/letsencrypt
 
 # Create a healthcheck that makes sure our httpd is up
 HEALTHCHECK --interval=30s --timeout=3s \

@@ -1,7 +1,8 @@
 ARG PHP_CORE_VERSION
 # hadolint ignore=DL3024
 FROM ${PHP_CORE_VERSION} AS php-cli
-LABEL maintainer="Matthew Baggett <matthew@baggett.me>"
+LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
+      org.label-schema.vcs-url="https://github.com/benzine-framework/docker"
 
 # Install a funky cool repl.
 RUN composer global require -q psy/psysh:@stable && \
@@ -13,7 +14,8 @@ COPY php+cli/psysh-config.php /root/.config/psysh/config.php
 
 ARG PHP_CORE_VERSION
 FROM ${PHP_CORE_VERSION} AS php-nginx
-LABEL maintainer="Matthew Baggett <matthew@baggett.me>"
+LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
+      org.label-schema.vcs-url="https://github.com/benzine-framework/docker"
 ARG PHP_VERSION
 ARG PHP_MEMORY_LIMIT=128M
 ARG PHP_DATA_MAX_SIZE=1024M
@@ -122,7 +124,8 @@ HEALTHCHECK --interval=30s --timeout=3s \
 
 ARG PHP_CORE_VERSION
 FROM ${PHP_CORE_VERSION} AS php-apache
-LABEL maintainer="Matthew Baggett <matthew@baggett.me>"
+LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
+      org.label-schema.vcs-url="https://github.com/benzine-framework/docker"
 ARG PHP_VERSION
 RUN apt-get -qq update && \
     apt-get -yqq install --no-install-recommends \

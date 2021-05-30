@@ -14,12 +14,13 @@ if [ -z "$LETSENCRYPT_EMAIL" ]; then
 fi
 
 if [ "${LETSENCRYPT_MODE,,}" = "production" ]; then
-    echo "LetsEncrypt is running against the PRODUCTION servers."
+    echo -e "LetsEncrypt is running against the \e[32mPRODUCTION\e[0m servers."
     LETSENCRYPT_MODE=
 else
-    echo "LetsEncrypt is running against the STAGING servers."
+    echo -e "LetsEncrypt is running against the \e[31mSTAGING\e[0m servers."
     LETSENCRYPT_MODE=--test-cert
 fi
+echo -e "To change this, change the value of LETSENCRYPT_MODE"
 
 echo "Certbot is running for ${LETSENCRYPT_EMAIL} / ${LETSENCRYPT_DOMAINS}..."
 certbot \

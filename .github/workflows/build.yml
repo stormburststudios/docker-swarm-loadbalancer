@@ -60,6 +60,7 @@ jobs:
           push: true
           tags: |
             benzine/marshall:latest
+            gone/marshall:latest
 
   php-build-core:
     name: "Build PHP Core"

@@ -26,14 +26,18 @@ echo -e "To change this, change the value of LETSENCRYPT_MODE"
 sleep 3;
 
 echo "Certbot is running for ${LETSENCRYPT_EMAIL} / ${LETSENCRYPT_DOMAINS}..."
-certbot \
-  certonly \
-    --nginx \
-    $LETSENCRYPT_TEST_MODE \
-    -n \
-    -m $LETSENCRYPT_EMAIL \
-    --agree-tos \
-    -d $LETSENCRYPT_DOMAINS
+( \
+  set -x; \
+  certbot \
+    certonly \
+      --nginx \
+      $LETSENCRYPT_TEST_MODE \
+      -d $LETSENCRYPT_DOMAINS \
+      -n \
+      -m $LETSENCRYPT_EMAIL \
+      --agree-tos \
+)
+
 echo "Certbot complete!"
 
 # replace the self-certs with these lovely new certs.

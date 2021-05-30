@@ -1,6 +1,7 @@
 FROM ubuntu:bionic
 
-LABEL maintainer="Matthew Baggett <matthew@baggett.me>"
+LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
+      org.label-schema.vcs-url="https://github.com/benzine-framework/docker"
 
 ENV DEBIAN_FRONTEND="teletype" \
     TERM=xterm-256color \

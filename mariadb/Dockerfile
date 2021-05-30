@@ -1,4 +1,7 @@
 FROM mariadb:10.6
+LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
+      org.label-schema.vcs-url="https://github.com/benzine-framework/docker"
+
 # Copy healthcheck file.
 COPY health.sh /usr/bin/healthcheck
 # Add healthcheck

@@ -23,9 +23,9 @@ fi
 echo -e "To change this, change the value of LETSENCRYPT_MODE"
 
 # Give Nginx a moment to start before we kill it again.
-sleep 3;
+sleep 30;
 
-echo "Certbot is running for ${LETSENCRYPT_EMAIL} / ${LETSENCRYPT_DOMAINS}..."
+echo -e "Certbot is running for \e[33m${LETSENCRYPT_EMAIL}\e[0m / \e[33m${LETSENCRYPT_DOMAINS}\e[0m..."
 ( \
   set -x; \
   certbot \
@@ -38,7 +38,7 @@ echo "Certbot is running for ${LETSENCRYPT_EMAIL} / ${LETSENCRYPT_DOMAINS}..."
       --agree-tos \
 )
 
-echo "Certbot complete!"
+echo -e "Certbot complete!"
 
 # replace the self-certs with these lovely new certs.
 if [ -f "/etc/letsencrypt/live/${LETSENCRYPT_DOMAINS}/fullchain.pem" ]; then
@@ -50,6 +50,6 @@ if [ -f "/etc/letsencrypt/live/${LETSENCRYPT_DOMAINS}/fullchain.pem" ]; then
   # Sleep for 24 hours and try again tomorrow with a renewal, just in case.
   sleep 86400
 else
-  echo "LetsEncrypt \e[31mFAILED TO GENERATE CERTS\e[0m. Will try again in an hour."
+  echo -e "LetsEncrypt \e[31mFAILED TO GENERATE CERTS\e[0m. Will try again in an hour."
   sleep 3600
 fi

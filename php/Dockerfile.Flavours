@@ -95,7 +95,7 @@ RUN apt-get -qq update && \
     mv /conf/nginx.runit /etc/service/nginx/run && \
     mv /conf/php-fpm.runit /etc/service/php-fpm/run && \
     mv /conf/letsencrypt.runit /etc/service/letsencrypt/run && \
-    mv /conf/logs-letsencrypt.runit /etc/service/logs-letsencrypt/run && \
+    #mv /conf/logs-letsencrypt.runit /etc/service/logs-letsencrypt/run && \
     mv /conf/logs-nginx-access.runit /etc/service/logs-nginx-access/run && \
     mv /conf/logs-nginx-error.runit /etc/service/logs-nginx-error/run && \
     mv /conf/logs-phpfpm-error.runit /etc/service/logs-phpfpm-error/run && \

@@ -1,5 +1,6 @@
 # hadolint ignore=DL3007
 FROM benzine/marshall:latest AS php-core
+LABEL maintainer="Matthew Baggett <matthew@baggett.me>"
 ARG PHP_PACKAGES
 COPY php-core/install-report.sh /usr/bin/install-report
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -45,13 +46,3 @@ RUN echo "APT::Acquire::Retries \"5\";" > /etc/apt/apt.conf.d/80-retries && \
             /usr/bin/mysqlshow \
             /usr/bin/mysqlslap \
             /usr/bin/mytop
-
-FROM php-core AS php-cli
-
-# Install a funky cool repl.
-RUN composer global require -q psy/psysh:@stable && \
-    ln -s /root/.composer/vendor/psy/psysh/bin/psysh /usr/local/bin/repl && \
-    /usr/local/bin/repl -v && \
-    composer clear-cache
-
-COPY php+cli/psysh-config.php /root/.config/psysh/config.php

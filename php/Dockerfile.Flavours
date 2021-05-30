@@ -87,7 +87,7 @@ RUN apt-get -qq update && \
     mkdir -p /etc/service/nginx \
              /etc/service/php-fpm \
              /etc/service/letsencrypt \
-             /etc/service/logs-letsencrypt \
+             #/etc/service/logs-letsencrypt \
              /etc/service/logs-nginx-access \
              /etc/service/logs-nginx-error \
              /etc/service/logs-phpfpm-error && \

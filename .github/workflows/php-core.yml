@@ -3,8 +3,8 @@ name: Build PHP Core
 on:
   push:
     paths:
-      - php/php-core
-      - php/Dockerfile.Core
+      - 'php/core/**'
+      - 'php/Dockerfile.Core'
   workflow_run:
     workflows:
       - Build Marshall

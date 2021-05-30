@@ -3,9 +3,9 @@ name: Build PHP Flavours
 on:
   push:
     paths:
-      - 'php/php+apache/**'
-      - 'php/php+cli/**'
-      - 'php/php+nginx/**'
+      - 'php/apache/**'
+      - 'php/cli/**'
+      - 'php/nginx/**'
       - 'php/Dockerfile.Flavours'
   workflow_run:
     workflows:

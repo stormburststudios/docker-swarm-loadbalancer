@@ -289,7 +289,12 @@ class Bouncer
     public function run(): void
     {
         $this->logger->info(sprintf('%s Starting Bouncer...', Emoji::CHARACTER_TIMER_CLOCK));
-        $this->stateHasChanged();
+        try {
+            $this->stateHasChanged();
+        }catch(\GuzzleHttp\Exception\ConnectException $connectException){
+            $this->logger->critical(sprintf("%s Could not connect to docker socket! Did you map it?", Emoji::CHARACTER_CRYING_CAT));
+            exit;
+        }
         while (true) {
             $this->runLoop();
         }
@@ -373,6 +378,10 @@ class Bouncer
             /** @var FileAttributes $newLocalCert */
             if ($newLocalCert->isFile() && pathinfo($newLocalCert->path(), PATHINFO_EXTENSION) == 'pem') {
                 $livePath = str_replace('archive/', 'live/', $newLocalCert->path());
+                // Stupid dirty hack bullshit reee
+                for($i = 1; $i <= 9; $i++){
+                    $livePath = str_replace("$i.pem", ".pem", $livePath);
+                }
                 $this->certificateStoreLocal->writeStream($livePath, $this->certificateStoreLocal->readStream($newLocalCert->path()));
             }
         }
@@ -413,7 +422,7 @@ class Bouncer
             $target->getName(),
             $this->twig->render('NginxTemplate.twig', $target->__toArray())
         );
-        $this->logger->info(sprintf('%s Created config for %s', Emoji::CHARACTER_PENCIL, $target->getName()));
+        $this->logger->info(sprintf('%s Created Nginx config for %s', Emoji::CHARACTER_PENCIL, $target->getName()));
 
         return $this;
     }
@@ -442,6 +451,8 @@ class Bouncer
                         round($timeRemainingSeconds / 86400)
                     ));
 
+                    $target->setUseTemporaryCert(false);
+                    $this->generateNginxConfig($target);
                     continue;
                 }
             }

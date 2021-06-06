@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 echo "Starting Bouncer"
 /app/bouncer
+sleep 60;

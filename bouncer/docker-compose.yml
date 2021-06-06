@@ -1,0 +1,37 @@
+version: "3.4"
+
+services:
+  bouncer:
+    image: benzine/bouncer
+    build: .
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./:/app
+    environment:
+      - BOUNCER_LETSENCRYPT_MODE=staging
+      - BOUNCER_LETSENCRYPT_EMAIL=matthew@baggett.me
+      - BOUNCER_S3_ENDPOINT=http://grey.ooo:9000
+      - BOUNCER_S3_KEY_ID=geusebio
+      - BOUNCER_S3_KEY_SECRET=changeme
+      - BOUNCER_S3_BUCKET=bouncer-certificates
+      - BOUNCER_S3_USE_PATH_STYLE_ENDPOINT="yes"
+    ports:
+      - 127.0.99.100:80:80
+      - 127.0.99.100:443:443
+
+  web-a:
+    image: benzine/php:nginx
+    volumes:
+      - ./test/public-web-a:/app/public
+    environment:
+      - BOUNCER_DOMAIN=a.web.grey.ooo
+      - BOUNCER_LETSENCRYPT=true
+
+#  web-b:
+#    image: benzine/php:nginx
+#    volumes:
+#      - ./test/public-web-b:/app/public
+#    environment:
+#      - BOUNCER_DOMAIN=b.web.grey.ooo
+#
+#

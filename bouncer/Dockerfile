@@ -1,6 +1,8 @@
 FROM benzine/php:cli-8.0
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
-      org.label-schema.vcs-url="https://github.com/benzine-framework/docker"
+      org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
+      org.opencontainers.image.source="https://github.com/benzine-framework/docker"
+
 COPY self-signed-certificates /certs
 
 # Install nginx, certbot

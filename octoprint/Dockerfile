@@ -1,4 +1,8 @@
 FROM octoprint/octoprint AS octoprint
+LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
+      org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
+      org.opencontainers.image.source="https://github.com/benzine-framework/docker"
+
 RUN apt-get update -q && \
     apt-get install --no-install-recommends -yq \
         cpulimit \
@@ -20,5 +24,9 @@ RUN curl -s -L https://github.com/pranjalv123/mjpg-streamer-yu12/archive/refs/he
     make
 
 FROM matthewbaggett/octoprint AS octoprint-mjpg-streamer
+LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
+      org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
+      org.opencontainers.image.source="https://github.com/benzine-framework/docker"
+
 COPY --from=builder /build/mjpg-streamer-yu12-master/mjpg-streamer/mjpg_streamer /usr/local/bin/mjpg_streamer
 COPY --from=builder /build/mjpg-streamer-yu12-master/mjpg-streamer/*.so /usr/local/lib/mjpg-streamer/

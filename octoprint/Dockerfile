@@ -6,10 +6,13 @@ LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
 RUN apt-get update -q && \
     apt-get install --no-install-recommends -yq \
         cpulimit \
-        && \
+        python-dev libpq-dev \
+        postgresql-client \
+    && \
     apt-get autoremove -y && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log && \
+    pip install psycopg2
 
 FROM matthewbaggett/octoprint AS builder
 RUN apt-get update -q && \

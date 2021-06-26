@@ -1,4 +1,4 @@
-FROM mariadb:10.6
+FROM mariadb:latest
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
       org.opencontainers.image.source="https://github.com/benzine-framework/docker"

@@ -33,3 +33,4 @@ jobs:
           push: true
           tags: |
             benzine/redis
+            ghcr.io/benzine-framework/redis

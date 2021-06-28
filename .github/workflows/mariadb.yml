@@ -34,3 +34,4 @@ jobs:
           push: true
           tags: |
             benzine/mariadb
+            ghcr.io/benzine-framework/mariadb

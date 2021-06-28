@@ -70,6 +70,7 @@ jobs:
           push: true
           tags: |
             benzine/php:core-${{ matrix.version }}
+            ghcr.io/benzine-framework/php:core-${{ matrix.version }}
           build-args: |
             ${{ steps.build_args.outputs.result }}
 

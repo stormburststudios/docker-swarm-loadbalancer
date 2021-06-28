@@ -68,5 +68,6 @@ jobs:
           push: true
           tags: |
             benzine/php:${{ matrix.variant }}-${{ matrix.version }}
+            ghcr.io/benzine-framework/php:${{ matrix.variant }}-${{ matrix.version }}
           build-args: |
             ${{ steps.build_args.outputs.result }}

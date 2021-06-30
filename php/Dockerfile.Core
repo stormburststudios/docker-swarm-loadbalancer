@@ -28,7 +28,6 @@ RUN echo "APT::Acquire::Retries \"5\";" > /etc/apt/apt.conf.d/80-retries && \
     apt-get clean && \
     curl https://getcomposer.org/composer-stable.phar --output /usr/local/bin/composer && \
     chmod +x /usr/local/bin/composer /usr/bin/install-report && \
-    /usr/local/bin/composer --version && \
     /usr/bin/install-report && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log && \
     rm -rf  /usr/bin/mariabackup \

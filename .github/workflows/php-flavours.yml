@@ -73,6 +73,7 @@ jobs:
           pull: true
           push: true
           tags: |
+            gone/php:${{ matrix.variant }}-${{ matrix.version }}
             benzine/php:${{ matrix.variant }}-${{ matrix.version }}
             ghcr.io/benzine-framework/php:${{ matrix.variant }}-${{ matrix.version }}
           build-args: |

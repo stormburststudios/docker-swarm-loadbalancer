@@ -11,9 +11,12 @@ echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/force-unsafe-io
 ) \
   | sed '/^#/d' \
   | sed '/^$/d' \
-  | uniq \
   > /etc/apt/sources.list.d/ubuntu.list
 rm /etc/apt/sources.list; touch /etc/apt/sources.list;
+
+# Remove duplicate sources
+sort /etc/apt/sources.list.d/ubuntu.list | uniq > /etc/apt/sources.list.d/ubuntu.list.uniq
+mv /etc/apt/sources.list.d/ubuntu.list.uniq /etc/apt/sources.list.d/ubuntu.list
 
 # Update apt repos
 apt-get -qq update

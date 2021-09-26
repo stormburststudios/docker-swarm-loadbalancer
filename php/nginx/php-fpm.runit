@@ -27,7 +27,7 @@ else
     sed -i "s|php_flag\[display_errors\].*|php_flag\[display_errors\] = off|g" /etc/php/{{PHP}}/fpm/pool.d/www.conf
     echo -e "PHP is running in \e[32mPRODUCTION MODE\e[0m\nError output will be suppressed."
 fi
-echo "To change this, change the value of DEBUG_MODE"
+echo "To change this, change the value of DEBUG_MODE to either 'on' or 'off'
 
 /usr/sbin/php-fpm{{PHP}} -F -R
 

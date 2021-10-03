@@ -17,7 +17,7 @@ on:
 jobs:
   php-build-flavours:
     name: "Build PHP Flavours"
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:

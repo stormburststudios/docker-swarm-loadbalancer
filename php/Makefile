@@ -3,9 +3,7 @@ BUILD:=docker build
 docker-marshall:
 	$(BUILD) \
 		--tag benzine/marshall:latest \
-		--target marshall \
-		--file Dockerfile.Marshall \
-		.
+ 		../marshall
 
 docker-php-core:
 	$(BUILD) \

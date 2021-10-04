@@ -15,6 +15,9 @@ RUN apt-get update -q && \
     pip install psycopg2
 
 FROM matthewbaggett/octoprint AS builder
+LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
+      org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
+      org.opencontainers.image.source="https://github.com/benzine-framework/docker"
 RUN apt-get update -q && \
     apt-get install --no-install-recommends -yq \
         unzip \

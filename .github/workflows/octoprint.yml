@@ -4,12 +4,6 @@ on:
   push:
     paths:
       - octoprint
-  workflow_run:
-    workflows:
-      - Lint Docker Files
-    branches: [ 'master', 'feature/**' ]
-    types:
-      - completed
 
 jobs:
   octoprint-build:

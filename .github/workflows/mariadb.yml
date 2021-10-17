@@ -3,7 +3,7 @@ name: Build MariaDB
 on:
   push:
     paths:
-      - mariadb
+      - 'mariadb/**'
   workflow_run:
     workflows:
       - Lint Docker Files

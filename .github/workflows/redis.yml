@@ -3,7 +3,7 @@ name: Build Redis
 on:
   push:
     paths:
-      - redis
+      - 'redis/**'
   workflow_run:
     workflows:
       - Lint Docker Files

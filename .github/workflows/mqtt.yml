@@ -3,7 +3,7 @@ name: Build MQTT
 on:
   push:
     paths:
-      - mqtt
+      - 'mqtt/**'
   workflow_run:
     workflows:
       - Lint Docker Files

@@ -3,7 +3,7 @@ name: Build Marshall
 on:
   push:
     paths:
-      - marshall
+      - 'marshall/**'
   workflow_run:
     workflows:
       - Lint Docker Files

@@ -3,7 +3,7 @@ name: Build Nginx + LetsEncrypt Bouncer
 on:
   push:
     paths:
-      - bouncer
+      - 'bouncer/**'
   workflow_run:
     workflows:
       - Build PHP Flavours

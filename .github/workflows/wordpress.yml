@@ -3,7 +3,7 @@ name: Build Wordpress Container
 on:
   push:
     paths:
-      - wordpress
+      - 'wordpress/**'
   workflow_run:
     workflows:
       - Build PHP Vanity Tags

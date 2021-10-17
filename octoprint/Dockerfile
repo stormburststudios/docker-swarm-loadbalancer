@@ -14,7 +14,7 @@ RUN apt-get update -q && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log && \
     pip install psycopg2
 
-FROM matthewbaggett/octoprint AS builder
+FROM octoprint AS builder
 RUN apt-get update -q && \
     apt-get install --no-install-recommends -yq \
         unzip \
@@ -26,7 +26,7 @@ RUN curl -s -L https://github.com/pranjalv123/mjpg-streamer-yu12/archive/refs/he
     cd mjpg-streamer-yu12-master/mjpg-streamer && \
     make
 
-FROM matthewbaggett/octoprint AS octoprint-mjpg-streamer
+FROM octoprint AS octoprint-mjpg-streamer
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
       org.opencontainers.image.source="https://github.com/benzine-framework/docker"

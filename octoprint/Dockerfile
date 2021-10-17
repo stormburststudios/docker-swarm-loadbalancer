@@ -14,6 +14,7 @@ RUN apt-get update -q && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log && \
     pip install psycopg2
 
+
 FROM matthewbaggett/octoprint AS builder
 RUN apt-get update -q && \
     apt-get install --no-install-recommends -yq \

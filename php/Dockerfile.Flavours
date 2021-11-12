@@ -42,7 +42,7 @@ RUN apt-get -qq update && \
         nginx \
         php$PHP_VERSION-fpm \
         certbot \
-        python-certbot-nginx \
+        python3-certbot-nginx \
         && \
     apt-get remove -yqq \
         lsb-core \
@@ -75,6 +75,7 @@ RUN apt-get -qq update && \
     mkdir -p /run/php && \
     # Destroy default html root, and link /app in its place.
     rm -fr /var/www/html && \
+    mkdir -p /var/www && \
     ln -s /app /var/www/html && \
     # Move nginx configuration into place
     mv /conf/NginxDefault /etc/nginx/sites-enabled/default && \

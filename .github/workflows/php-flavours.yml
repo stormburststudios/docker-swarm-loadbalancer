@@ -7,6 +7,7 @@ on:
       - 'php/cli/**'
       - 'php/nginx/**'
       - 'php/Dockerfile.Flavours'
+  workflow_dispatch:
   workflow_run:
     workflows:
       - Build PHP Core

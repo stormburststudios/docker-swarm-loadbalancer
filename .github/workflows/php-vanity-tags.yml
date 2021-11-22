@@ -1,6 +1,7 @@
 name: Build PHP Vanity Tags
 
 on:
+  workflow_dispatch:
   workflow_run:
     workflows:
       - Build PHP Flavours

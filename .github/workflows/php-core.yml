@@ -5,6 +5,7 @@ on:
     paths:
       - 'php/core/**'
       - 'php/Dockerfile.Core'
+  workflow_dispatch:
   workflow_run:
     workflows:
       - Build Marshall

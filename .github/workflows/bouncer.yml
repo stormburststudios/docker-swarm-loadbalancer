@@ -10,6 +10,7 @@ on:
     branches: [ 'master', 'feature/**' ]
     types:
       - completed
+  workflow_dispatch:
 
 jobs:
   bouncer-build:

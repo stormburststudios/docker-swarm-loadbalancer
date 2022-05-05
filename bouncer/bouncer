@@ -271,7 +271,7 @@ class Bouncer
                     $networks = array_values($inspect['NetworkSettings']['Networks']);
                     $bouncerTarget->setIp($networks[0]['IPAddress']);
                 }
-                $this->logger->debug(sprintf('Decided that %s has the ip %s', $bouncerTarget->getName(), $bouncerTarget->getIp()));
+                //$this->logger->debug(sprintf('Decided that %s has the ip %s', $bouncerTarget->getName(), $bouncerTarget->getIp()));
 
                 $bouncerTarget->setTargetPath(sprintf('http://%s:%d/', $bouncerTarget->getIp(), $bouncerTarget->getPort()));
 
@@ -388,7 +388,7 @@ class Bouncer
         }
         $determineSwarmMode = json_decode($this->client->request('GET', 'swarm')->getBody()->getContents(), true);
         $this->setSwarmMode(!isset($determineSwarmMode['message']));
-        $this->logger->info(sprintf("Swarm mode is %s.", $this->isSwarmMode() ? 'enabled' : 'disabled'));
+        $this->logger->info(sprintf("%s Swarm mode is %s.", Emoji:: $this->isSwarmMode() ? 'enabled' : 'disabled'));
         $targets = $this->isSwarmMode() ? $this->findContainersSwarmMode() : $this->findContainersContainerMode();
 
         $this->logger->info(sprintf('%s Found %d services with BOUNCER_DOMAIN set', Emoji::CHARACTER_MAGNIFYING_GLASS_TILTED_LEFT, count($targets)));
@@ -407,7 +407,7 @@ class Bouncer
         while ($this->stateHasChanged() === false) {
             sleep(5);
         }
-        $this->logger->debug(sprintf('%s Host Container state has changed', Emoji::CHARACTER_WARNING));
+        $this->logger->debug(sprintf('%s  Host Container state has changed', Emoji::CHARACTER_WARNING));
     }
 
     private function s3Enabled(): bool
@@ -477,7 +477,7 @@ class Bouncer
             $target->getName(),
             $this->twig->render('NginxTemplate.twig', $target->__toArray())
         );
-        $this->logger->info(sprintf('%s Created Nginx config for %s', Emoji::CHARACTER_PENCIL, $target->getName()));
+        $this->logger->info(sprintf('%s  Created Nginx config for http://%s', Emoji::CHARACTER_PENCIL, $target->getName()));
 
         return $this;
     }
@@ -546,7 +546,7 @@ class Bouncer
         $shell = new Exec();
         $command = new CommandBuilder('/usr/sbin/nginx');
         $command->addFlag('s', 'reload');
-        $this->logger->info(sprintf('%s Restarting nginx', Emoji::CHARACTER_TIMER_CLOCK));
+        $this->logger->info(sprintf('%s  Restarting nginx', Emoji::CHARACTER_TIMER_CLOCK));
         $shell->run($command);
     }
 

@@ -325,7 +325,7 @@ class Bouncer
 
     public function run(): void
     {
-        $this->logger->info(sprintf('%s Starting Bouncer...', Emoji::CHARACTER_TIMER_CLOCK));
+        $this->logger->info(sprintf('%s  Starting Bouncer...', Emoji::CHARACTER_TIMER_CLOCK));
         try {
             $this->stateHasChanged();
         }catch(\GuzzleHttp\Exception\ConnectException $connectException){

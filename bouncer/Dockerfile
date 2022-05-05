@@ -20,7 +20,7 @@ RUN apt-get -qq update && \
     apt-get -qq update && \
     apt-get -yqq install --no-install-recommends \
         nginx \
-        python-certbot-nginx \
+        python3-certbot-nginx \
         && \
     apt-get remove -yqq \
         lsb-core \

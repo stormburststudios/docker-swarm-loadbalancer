@@ -345,16 +345,30 @@ class Bouncer
     private function stateHasChanged(): bool
     {
         $newInstanceStates = [];
+
+        // Standard Containers
         $containers = json_decode($this->client->request('GET', 'containers/json')->getBody()->getContents(), true);
         foreach ($containers as $container) {
             $inspect = json_decode($this->client->request('GET', "containers/{$container['Id']}/json")->getBody()->getContents(), true);
-            $newInstanceStates[$inspect['Id']] = implode('::', [
+            $newInstanceStates['container-' . $inspect['Id']] = implode('::', [
                 $inspect['Name'],
                 $inspect['Created'],
                 $inspect['Image'],
                 $inspect['State']['Status'],
                 sha1(implode('|', $inspect['Config']['Env'])),
             ]);
+        }
+
+        // Swarm Services
+        $services = json_decode($this->client->request('GET', 'services')->getBody()->getContents(), true);
+        if(isset($services['message'])){
+            $this->logger->debug(sprintf('Something happened while interrogating services.. This node is not a swarm node, cannot have services: %s', $services['message']));
+        }else{
+            foreach($services as $service){
+                $newInstanceStates['service-' . $service['ID']] = implode("::", [
+                    $service['Version']['Index']
+                ]);
+            }
         }
         $newStateHash = sha1(implode("\n", $newInstanceStates));
         //$this->logger->debug(sprintf("Old state = %s. New State = %s.", substr($this->instanceStateHash,0,7), substr($newStateHash, 0,7)));

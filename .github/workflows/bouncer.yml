@@ -37,6 +37,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           pull: true
           push: true
+          target: bouncer
           tags: |
             benzine/bouncer
             ghcr.io/benzine-framework/bouncer

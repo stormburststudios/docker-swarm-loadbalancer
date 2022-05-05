@@ -40,6 +40,7 @@ COPY logs-nginx-error.runit /etc/service/logs-nginx-error/run
 RUN chmod +x /etc/service/*/run
 COPY NginxDefault /etc/nginx/sites-enabled/default
 COPY NginxSSL /etc/nginx/sites-enabled/default-ssl
+COPY Nginx-tweak.conf /etc/nginx/conf.d/tweak.conf
 COPY NginxTemplate.twig /app/
 # Disable daemonising in nginx
 RUN sed -i '1s;^;daemon off\;\n;' /etc/nginx/nginx.conf

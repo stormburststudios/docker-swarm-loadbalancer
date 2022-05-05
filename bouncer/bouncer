@@ -158,7 +158,7 @@ class Bouncer
     private Environment $twig;
     private Filesystem $configFilesystem;
     private Filesystem $certificateStoreLocal;
-    private ?Filesystem $certificateStoreRemote;
+    private ?Filesystem $certificateStoreRemote = null;
     private Logger $logger;
     private string $instanceStateHash = '';
     private array $fileHashes;
@@ -195,7 +195,7 @@ class Bouncer
         $this->certificateStoreLocal = new Filesystem(new LocalFilesystemAdapter('/etc/letsencrypt'));
 
         // Set up Remote certificate store, if configured
-        if ($this->environment['BOUNCER_S3_BUCKET']) {
+        if (isset($this->environment['BOUNCER_S3_BUCKET'])) {
             $this->certificateStoreRemote = new Filesystem(
                 new AwsS3V3Adapter(
                     new S3Client([

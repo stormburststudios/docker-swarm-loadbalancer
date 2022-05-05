@@ -290,6 +290,15 @@ class Bouncer
         }else{
             foreach($services as $service){
                 $envs = [];
+                if(
+                    !isset($service['Spec'])
+                    || !isset($service['Spec']['TaskTemplate'])
+                    || !isset($service['Spec']['TaskTemplate']['ContainerSpec'])
+                    || !isset($service['Spec']['TaskTemplate']['ContainerSpec']['Env'])
+                )
+                {
+                    continue;
+                }
                 foreach($service['Spec']['TaskTemplate']['ContainerSpec']['Env'] as $env){
                     list($eKey, $eVal) = explode("=", $env,2);
                     $envs[$eKey] = $eVal;

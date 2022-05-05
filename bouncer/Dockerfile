@@ -1,4 +1,4 @@
-FROM benzine/php:cli-8.0
+FROM benzine/php:cli-8.0 as bouncer
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
       org.opencontainers.image.source="https://github.com/benzine-framework/docker"
@@ -48,3 +48,10 @@ COPY composer.* /app/
 RUN composer install && \
     chmod +x /app/bouncer && \
     mkdir -p /var/log/bouncer
+
+FROM benzine/php:nginx-8.0 as test-app-a
+COPY ./test/public-web-a /app/public
+
+FROM benzine/php:nginx-8.0 as test-app-b
+COPY ./test/public-web-b /app/public
+

@@ -162,6 +162,25 @@ class Bouncer
     private Logger $logger;
     private string $instanceStateHash = '';
     private array $fileHashes;
+    private bool $swarmMode = false;
+
+    /**
+     * @return bool
+     */
+    public function isSwarmMode(): bool
+    {
+        return $this->swarmMode;
+    }
+
+    /**
+     * @param bool $swarmMode
+     * @return Bouncer
+     */
+    public function setSwarmMode(bool $swarmMode): Bouncer
+    {
+        $this->swarmMode = $swarmMode;
+        return $this;
+    }
 
     public function __construct()
     {
@@ -220,9 +239,10 @@ class Bouncer
      *
      * @return BouncerTarget[]
      */
-    public function findContainers(): array
+    public function findContainersContainerMode(): array
     {
         $bouncerTargets = [];
+
         $containers = json_decode($this->client->request('GET', 'containers/json')->getBody()->getContents(), true);
         foreach ($containers as $container) {
             $envs = [];
@@ -241,31 +261,7 @@ class Bouncer
                 $bouncerTarget = (new BouncerTarget())
                     ->setId($inspect['Id'])
                 ;
-                foreach ($envs as $eKey => $eVal) {
-                    switch ($eKey) {
-                        case 'BOUNCER_DOMAIN':
-                            $domains = explode(',', $eVal);
-                            array_walk($domains, function (&$domain, $key): void { $domain = trim($domain); });
-                            $bouncerTarget->setDomains($domains);
-
-                            break;
-
-                        case 'BOUNCER_LETSENCRYPT':
-                            $bouncerTarget->setLetsEncrypt(in_array(strtolower($eVal), ['yes', 'true'], true));
-
-                            break;
-
-                        case 'BOUNCER_TARGET_PORT':
-                            $bouncerTarget->setPort($eVal);
-
-                            break;
-
-                        case 'BOUNCER_ALLOW_NON_SSL':
-                            $bouncerTarget->setAllowNonSSL(in_array(strtolower($eVal), ['yes', 'true'], true));
-
-                            break;
-                    }
-                }
+                $bouncerTarget = $this->parseContainerEnvironmentVariables($envs, $bouncerTarget);
 
                 if (isset($inspect['NetworkSettings']['IPAddress']) && !empty($inspect['NetworkSettings']['IPAddress'])) {
                     // As per docker service
@@ -280,6 +276,38 @@ class Bouncer
                 $bouncerTarget->setTargetPath(sprintf('http://%s:%d/', $bouncerTarget->getIp(), $bouncerTarget->getPort()));
 
                 $bouncerTargets[] = $bouncerTarget;
+            }
+        }
+        return $bouncerTargets;
+    }
+    public function findContainersSwarmMode(): array
+    {
+        $bouncerTargets = [];
+        $services = json_decode($this->client->request('GET', 'services')->getBody()->getContents(), true);
+
+        if(isset($services['message'])){
+            $this->logger->debug(sprintf('Something happened while interrogating services.. This node is not a swarm node, cannot have services: %s', $services['message']));
+        }else{
+            foreach($services as $service){
+                $envs = [];
+                foreach($service['Spec']['TaskTemplate']['ContainerSpec']['Env'] as $env){
+                    list($eKey, $eVal) = explode("=", $env,2);
+                    $envs[$eKey] = $eVal;
+                }
+                if(isset($envs['BOUNCER_DOMAIN'])) {
+                    $bouncerTarget = (new BouncerTarget())
+                        ->setId($service['ID']);
+
+                    $bouncerTarget = $this->parseContainerEnvironmentVariables($envs, $bouncerTarget);
+
+                    $bouncerTarget->setIp("172.17.0.1");
+                    $bouncerTarget->setPort($service['Endpoint']['Ports'][0]['PublishedPort']);
+                    $bouncerTarget->setTargetPath(sprintf('http://%s:%d/', $bouncerTarget->getIp(), $bouncerTarget->getPort()));
+
+                    $this->logger->debug(sprintf('Decided that %s has the target path %s', $bouncerTarget->getName(), $bouncerTarget->getTargetPath()));
+
+                    $bouncerTargets[] = $bouncerTarget;
+                }
             }
         }
 
@@ -335,7 +363,11 @@ class Bouncer
         if ($this->s3Enabled()) {
             $this->getCertificatesFromS3();
         }
-        $targets = $this->findContainers();
+        $determineSwarmMode = json_decode($this->client->request('GET', 'swarm')->getBody()->getContents(), true);
+        $this->setSwarmMode(!isset($determineSwarmMode['message']));
+        $this->logger->info(sprintf("Swarm mode is %s.", $this->isSwarmMode() ? 'enabled' : 'disabled'));
+        $targets = $this->isSwarmMode() ? $this->findContainersSwarmMode() : $this->findContainersContainerMode();
+
         $this->logger->info(sprintf('%s Found %d services with BOUNCER_DOMAIN set', Emoji::CHARACTER_MAGNIFYING_GLASS_TILTED_LEFT, count($targets)));
         foreach ($targets as $target) {
             $this->generateNginxConfig($target);
@@ -493,6 +525,44 @@ class Bouncer
         $command->addFlag('s', 'reload');
         $this->logger->info(sprintf('%s Restarting nginx', Emoji::CHARACTER_TIMER_CLOCK));
         $shell->run($command);
+    }
+
+    /**
+     * @param array $envs
+     * @param BouncerTarget $bouncerTarget
+     * @return BouncerTarget
+     */
+    public function parseContainerEnvironmentVariables(array $envs, BouncerTarget $bouncerTarget): BouncerTarget
+    {
+        foreach ($envs as $eKey => $eVal) {
+            switch ($eKey) {
+                case 'BOUNCER_DOMAIN':
+                    $domains = explode(',', $eVal);
+                    array_walk($domains, function (&$domain, $key): void {
+                        $domain = trim($domain);
+                    });
+                    $bouncerTarget->setDomains($domains);
+
+                    break;
+
+                case 'BOUNCER_LETSENCRYPT':
+                    $bouncerTarget->setLetsEncrypt(in_array(strtolower($eVal), ['yes', 'true'], true));
+
+                    break;
+
+                case 'BOUNCER_TARGET_PORT':
+                    $bouncerTarget->setPort($eVal);
+
+                    break;
+
+                case 'BOUNCER_ALLOW_NON_SSL':
+                    $bouncerTarget->setAllowNonSSL(in_array(strtolower($eVal), ['yes', 'true'], true));
+
+                    break;
+
+            }
+        }
+        return $bouncerTarget;
     }
 }
 

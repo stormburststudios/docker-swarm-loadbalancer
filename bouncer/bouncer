@@ -313,7 +313,7 @@ class Bouncer
                     $bouncerTarget->setPort($service['Endpoint']['Ports'][0]['PublishedPort']);
                     $bouncerTarget->setTargetPath(sprintf('http://%s:%d/', $bouncerTarget->getIp(), $bouncerTarget->getPort()));
 
-                    $this->logger->debug(sprintf('Decided that %s has the target path %s', $bouncerTarget->getName(), $bouncerTarget->getTargetPath()));
+                    //$this->logger->debug(sprintf('Decided that %s has the target path %s', $bouncerTarget->getName(), $bouncerTarget->getTargetPath()));
 
                     $bouncerTargets[] = $bouncerTarget;
                 }
@@ -407,7 +407,7 @@ class Bouncer
         while ($this->stateHasChanged() === false) {
             sleep(5);
         }
-        $this->logger->debug(sprintf('%s  Host Container state has changed', Emoji::CHARACTER_WARNING));
+        $this->logger->info(sprintf('%s  Host Container state has changed', Emoji::CHARACTER_WARNING));
     }
 
     private function s3Enabled(): bool

@@ -46,7 +46,7 @@ COPY NginxTemplate.twig /app/
 RUN sed -i '1s;^;daemon off\;\n;' /etc/nginx/nginx.conf
 COPY bouncer /app
 COPY composer.* /app/
-COPY public /app/
+COPY public /app/public
 RUN composer install && \
     chmod +x /app/bouncer && \
     mkdir -p /var/log/bouncer

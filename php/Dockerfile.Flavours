@@ -29,6 +29,7 @@ COPY self-signed-certificates /certs
 RUN apt-get -qq update && \
     # Install pre-dependencies to use apt-key.
     apt-get -yqq install --no-install-recommends \
+        sudo \
         lsb-core \
         gnupg \
         && \
@@ -107,6 +108,9 @@ RUN apt-get -qq update && \
     dos2unix -q /etc/service/*/run && \
     # Make sure all our new services are executable
     chmod +x /etc/service/*/run && \
+    # Insert shim for php-cli still running in this nginx container to run as www-data.
+    mv /conf/php-cli-user-shim.sh /usr/local/sbin/php && \
+    chmod +x /usr/local/sbin/php && \
     # Cleanup the /conf dir
     rm -R /conf && \
     # Write the PHP version into some template locations

@@ -33,5 +33,6 @@ bake:
 	$(MAKE) docker-php-core bake-flavours PHP_VERSION=7.3
 	$(MAKE) docker-php-core bake-flavours PHP_VERSION=7.4
 	$(MAKE) docker-php-core bake-flavours PHP_VERSION=8.0
+	$(MAKE) docker-php-core bake-flavours PHP_VERSION=8.1
 
 all: bake

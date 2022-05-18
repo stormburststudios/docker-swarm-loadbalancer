@@ -109,7 +109,7 @@ RUN apt-get -qq update && \
     # Make sure all our new services are executable
     chmod +x /etc/service/*/run && \
     # Insert shim for php-cli still running in this nginx container to run as www-data.
-    mv /conf/php-cli-user-shim.sh /usr/local/sbin/php && \
+    mv /conf/php-cli-user-shim.sh /usr/local/sbin/php-uid && \
     chmod +x /usr/local/sbin/php && \
     # Cleanup the /conf dir
     rm -R /conf && \

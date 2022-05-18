@@ -110,7 +110,7 @@ RUN apt-get -qq update && \
     chmod +x /etc/service/*/run && \
     # Insert shim for php-cli still running in this nginx container to run as www-data.
     mv /conf/php-cli-user-shim.sh /usr/local/sbin/php-uid && \
-    chmod +x /usr/local/sbin/php && \
+    chmod +x /usr/local/sbin/php-uid && \
     # Cleanup the /conf dir
     rm -R /conf && \
     # Write the PHP version into some template locations

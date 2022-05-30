@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - 'node/**'
+  pull_request:
+    branches:
+      - '!dependabot/**'
   workflow_run:
     workflows:
       - Build Marshall

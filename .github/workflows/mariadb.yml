@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - 'mariadb/**'
+  pull_request:
+    branches:
+      - '!dependabot/**'
   workflow_run:
     workflows:
       - Lint Docker Files

@@ -5,6 +5,9 @@ on:
     paths:
       - 'php/core/**'
       - 'php/Dockerfile.Core'
+  pull_request:
+    branches:
+      - '!dependabot/**'
   workflow_dispatch:
   workflow_run:
     workflows:

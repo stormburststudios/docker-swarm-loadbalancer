@@ -4,7 +4,9 @@ on:
   push:
     paths:
       - 'octoprint/**'
-
+  pull_request:
+    branches:
+      - '!dependabot/**'
 jobs:
   octoprint-build:
     name: "Bake Octoprint"

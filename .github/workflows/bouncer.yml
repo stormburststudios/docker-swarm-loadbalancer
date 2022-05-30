@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - 'bouncer/**'
+  pull_request:
+    branches:
+      - '!dependabot/**'
   workflow_run:
     workflows:
       - Build PHP Flavours

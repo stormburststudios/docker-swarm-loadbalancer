@@ -25,7 +25,7 @@ class BouncerTarget
     private int $port = 80;
     private bool $letsEncrypt = false;
     private string $targetPath;
-    private bool $allowNonSSL = false;
+    private bool $allowNonSSL = true;
 
     private bool $useTemporaryCert = true;
 

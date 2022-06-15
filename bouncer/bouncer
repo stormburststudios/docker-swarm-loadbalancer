@@ -28,8 +28,8 @@ class BouncerTarget
     private bool $allowNonSSL = true;
     private bool $useTemporaryCert = true;
     private bool $allowWebsocketSupport = true;
-    private bool $allowLargeEntities = false;
-    private int $maxEntitySizeMegabytes = 256;
+    private bool $allowLargePayloads = false;
+    private int $maxPayloadSizeMegabytes = 256;
 
     public function __toArray()
     {
@@ -42,8 +42,8 @@ class BouncerTarget
             'useTemporaryCert' => $this->isUseTemporaryCert(),
             'allowNonSSL' => $this->isAllowNonSSL(),
             'allowWebsocketSupport' => $this->isAllowWebsocketSupport(),
-            'allowLargeEntities' => $this->isAllowLargeEntities(),
-            'maxEntitySizeMegabytes' => $this->getMaxEntitySizeMegabytes(),
+            'allowLargePayloads' => $this->isAllowLargePayloads(),
+            'maxPayloadSizeMegabytes' => $this->getMaxPayloadSizeMegabytes(),
         ];
     }
 
@@ -71,26 +71,26 @@ class BouncerTarget
         return $this;
     }
 
-    public function isAllowLargeEntities(): bool
+    public function isAllowLargePayloads(): bool
     {
-        return $this->allowLargeEntities;
+        return $this->allowLargePayloads;
     }
 
-    public function setAllowLargeEntities(bool $allowLargeEntities): BouncerTarget
+    public function setAllowLargePayloads(bool $allowLargePayloads): BouncerTarget
     {
-        $this->allowLargeEntities = $allowLargeEntities;
+        $this->allowLargePayloads = $allowLargePayloads;
 
         return $this;
     }
 
-    public function getMaxEntitySizeMegabytes(): int
+    public function getMaxPayloadSizeMegabytes(): int
     {
-        return $this->maxEntitySizeMegabytes;
+        return $this->maxPayloadSizeMegabytes;
     }
 
-    public function setMaxEntitySizeMegabytes(int $maxEntitySizeMegabytes): BouncerTarget
+    public function setMaxPayloadSizeMegabytes(int $maxPayloadSizeMegabytes): BouncerTarget
     {
-        $this->maxEntitySizeMegabytes = $maxEntitySizeMegabytes;
+        $this->maxPayloadSizeMegabytes = $maxPayloadSizeMegabytes;
 
         return $this;
     }
@@ -406,6 +406,16 @@ class Bouncer
 
                 case 'BOUNCER_ALLOW_WEBSOCKETS':
                     $bouncerTarget->setAllowWebsocketSupport(in_array(strtolower($eVal), ['yes', 'true'], true));
+
+                    break;
+
+                case 'BOUNCER_ALLOW_LARGE_PAYLOADS':
+                    $bouncerTarget->setAllowLargePayloads(in_array(strtolower($eVal), ['yes', 'true'], true));
+
+                    break;
+
+                case 'BOUNCER_MAX_PAYLOADS_MEGABYTES':
+                    $bouncerTarget->setMaxPayloadSizeMegabytes(is_numeric($eVal) ? $eVal : 256);
 
                     break;
             }

@@ -1,4 +1,4 @@
-FROM benzine/php:cli-8.0 as bouncer
+FROM benzine/php:cli-8.1 as bouncer
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
       org.opencontainers.image.source="https://github.com/benzine-framework/docker"

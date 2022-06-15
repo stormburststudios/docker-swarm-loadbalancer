@@ -18,7 +18,8 @@
         "bramus/monolog-colored-line-formatter": "~3.0",
         "adambrett/shell-wrapper": "dev-master",
         "league/flysystem-aws-s3-v3": "^2.1",
-        "spatie/emoji": "^2.3"
+        "spatie/emoji": "^2.3",
+        "ext-openssl": "*"
     },
     "authors": [
         {

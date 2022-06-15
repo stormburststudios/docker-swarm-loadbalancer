@@ -26,8 +26,10 @@ class BouncerTarget
     private bool $letsEncrypt = false;
     private string $targetPath;
     private bool $allowNonSSL = true;
-
     private bool $useTemporaryCert = true;
+    private bool $allowWebsocketSupport = true;
+    private bool $allowLargeEntities = false;
+    private int $maxEntitySizeMegabytes = 256;
 
     public function __toArray()
     {
@@ -39,6 +41,9 @@ class BouncerTarget
             'targetPath' => $this->getTargetPath(),
             'useTemporaryCert' => $this->isUseTemporaryCert(),
             'allowNonSSL' => $this->isAllowNonSSL(),
+            'allowWebsocketSupport' => $this->isAllowWebsocketSupport(),
+            'allowLargeEntities' => $this->isAllowLargeEntities(),
+            'maxEntitySizeMegabytes' => $this->getMaxEntitySizeMegabytes(),
         ];
     }
 
@@ -50,6 +55,42 @@ class BouncerTarget
     public function setUseTemporaryCert(bool $useTemporaryCert): BouncerTarget
     {
         $this->useTemporaryCert = $useTemporaryCert;
+
+        return $this;
+    }
+
+    public function isAllowWebsocketSupport(): bool
+    {
+        return $this->allowWebsocketSupport;
+    }
+
+    public function setAllowWebsocketSupport(bool $allowWebsocketSupport): BouncerTarget
+    {
+        $this->allowWebsocketSupport = $allowWebsocketSupport;
+
+        return $this;
+    }
+
+    public function isAllowLargeEntities(): bool
+    {
+        return $this->allowLargeEntities;
+    }
+
+    public function setAllowLargeEntities(bool $allowLargeEntities): BouncerTarget
+    {
+        $this->allowLargeEntities = $allowLargeEntities;
+
+        return $this;
+    }
+
+    public function getMaxEntitySizeMegabytes(): int
+    {
+        return $this->maxEntitySizeMegabytes;
+    }
+
+    public function setMaxEntitySizeMegabytes(int $maxEntitySizeMegabytes): BouncerTarget
+    {
+        $this->maxEntitySizeMegabytes = $maxEntitySizeMegabytes;
 
         return $this;
     }
@@ -164,24 +205,6 @@ class Bouncer
     private array $fileHashes;
     private bool $swarmMode = false;
 
-    /**
-     * @return bool
-     */
-    public function isSwarmMode(): bool
-    {
-        return $this->swarmMode;
-    }
-
-    /**
-     * @param bool $swarmMode
-     * @return Bouncer
-     */
-    public function setSwarmMode(bool $swarmMode): Bouncer
-    {
-        $this->swarmMode = $swarmMode;
-        return $this;
-    }
-
     public function __construct()
     {
         $this->environment = array_merge($_ENV, $_SERVER);
@@ -234,6 +257,18 @@ class Bouncer
         }
     }
 
+    public function isSwarmMode(): bool
+    {
+        return $this->swarmMode;
+    }
+
+    public function setSwarmMode(bool $swarmMode): Bouncer
+    {
+        $this->swarmMode = $swarmMode;
+
+        return $this;
+    }
+
     /**
      * @throws \GuzzleHttp\Exception\GuzzleException
      *
@@ -271,49 +306,51 @@ class Bouncer
                     $networks = array_values($inspect['NetworkSettings']['Networks']);
                     $bouncerTarget->setIp($networks[0]['IPAddress']);
                 }
-                //$this->logger->debug(sprintf('Decided that %s has the ip %s', $bouncerTarget->getName(), $bouncerTarget->getIp()));
+                // $this->logger->debug(sprintf('Decided that %s has the ip %s', $bouncerTarget->getName(), $bouncerTarget->getIp()));
 
                 $bouncerTarget->setTargetPath(sprintf('http://%s:%d/', $bouncerTarget->getIp(), $bouncerTarget->getPort()));
 
                 $bouncerTargets[] = $bouncerTarget;
             }
         }
+
         return $bouncerTargets;
     }
+
     public function findContainersSwarmMode(): array
     {
         $bouncerTargets = [];
         $services = json_decode($this->client->request('GET', 'services')->getBody()->getContents(), true);
 
-        if(isset($services['message'])){
+        if (isset($services['message'])) {
             $this->logger->debug(sprintf('Something happened while interrogating services.. This node is not a swarm node, cannot have services: %s', $services['message']));
-        }else{
-            foreach($services as $service){
+        } else {
+            foreach ($services as $service) {
                 $envs = [];
-                if(
+                if (
                     !isset($service['Spec'])
                     || !isset($service['Spec']['TaskTemplate'])
                     || !isset($service['Spec']['TaskTemplate']['ContainerSpec'])
                     || !isset($service['Spec']['TaskTemplate']['ContainerSpec']['Env'])
-                )
-                {
+                ) {
                     continue;
                 }
-                foreach($service['Spec']['TaskTemplate']['ContainerSpec']['Env'] as $env){
-                    list($eKey, $eVal) = explode("=", $env,2);
+                foreach ($service['Spec']['TaskTemplate']['ContainerSpec']['Env'] as $env) {
+                    [$eKey, $eVal] = explode('=', $env, 2);
                     $envs[$eKey] = $eVal;
                 }
-                if(isset($envs['BOUNCER_DOMAIN'])) {
+                if (isset($envs['BOUNCER_DOMAIN'])) {
                     $bouncerTarget = (new BouncerTarget())
-                        ->setId($service['ID']);
+                        ->setId($service['ID'])
+                    ;
 
                     $bouncerTarget = $this->parseContainerEnvironmentVariables($envs, $bouncerTarget);
 
-                    $bouncerTarget->setIp("172.17.0.1");
+                    $bouncerTarget->setIp('172.17.0.1');
                     $bouncerTarget->setPort($service['Endpoint']['Ports'][0]['PublishedPort']);
                     $bouncerTarget->setTargetPath(sprintf('http://%s:%d/', $bouncerTarget->getIp(), $bouncerTarget->getPort()));
 
-                    //$this->logger->debug(sprintf('Decided that %s has the target path %s', $bouncerTarget->getName(), $bouncerTarget->getTargetPath()));
+                    // $this->logger->debug(sprintf('Decided that %s has the target path %s', $bouncerTarget->getName(), $bouncerTarget->getTargetPath()));
 
                     $bouncerTargets[] = $bouncerTarget;
                 }
@@ -326,15 +363,55 @@ class Bouncer
     public function run(): void
     {
         $this->logger->info(sprintf('%s  Starting Bouncer...', Emoji::CHARACTER_TIMER_CLOCK));
+
         try {
             $this->stateHasChanged();
-        }catch(\GuzzleHttp\Exception\ConnectException $connectException){
-            $this->logger->critical(sprintf("%s Could not connect to docker socket! Did you map it?", Emoji::CHARACTER_CRYING_CAT));
+        } catch (\GuzzleHttp\Exception\ConnectException $connectException) {
+            $this->logger->critical(sprintf('%s Could not connect to docker socket! Did you map it?', Emoji::CHARACTER_CRYING_CAT));
+
             exit;
         }
         while (true) {
             $this->runLoop();
         }
+    }
+
+    public function parseContainerEnvironmentVariables(array $envs, BouncerTarget $bouncerTarget): BouncerTarget
+    {
+        foreach ($envs as $eKey => $eVal) {
+            switch ($eKey) {
+                case 'BOUNCER_DOMAIN':
+                    $domains = explode(',', $eVal);
+                    array_walk($domains, function (&$domain, $key): void {
+                        $domain = trim($domain);
+                    });
+                    $bouncerTarget->setDomains($domains);
+
+                    break;
+
+                case 'BOUNCER_LETSENCRYPT':
+                    $bouncerTarget->setLetsEncrypt(in_array(strtolower($eVal), ['yes', 'true'], true));
+
+                    break;
+
+                case 'BOUNCER_TARGET_PORT':
+                    $bouncerTarget->setPort($eVal);
+
+                    break;
+
+                case 'BOUNCER_ALLOW_NON_SSL':
+                    $bouncerTarget->setAllowNonSSL(in_array(strtolower($eVal), ['yes', 'true'], true));
+
+                    break;
+
+                case 'BOUNCER_ALLOW_WEBSOCKETS':
+                    $bouncerTarget->setAllowWebsocketSupport(in_array(strtolower($eVal), ['yes', 'true'], true));
+
+                    break;
+            }
+        }
+
+        return $bouncerTarget;
     }
 
     /**
@@ -350,7 +427,7 @@ class Bouncer
         $containers = json_decode($this->client->request('GET', 'containers/json')->getBody()->getContents(), true);
         foreach ($containers as $container) {
             $inspect = json_decode($this->client->request('GET', "containers/{$container['Id']}/json")->getBody()->getContents(), true);
-            $newInstanceStates['container-' . $inspect['Id']] = implode('::', [
+            $newInstanceStates['container-'.$inspect['Id']] = implode('::', [
                 $inspect['Name'],
                 $inspect['Created'],
                 $inspect['Image'],
@@ -361,17 +438,17 @@ class Bouncer
 
         // Swarm Services
         $services = json_decode($this->client->request('GET', 'services')->getBody()->getContents(), true);
-        if(isset($services['message'])){
+        if (isset($services['message'])) {
             $this->logger->debug(sprintf('Something happened while interrogating services.. This node is not a swarm node, cannot have services: %s', $services['message']));
-        }else{
-            foreach($services as $service){
-                $newInstanceStates['service-' . $service['ID']] = implode("::", [
-                    $service['Version']['Index']
+        } else {
+            foreach ($services as $service) {
+                $newInstanceStates['service-'.$service['ID']] = implode('::', [
+                    $service['Version']['Index'],
                 ]);
             }
         }
         $newStateHash = sha1(implode("\n", $newInstanceStates));
-        //$this->logger->debug(sprintf("Old state = %s. New State = %s.", substr($this->instanceStateHash,0,7), substr($newStateHash, 0,7)));
+        // $this->logger->debug(sprintf("Old state = %s. New State = %s.", substr($this->instanceStateHash,0,7), substr($newStateHash, 0,7)));
         if ($this->instanceStateHash != $newStateHash) {
             $this->instanceStateHash = $newStateHash;
 
@@ -388,7 +465,7 @@ class Bouncer
         }
         $determineSwarmMode = json_decode($this->client->request('GET', 'swarm')->getBody()->getContents(), true);
         $this->setSwarmMode(!isset($determineSwarmMode['message']));
-        $this->logger->info(sprintf("%s Swarm mode is %s.", Emoji::CHARACTER_HONEYBEE, $this->isSwarmMode() ? 'enabled' : 'disabled'));
+        $this->logger->info(sprintf('%s Swarm mode is %s.', Emoji::CHARACTER_HONEYBEE, $this->isSwarmMode() ? 'enabled' : 'disabled'));
         $targets = $this->isSwarmMode() ? $this->findContainersSwarmMode() : $this->findContainersContainerMode();
 
         $this->logger->info(sprintf('%s Found %d services with BOUNCER_DOMAIN set', Emoji::CHARACTER_MAGNIFYING_GLASS_TILTED_LEFT, count($targets)));
@@ -422,7 +499,7 @@ class Bouncer
             /** @var FileAttributes $file */
             if ($file->isFile()) {
                 $localPath = "archive/{$file->path()}";
-                #$this->logger->debug(sprintf(" > Downloading {$file->path()} "));
+                // $this->logger->debug(sprintf(" > Downloading {$file->path()} "));
                 $this->certificateStoreLocal->writeStream($localPath, $this->certificateStoreRemote->readStream($file->path()));
                 $this->fileHashes[$localPath] = sha1($this->certificateStoreLocal->read($localPath));
             }
@@ -434,8 +511,8 @@ class Bouncer
             if ($newLocalCert->isFile() && pathinfo($newLocalCert->path(), PATHINFO_EXTENSION) == 'pem') {
                 $livePath = str_replace('archive/', 'live/', $newLocalCert->path());
                 // Stupid dirty hack bullshit reee
-                for($i = 1; $i <= 9; $i++){
-                    $livePath = str_replace("$i.pem", ".pem", $livePath);
+                for ($i = 1; $i <= 9; ++$i) {
+                    $livePath = str_replace("{$i}.pem", '.pem', $livePath);
                 }
                 $this->certificateStoreLocal->writeStream($livePath, $this->certificateStoreLocal->readStream($newLocalCert->path()));
             }
@@ -462,11 +539,10 @@ class Bouncer
             if ($file->isFile()) {
                 $remotePath = str_replace('archive/', '', $file->path());
                 if (!$this->certificateStoreRemote->fileExists($remotePath) || $this->fileChanged($file->path())) {
-                    #$this->logger->debug(sprintf(" > Uploading {$file->path()} "));
+                    // $this->logger->debug(sprintf(" > Uploading {$file->path()} "));
                     $this->certificateStoreRemote->writeStream($remotePath, $this->certificateStoreLocal->readStream($file->path()));
-                } else {
-                    #$this->logger->debug(sprintf(" > Skipping uploading {$file->path()}, file not changed."));
                 }
+                // $this->logger->debug(sprintf(" > Skipping uploading {$file->path()}, file not changed."));
             }
         }
     }
@@ -508,6 +584,7 @@ class Bouncer
 
                     $target->setUseTemporaryCert(false);
                     $this->generateNginxConfig($target);
+
                     continue;
                 }
             }
@@ -548,44 +625,6 @@ class Bouncer
         $command->addFlag('s', 'reload');
         $this->logger->info(sprintf('%s  Restarting nginx', Emoji::CHARACTER_TIMER_CLOCK));
         $shell->run($command);
-    }
-
-    /**
-     * @param array $envs
-     * @param BouncerTarget $bouncerTarget
-     * @return BouncerTarget
-     */
-    public function parseContainerEnvironmentVariables(array $envs, BouncerTarget $bouncerTarget): BouncerTarget
-    {
-        foreach ($envs as $eKey => $eVal) {
-            switch ($eKey) {
-                case 'BOUNCER_DOMAIN':
-                    $domains = explode(',', $eVal);
-                    array_walk($domains, function (&$domain, $key): void {
-                        $domain = trim($domain);
-                    });
-                    $bouncerTarget->setDomains($domains);
-
-                    break;
-
-                case 'BOUNCER_LETSENCRYPT':
-                    $bouncerTarget->setLetsEncrypt(in_array(strtolower($eVal), ['yes', 'true'], true));
-
-                    break;
-
-                case 'BOUNCER_TARGET_PORT':
-                    $bouncerTarget->setPort($eVal);
-
-                    break;
-
-                case 'BOUNCER_ALLOW_NON_SSL':
-                    $bouncerTarget->setAllowNonSSL(in_array(strtolower($eVal), ['yes', 'true'], true));
-
-                    break;
-
-            }
-        }
-        return $bouncerTarget;
     }
 }
 

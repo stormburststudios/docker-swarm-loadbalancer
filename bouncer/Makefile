@@ -1,3 +1,14 @@
+all: fix build-n-push
+php-cs-fixer:
+	docker run --rm -v $(PWD):/data cytopia/php-cs-fixer fix --config=.php-cs-fixer.php bouncer
+
+fix: php-cs-fixer
+
+build-n-push:
+	docker build --tag benzine/bouncer --tag ghcr.io/benzine-framework/bouncer --target bouncer .
+	#docker push benzine/bouncer
+	docker push ghcr.io/benzine-framework/bouncer
+
 test-as-service: clean
 	docker build -t bouncer --target bouncer .
 	docker build -t test-app-a --target test-app-a .

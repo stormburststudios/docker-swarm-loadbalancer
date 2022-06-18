@@ -38,7 +38,8 @@ server {
 
     proxy_pass  {{ targetPath }};
   }
-%}
+}
+
 {% if not allowNonSSL %}
 server {
   listen      80;

@@ -17,7 +17,6 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       - name: Bake
-        uses: docker/bake-action@v2.1.0
-        with:
-          push: true
-          files: ./swarm-monitor/docker-compose.yml
+        working-directory: swarm-monitor
+        run: docker buildx bake --push
+

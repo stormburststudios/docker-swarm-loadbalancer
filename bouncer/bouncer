@@ -447,14 +447,16 @@ class Bouncer
         }
 
         // Swarm Services
-        $services = json_decode($this->client->request('GET', 'services')->getBody()->getContents(), true);
-        if (isset($services['message'])) {
-            $this->logger->debug(sprintf('Something happened while interrogating services.. This node is not a swarm node, cannot have services: %s', $services['message']));
-        } else {
-            foreach ($services as $service) {
-                $newInstanceStates['service-'.$service['ID']] = implode('::', [
-                    $service['Version']['Index'],
-                ]);
+        if ($this->isSwarmMode()) {
+            $services = json_decode($this->client->request('GET', 'services')->getBody()->getContents(), true);
+            if (isset($services['message'])) {
+                $this->logger->debug(sprintf('Something happened while interrogating services.. This node is not a swarm node, cannot have services: %s', $services['message']));
+            } else {
+                foreach ($services as $service) {
+                    $newInstanceStates['service-'.$service['ID']] = implode('::', [
+                        $service['Version']['Index'],
+                    ]);
+                }
             }
         }
         $newStateHash = sha1(implode("\n", $newInstanceStates));
@@ -473,8 +475,14 @@ class Bouncer
         if ($this->s3Enabled()) {
             $this->getCertificatesFromS3();
         }
-        $determineSwarmMode = json_decode($this->client->request('GET', 'swarm')->getBody()->getContents(), true);
-        $this->setSwarmMode(!isset($determineSwarmMode['message']));
+
+        try {
+            $determineSwarmMode = json_decode($this->client->request('GET', 'swarm')->getBody()->getContents(), true);
+            $this->setSwarmMode(!isset($determineSwarmMode['message']));
+        } catch (\GuzzleHttp\Exception\ServerException $exception) {
+            $this->setSwarmMode(false);
+        }
+
         $this->logger->info(sprintf('%s Swarm mode is %s.', Emoji::CHARACTER_HONEYBEE, $this->isSwarmMode() ? 'enabled' : 'disabled'));
         $targets = $this->isSwarmMode() ? $this->findContainersSwarmMode() : $this->findContainersContainerMode();
 

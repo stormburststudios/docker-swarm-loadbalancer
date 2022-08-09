@@ -433,7 +433,7 @@ class Bouncer
                 //    $valid ? 'is valid' : 'is not valid'
                 // ));
                 if ($valid) {
-                    $bouncerTargets[] = $bouncerTarget;
+                    $bouncerTargets[$bouncerTarget->getDomains()[0]] = $bouncerTarget;
                 }
             }
         }
@@ -495,7 +495,7 @@ class Bouncer
                     //    $valid ? 'is valid' : 'is not valid'
                     // ));
                     if ($valid) {
-                        $bouncerTargets[] = $bouncerTarget;
+                        $bouncerTargets[$bouncerTarget->getDomains()[0]] = $bouncerTarget;
                     }
                 }
             }
@@ -633,9 +633,11 @@ class Bouncer
 
         $this->logger->info(sprintf('%s Swarm mode is %s.', Emoji::CHARACTER_HONEYBEE, $this->isSwarmMode() ? 'enabled' : 'disabled'));
 
-        $targets = array_merge(
-            $this->findContainersContainerMode(),
-            $this->isSwarmMode() ? $this->findContainersSwarmMode() : []
+        $targets = array_values(
+            array_merge(
+                $this->findContainersContainerMode(),
+                $this->isSwarmMode() ? $this->findContainersSwarmMode() : []
+            )
         );
 
         $this->wipeNginxConfig();

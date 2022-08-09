@@ -28,6 +28,7 @@ class BouncerTarget
     private bool $allowNonSSL = true;
     private bool $useTemporaryCert = true;
     private bool $useGlobalCert = false;
+    private bool $useLetsEncrypt = false;
     private bool $allowWebsocketSupport = true;
     private bool $allowLargePayloads = false;
     private int $maxPayloadSizeMegabytes = 256;
@@ -47,11 +48,18 @@ class BouncerTarget
             'targetPath' => $this->getTargetPath(),
             'useTemporaryCert' => $this->isUseTemporaryCert(),
             'useGlobalCert' => $this->isUseGlobalCert(),
+            'useLetsEncrypt' => $this->isUseLetsEncrypt(),
             'allowNonSSL' => $this->isAllowNonSSL(),
+            'enableSSL' => $this->isEnableSSL(),
             'allowWebsocketSupport' => $this->isAllowWebsocketSupport(),
             'allowLargePayloads' => $this->isAllowLargePayloads(),
             'maxPayloadSizeMegabytes' => $this->getMaxPayloadSizeMegabytes(),
         ];
+    }
+
+    public function isEnableSSL(): bool
+    {
+        return $this->isUseLetsEncrypt() || $this->isUseGlobalCert() || $this->isUseLetsEncrypt();
     }
 
     public function isUseTemporaryCert(): bool
@@ -62,6 +70,18 @@ class BouncerTarget
     public function setUseTemporaryCert(bool $useTemporaryCert): BouncerTarget
     {
         $this->useTemporaryCert = $useTemporaryCert;
+
+        return $this;
+    }
+
+    public function isUseLetsEncrypt(): bool
+    {
+        return $this->useLetsEncrypt;
+    }
+
+    public function setUseLetsEncrypt(bool $useLetsEncrypt): BouncerTarget
+    {
+        $this->useLetsEncrypt = $useLetsEncrypt;
 
         return $this;
     }
@@ -515,6 +535,7 @@ class Bouncer
 
                 case 'BOUNCER_LETSENCRYPT':
                     $bouncerTarget->setLetsEncrypt(in_array(strtolower($eVal), ['yes', 'true'], true));
+                    $bouncerTarget->setUseLetsEncrypt(true);
 
                     break;
 
@@ -613,8 +634,8 @@ class Bouncer
         $this->logger->info(sprintf('%s Swarm mode is %s.', Emoji::CHARACTER_HONEYBEE, $this->isSwarmMode() ? 'enabled' : 'disabled'));
 
         $targets = array_merge(
-                $this->findContainersContainerMode(),
-                $this->isSwarmMode() ? $this->findContainersSwarmMode() : []
+            $this->findContainersContainerMode(),
+            $this->isSwarmMode() ? $this->findContainersSwarmMode() : []
         );
 
         $this->wipeNginxConfig();

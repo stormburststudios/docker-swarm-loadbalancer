@@ -611,7 +611,11 @@ class Bouncer
         }
 
         $this->logger->info(sprintf('%s Swarm mode is %s.', Emoji::CHARACTER_HONEYBEE, $this->isSwarmMode() ? 'enabled' : 'disabled'));
-        $targets = $this->isSwarmMode() ? $this->findContainersSwarmMode() : $this->findContainersContainerMode();
+
+        $targets = array_merge(
+                $this->findContainersContainerMode(),
+                $this->isSwarmMode() ? $this->findContainersSwarmMode() : []
+        );
 
         $this->wipeNginxConfig();
 

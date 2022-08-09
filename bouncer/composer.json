@@ -1,13 +1,13 @@
 {
     "name": "benzine/bouncer",
-    "description": "Nginx Configuration Management",
+    "description": "Automated Docker-swarm aware Nginx configuration management",
     "type": "project",
     "config": {
         "sort-packages": true
     },
     "license": "GPL-3.0-or-later",
     "require": {
-        "php": "^8.0",
+        "php": "^8.1",
         "ext-json": "*",
         "ext-curl": "*",
         "kint-php/kint": "^3.3",

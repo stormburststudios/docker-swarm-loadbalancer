@@ -49,11 +49,13 @@ COPY composer.* /app/
 COPY public /app/public
 RUN composer install && \
     chmod +x /app/bouncer && \
-    mkdir -p /var/log/bouncer
+    mkdir -p /var/log/bouncer && \
+    rm /etc/nginx/sites-enabled/default && \
+    cp /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
-FROM benzine/php:nginx-8.0 as test-app-a
+FROM benzine/php:nginx-8.1 as test-app-a
 COPY ./test/public-web-a /app/public
 
-FROM benzine/php:nginx-8.0 as test-app-b
+FROM benzine/php:nginx-8.1 as test-app-b
 COPY ./test/public-web-b /app/public
 

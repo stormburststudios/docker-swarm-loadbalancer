@@ -12,6 +12,9 @@ server {
 {% if useTemporaryCert %}
   ssl_certificate     /certs/example.crt;
   ssl_certificate_key /certs/example.key;
+{% elseif useGlobalCert %}
+  ssl_certificate     /certs/global.crt;
+  ssl_certificate_key /certs/global.key;
 {% else %}
   ssl_certificate     /etc/letsencrypt/live/{{ name }}/fullchain.pem;
   ssl_certificate_key /etc/letsencrypt/live/{{ name }}/privkey.pem;

@@ -17,7 +17,7 @@ on:
 jobs:
   redis-build:
     name: "Redis with Healthchecks"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v1
       - uses: docker/setup-qemu-action@v1

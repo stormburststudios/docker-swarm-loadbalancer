@@ -7,7 +7,7 @@ on:
 jobs:
   lint:
     name: Lint Docker Files
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:

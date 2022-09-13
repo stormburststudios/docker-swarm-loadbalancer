@@ -3,6 +3,7 @@ LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
       org.opencontainers.image.source="https://github.com/benzine-framework/docker"
 
+# hadolint ignore=DL3013
 RUN apt-get update -q && \
     apt-get install --no-install-recommends -yq \
         cpulimit \
@@ -12,7 +13,7 @@ RUN apt-get update -q && \
     apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log && \
-    pip install psycopg2
+    pip install --no-cache-dir psycopg2
 
 FROM octoprint AS builder
 RUN apt-get update -q && \

@@ -1,3 +1,4 @@
+# hadolint ignore=DL3007
 FROM mariadb:latest
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \

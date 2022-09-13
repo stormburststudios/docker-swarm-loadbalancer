@@ -1,3 +1,4 @@
+# hadolint ignore=DL3007
 FROM benzine/marshall:latest AS nodejs
 
 ARG NODE_VERSION

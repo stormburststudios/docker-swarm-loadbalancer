@@ -18,7 +18,6 @@ jobs:
   mariadb-build:
     name: "MariaDB with Healthchecks"
     runs-on: self-hosted
-    needs: [ lint ]
     steps:
       - uses: actions/checkout@v1
       - uses: docker/setup-qemu-action@v1

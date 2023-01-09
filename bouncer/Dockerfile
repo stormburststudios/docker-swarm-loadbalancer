@@ -17,11 +17,15 @@ RUN apt-get -qq update && \
             > /etc/apt/sources.list.d/nginx-stable.list' && \
     # Add nginx key
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C300EE8C && \
+    # Update
     apt-get -qq update && \
+    # Install Nginx, Certbot bits and apache2-utils for htpasswd generation
     apt-get -yqq install --no-install-recommends \
         nginx \
         python3-certbot-nginx \
+        apache2-utils \
         && \
+    # Cleanup
     apt-get remove -yqq \
         lsb-core \
         cups-common \
@@ -44,6 +48,7 @@ COPY Nginx-tweak.conf /etc/nginx/conf.d/tweak.conf
 COPY NginxTemplate.twig /app/
 # Disable daemonising in nginx
 RUN sed -i '1s;^;daemon off\;\n;' /etc/nginx/nginx.conf
+RUN sed -i 's|include /etc/nginx/sites-enabled/*|include /etc/nginx/sites-enabled/*.conf|g' /etc/nginx/nginx.conf
 COPY bouncer /app
 COPY composer.* /app/
 COPY public /app/public
@@ -58,4 +63,7 @@ COPY ./test/public-web-a /app/public
 
 FROM benzine/php:nginx-8.1 as test-app-b
 COPY ./test/public-web-b /app/public
+
+FROM benzine/php:nginx-8.1 as test-app-c
+COPY ./test/public-web-c /app/public
 

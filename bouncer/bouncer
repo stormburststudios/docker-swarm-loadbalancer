@@ -7,6 +7,8 @@ use AdamBrett\ShellWrapper\Runners\Exec;
 use Aws\S3\S3Client;
 use Bramus\Monolog\Formatter\ColoredLineFormatter;
 use GuzzleHttp\Client as Guzzle;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\ServerException;
 use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use League\Flysystem\FileAttributes;
 use League\Flysystem\Filesystem;
@@ -28,10 +30,12 @@ class BouncerTarget
     private bool $allowNonSSL = true;
     private bool $useTemporaryCert = true;
     private bool $useGlobalCert = false;
-    private bool $useLetsEncrypt = false;
     private bool $allowWebsocketSupport = true;
     private bool $allowLargePayloads = false;
     private int $maxPayloadSizeMegabytes = 256;
+    private ?int $proxyTimeoutSeconds = null;
+    private ?string $username = null;
+    private ?string $password = null;
 
     public function __construct(
         private Logger $logger
@@ -48,18 +52,88 @@ class BouncerTarget
             'targetPath' => $this->getTargetPath(),
             'useTemporaryCert' => $this->isUseTemporaryCert(),
             'useGlobalCert' => $this->isUseGlobalCert(),
-            'useLetsEncrypt' => $this->isUseLetsEncrypt(),
             'allowNonSSL' => $this->isAllowNonSSL(),
-            'enableSSL' => $this->isEnableSSL(),
             'allowWebsocketSupport' => $this->isAllowWebsocketSupport(),
             'allowLargePayloads' => $this->isAllowLargePayloads(),
             'maxPayloadSizeMegabytes' => $this->getMaxPayloadSizeMegabytes(),
+            'proxyTimeoutSeconds' => $this->getProxyTimeoutSeconds(),
+            'hasAuth' => $this->hasAuth(),
+            'authFile' => $this->getAuthFileName(),
         ];
     }
 
-    public function isEnableSSL(): bool
+    /**
+     * @return string|null
+     */
+    public function getUsername(): ?string
     {
-        return $this->isUseLetsEncrypt() || $this->isUseGlobalCert() || $this->isUseLetsEncrypt();
+        return $this->username;
+    }
+
+    /**
+     * @param string
+     * @return BouncerTarget
+     */
+    public function setUsername(string $username): BouncerTarget
+    {
+        $this->username = $username;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    /**
+     * @param string $password
+     * @return BouncerTarget
+     */
+    public function setPassword(string $password): BouncerTarget
+    {
+        $this->password = $password;
+        return $this;
+    }
+
+    public function setAuth(string $username, string $password): BouncerTarget
+    {
+        return $this->setUsername($username)->setPassword($password);
+    }
+
+    public function hasAuth() : bool
+    {
+        return $this->username != null && $this->password != null;
+    }
+
+    public function getFileName() : string
+    {
+        return "{$this->getName()}.conf";
+    }
+
+    public function getAuthFileName() : string
+    {
+        return "{$this->getName()}.secret";
+    }
+
+    public function getAuthFileData() : string
+    {
+        $output = shell_exec(sprintf("htpasswd -nibB -C10 %s %s",$this->getUsername(), $this->getPassword()));
+        return trim($output)."\n";
+    }
+
+    public function getProxyTimeoutSeconds(): ?int
+    {
+        return $this->proxyTimeoutSeconds;
+    }
+
+    public function setProxyTimeoutSeconds(?int $proxyTimeoutSeconds): BouncerTarget
+    {
+        $this->proxyTimeoutSeconds = $proxyTimeoutSeconds;
+
+        return $this;
     }
 
     public function isUseTemporaryCert(): bool
@@ -74,18 +148,6 @@ class BouncerTarget
         return $this;
     }
 
-    public function isUseLetsEncrypt(): bool
-    {
-        return $this->useLetsEncrypt;
-    }
-
-    public function setUseLetsEncrypt(bool $useLetsEncrypt): BouncerTarget
-    {
-        $this->useLetsEncrypt = $useLetsEncrypt;
-
-        return $this;
-    }
-
     public function isUseGlobalCert(): bool
     {
         return $this->useGlobalCert;
@@ -96,7 +158,9 @@ class BouncerTarget
         $this->useGlobalCert = $useGlobalCert;
 
         // Global cert overrides temporary certs.
-        $this->setUseTemporaryCert(false);
+        if($useGlobalCert) {
+            $this->setUseTemporaryCert(false);
+        }
 
         return $this;
     }
@@ -277,6 +341,7 @@ class Bouncer
     private bool $useGlobalCert = false;
     private int $forcedUpdateIntervalSeconds = 600;
     private ?int $lastUpdateEpoch = null;
+    private int $maximumNginxConfigCreationNotices = 15;
 
     public function __construct()
     {
@@ -344,6 +409,26 @@ class Bouncer
             $this->setForcedUpdateIntervalSeconds($this->environment['BOUNCER_FORCED_UPDATE_INTERVAL_SECONDS']);
         }
         $this->logger->info(sprintf('%s  Forced update interval is every %d seconds', Emoji::watch(), $this->getForcedUpdateIntervalSeconds()));
+    }
+
+    /**
+     * @return int
+     */
+    public function getMaximumNginxConfigCreationNotices(): int
+    {
+        return $this->maximumNginxConfigCreationNotices;
+    }
+
+    /**
+     * @param int $maximumNginxConfigCreationNotices
+     *
+     * @return Bouncer
+     */
+    public function setMaximumNginxConfigCreationNotices(int $maximumNginxConfigCreationNotices): Bouncer
+    {
+        $this->maximumNginxConfigCreationNotices = $maximumNginxConfigCreationNotices;
+
+        return $this;
     }
 
     public function isSwarmMode(): bool
@@ -433,7 +518,7 @@ class Bouncer
                 //    $valid ? 'is valid' : 'is not valid'
                 // ));
                 if ($valid) {
-                    $bouncerTargets[$bouncerTarget->getDomains()[0]] = $bouncerTarget;
+                    $bouncerTargets[] = $bouncerTarget;
                 }
             }
         }
@@ -495,7 +580,7 @@ class Bouncer
                     //    $valid ? 'is valid' : 'is not valid'
                     // ));
                     if ($valid) {
-                        $bouncerTargets[$bouncerTarget->getDomains()[0]] = $bouncerTarget;
+                        $bouncerTargets[] = $bouncerTarget;
                     }
                 }
             }
@@ -510,7 +595,7 @@ class Bouncer
 
         try {
             $this->stateHasChanged();
-        } catch (\GuzzleHttp\Exception\ConnectException $connectException) {
+        } catch (ConnectException $connectException) {
             $this->logger->critical(sprintf('%s Could not connect to docker socket! Did you map it?', Emoji::CHARACTER_CRYING_CAT));
 
             exit;
@@ -533,9 +618,14 @@ class Bouncer
 
                     break;
 
+                case 'BOUNCER_AUTH':
+                    list($username, $password) = explode(":", $eVal);
+                    $bouncerTarget->setAuth($username, $password);
+
+                    break;
+
                 case 'BOUNCER_LETSENCRYPT':
                     $bouncerTarget->setLetsEncrypt(in_array(strtolower($eVal), ['yes', 'true'], true));
-                    $bouncerTarget->setUseLetsEncrypt(true);
 
                     break;
 
@@ -561,6 +651,11 @@ class Bouncer
 
                 case 'BOUNCER_MAX_PAYLOADS_MEGABYTES':
                     $bouncerTarget->setMaxPayloadSizeMegabytes(is_numeric($eVal) ? $eVal : 256);
+
+                    break;
+
+                case 'BOUNCER_PROXY_TIMEOUT_SECONDS':
+                    $bouncerTarget->setProxyTimeoutSeconds(is_numeric($eVal) ? $eVal : null);
 
                     break;
             }
@@ -627,8 +722,13 @@ class Bouncer
         try {
             $determineSwarmMode = json_decode($this->client->request('GET', 'swarm')->getBody()->getContents(), true);
             $this->setSwarmMode(!isset($determineSwarmMode['message']));
-        } catch (\GuzzleHttp\Exception\ServerException $exception) {
+        } catch (ServerException $exception) {
             $this->setSwarmMode(false);
+        } catch (ConnectException $exception) {
+            $this->logger->critical(sprintf('%s Unable to connect to docker socket!', Emoji::warning()));
+            $this->logger->critical($exception->getMessage());
+
+            exit(1);
         }
 
         $this->logger->info(sprintf('%s Swarm mode is %s.', Emoji::CHARACTER_HONEYBEE, $this->isSwarmMode() ? 'enabled' : 'disabled'));
@@ -643,9 +743,7 @@ class Bouncer
         $this->wipeNginxConfig();
 
         $this->logger->info(sprintf('%s Found %d services with BOUNCER_DOMAIN set', Emoji::CHARACTER_MAGNIFYING_GLASS_TILTED_LEFT, count($targets)));
-        foreach ($targets as $target) {
-            $this->generateNginxConfig($target);
-        }
+        $this->generateNginxConfigs($targets);
         $this->generateLetsEncryptCerts($targets);
         if ($this->s3Enabled()) {
             $this->writeCertificatesToS3();
@@ -722,11 +820,34 @@ class Bouncer
         }
     }
 
+    /**
+     * @param BouncerTarget[] $target
+     *
+     * @return $this
+     */
+    private function generateNginxConfigs(array $targets): self
+    {
+        foreach ($targets as $target) {
+            $this->generateNginxConfig($target);
+            if (count($targets) <= $this->getMaximumNginxConfigCreationNotices()) {
+                $this->logger->info(sprintf('%s  Created Nginx config for http://%s', Emoji::pencil(), $target->getName()));
+            }
+        }
+        if (count($targets) > $this->getMaximumNginxConfigCreationNotices()) {
+            $this->logger->info(sprintf('%s  More than %d Nginx configs generated.. Too many to show them all!', Emoji::pencil(), $this->getMaximumNginxConfigCreationNotices()));
+        }
+        $this->logger->info(sprintf('%s  Created %d Nginx configs..', Emoji::pencil(), count($targets)));
+
+        return $this;
+    }
+
     private function generateNginxConfig(BouncerTarget $target): self
     {
         $configData = $this->twig->render('NginxTemplate.twig', $target->__toArray());
-        $this->configFilesystem->write($target->getName(), $configData);
-        $this->logger->info(sprintf('%s  Created Nginx config for http://%s', Emoji::CHARACTER_PENCIL, $target->getName()));
+        $this->configFilesystem->write($target->getFileName(), $configData);
+        if($target->hasAuth()){
+            $this->configFilesystem->write($target->getAuthFileName(), $target->getAuthFileData());
+        }
 
         return $this;
     }

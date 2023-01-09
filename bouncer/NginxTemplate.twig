@@ -3,10 +3,8 @@ server {
   listen      80;
   listen      [::]:80;
 {% endif %}
-{% if enableSSL %}
   listen      443 ssl;
   listen      [::]:443 ssl;
-{% endif %}
   server_name {{ domains|join(' ') }};
   access_log  /var/log/bouncer/{{ name }}.access.log;
   error_log   /var/log/bouncer/{{ name }}.error.log;
@@ -17,7 +15,7 @@ server {
 {% elseif useGlobalCert %}
   ssl_certificate     /certs/global.crt;
   ssl_certificate_key /certs/global.key;
-{% elseif useLetsEncrypt %}
+{% else %}
   ssl_certificate     /etc/letsencrypt/live/{{ name }}/fullchain.pem;
   ssl_certificate_key /etc/letsencrypt/live/{{ name }}/privkey.pem;
 {% endif %}
@@ -34,11 +32,22 @@ server {
     proxy_set_header X-Forwarded-Proto https;
     proxy_set_header Host $host;
 
+{% if hasAuth %}
+    auth_basic           "closed site";
+    auth_basic_user_file sites-enabled/{{ authFile }};
+{% endif %}
+
 {% if allowWebsocketSupport %}
     # WebSocket support
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection "upgrade";
+{% endif %}
+
+{% if proxyTimeoutSeconds %}
+    proxy_read_timeout    {{ proxyTimeoutSeconds }};
+    proxy_connect_timeout {{ proxyTimeoutSeconds }};
+    proxy_send_timeout    {{ proxyTimeoutSeconds }};
 {% endif %}
 
     proxy_pass  {{ targetPath }};

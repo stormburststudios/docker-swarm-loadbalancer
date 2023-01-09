@@ -14,7 +14,7 @@ jobs:
     name: Vanity Tags
     runs-on: self-hosted
     env:
-      latest-stable-version: "7.4"
+      latest-stable-version: "8.1"
     strategy:
       fail-fast: false
       matrix:

@@ -883,7 +883,16 @@ class Bouncer
                 }
             }
 
+            // Start running shell commands...
             $shell = new Exec();
+
+            // Disable nginx tweaks
+            $disableNginxTweaksCommand = (new CommandBuilder("mv"))
+                ->addArgument("/etc/nginx/conf.d/tweak.conf")
+                ->addArgument("/etc/nginx/conf.d/tweak.disabled");
+            $shell->run($disableNginxTweaksCommand);
+
+            // Generate letsencrypt cert
             $command = new CommandBuilder('/usr/bin/certbot');
             $command->addSubCommand('certonly');
             $command->addArgument('nginx');
@@ -902,6 +911,12 @@ class Bouncer
             } else {
                 $this->logger->critical(sprintf('%s Generating failed!', Emoji::CHARACTER_WARNING));
             }
+
+            // Re-enable nginx tweaks
+            $disableNginxTweaksCommand = (new CommandBuilder("mv"))
+                ->addArgument("/etc/nginx/conf.d/tweak.disabled")
+                ->addArgument("/etc/nginx/conf.d/tweak.conf");
+            $shell->run($disableNginxTweaksCommand);
 
             $target->setUseTemporaryCert(false);
             $this->generateNginxConfig($target);

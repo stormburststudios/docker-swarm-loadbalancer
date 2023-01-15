@@ -772,7 +772,11 @@ class Bouncer
             /** @var FileAttributes $file */
             if ($file->isFile()) {
                 $localPath = "archive/{$file->path()}";
-                // $this->logger->debug(sprintf(" > Downloading {$file->path()} "));
+                if($file->fileSize() == 0){
+                    $this->logger->warning(sprintf(" > Downloading %s to %s was skipped, because it was empty", $file->path(), $localPath));
+                    continue;
+                }
+                $this->logger->debug(sprintf(" > Downloading %s to %s (%d bytes)", $file->path(), $localPath, $file->fileSize()));
                 $this->certificateStoreLocal->writeStream($localPath, $this->certificateStoreRemote->readStream($file->path()));
                 $this->fileHashes[$localPath] = sha1($this->certificateStoreLocal->read($localPath));
             }
@@ -787,6 +791,7 @@ class Bouncer
                 for ($i = 1; $i <= 9; ++$i) {
                     $livePath = str_replace("{$i}.pem", '.pem', $livePath);
                 }
+                $this->logger->debug(sprintf(" > Downloading %s to %s (%d bytes)", $file->path(), $localPath, $file->fileSize()));
                 $this->certificateStoreLocal->writeStream($livePath, $this->certificateStoreLocal->readStream($newLocalCert->path()));
             }
         }
@@ -811,11 +816,14 @@ class Bouncer
             /** @var FileAttributes $file */
             if ($file->isFile()) {
                 $remotePath = str_replace('archive/', '', $file->path());
-                if (!$this->certificateStoreRemote->fileExists($remotePath) || $this->fileChanged($file->path())) {
-                    // $this->logger->debug(sprintf(" > Uploading {$file->path()} "));
-                    $this->certificateStoreRemote->writeStream($remotePath, $this->certificateStoreLocal->readStream($file->path()));
+                if ($file->fileSize() == 0){
+                    $this->logger->warning(sprintf(" > Skipping uploading {$file->path()}, file is garbage (empty)."));
+                } elseif (!$this->certificateStoreRemote->fileExists($remotePath) || $this->fileChanged($file->path())) {
+                    $this->logger->debug(sprintf(" > Uploading %s (%d bytes)", $file->path(), $file->fileSize()));
+                    $this->certificateStoreRemote->write($remotePath, $this->certificateStoreLocal->read($file->path()));
+                } else {
+                    $this->logger->debug(sprintf(" > Skipping uploading {$file->path()}, file not changed."));
                 }
-                // $this->logger->debug(sprintf(" > Skipping uploading {$file->path()}, file not changed."));
             }
         }
     }
@@ -887,9 +895,10 @@ class Bouncer
             $shell = new Exec();
 
             // Disable nginx tweaks
+            $this->logger->debug("Moving nginx tweak file..");
             $disableNginxTweaksCommand = (new CommandBuilder("mv"))
-                ->addArgument("/etc/nginx/conf.d/tweak.conf")
-                ->addArgument("/etc/nginx/conf.d/tweak.disabled");
+                ->addSubCommand("/etc/nginx/conf.d/tweak.conf")
+                ->addSubCommand("/etc/nginx/conf.d/tweak.disabled");
             $shell->run($disableNginxTweaksCommand);
 
             // Generate letsencrypt cert
@@ -913,9 +922,10 @@ class Bouncer
             }
 
             // Re-enable nginx tweaks
+            $this->logger->debug("Moving nginx tweak file back..");
             $disableNginxTweaksCommand = (new CommandBuilder("mv"))
-                ->addArgument("/etc/nginx/conf.d/tweak.disabled")
-                ->addArgument("/etc/nginx/conf.d/tweak.conf");
+                ->addSubCommand("/etc/nginx/conf.d/tweak.disabled")
+                ->addSubCommand("/etc/nginx/conf.d/tweak.conf");
             $shell->run($disableNginxTweaksCommand);
 
             $target->setUseTemporaryCert(false);

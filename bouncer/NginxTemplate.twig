@@ -23,7 +23,7 @@ server {
   # ssl_ciphers       HIGH:!aNULL:!MD5;
 
 {% if allowLargePayloads %}
-  client_max_body_size {{ maxPayloadSizeMegabytes }}M;
+  client_max_body_size 0;
 {% endif %}
 
   location / {

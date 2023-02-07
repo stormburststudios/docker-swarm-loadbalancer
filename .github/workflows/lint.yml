@@ -17,12 +17,13 @@ jobs:
           - marshall/Dockerfile
           - php/Dockerfile.Core
           - php/Dockerfile.Flavours
+          - laravel/Dockerfile
+          - wordpress/Dockerfile
+          - mqtt/Dockerfile
           - node/Dockerfile
-          - mariadb/Dockerfile
           - redis/Dockerfile
-          - octoprint/Dockerfile
     steps:
       - uses: actions/checkout@v3
       - uses: hadolint/hadolint-action@v3.0.0
         with:
-          dockerfile: ${{ matrix.dockerfile }}
+          dockerfile: ./${{ matrix.dockerfile }}

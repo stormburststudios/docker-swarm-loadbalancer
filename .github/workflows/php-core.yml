@@ -67,12 +67,12 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-      - uses: docker/login-action@v2
-        name: Login to Github Container Registry
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+#      - uses: docker/login-action@v2
+#        name: Login to Github Container Registry
+#        with:
+#          registry: ghcr.io
+#          username: ${{ github.actor }}
+#          password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/build-push-action@v3
         name: Build & Push
         with:
@@ -85,7 +85,7 @@ jobs:
           tags: |
             gone/php:core-${{ matrix.version }}
             benzine/php:core-${{ matrix.version }}
-            ghcr.io/benzine-framework/php:core-${{ matrix.version }}
+#            ghcr.io/benzine-framework/php:core-${{ matrix.version }}
           build-args: |
             ${{ steps.build_args.outputs.result }}
 

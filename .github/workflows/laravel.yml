@@ -13,9 +13,10 @@ on:
     branches: [ 'master', 'feature/**' ]
     types:
       - completed
+  workflow_dispatch:
 
 jobs:
-  wordpress-build:
+  build:
     name: "Bake Laravel Container"
     runs-on: self-hosted
     steps:

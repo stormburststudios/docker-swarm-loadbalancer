@@ -32,8 +32,8 @@ jobs:
         name: Login to Github Container Registry
         with:
           registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GHCR_PAT }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Retag benzine/php:${{ matrix.variant }}-${{ env.latest-stable-version }} to benzine/php:${{ matrix.variant }}
         run: |
           docker pull benzine/php:${{ matrix.variant }}-${{ env.latest-stable-version }}

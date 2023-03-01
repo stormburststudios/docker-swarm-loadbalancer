@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+rm -f /var/lock/laravel_horizon_started
+
+# If horizon is present, publish the frontend assets, if HORIZON_UI is set to "on"
+if [[ -f "/app/config/horizon.php" ]]; then
+  echo "[HORIZON] Waiting until Migration Complete."
+  until [ -f /var/lock/laravel_migration_complete ]
+  do
+       sleep 1
+  done
+  echo "[HORIZON] Migration is complete, running Horizon."
+  if [ "${HORIZON_UI,,}" = "on" ]; then
+    echo "[HORIZON] Publishing horizon frontend assets"
+    artisan horizon:publish
+  fi
+  echo "[HORIZON] Running laravel horizon runner"
+  cpulimit -l 30 -- artisan horizon
+  touch /var/lock/laravel_horizon_started
+else
+  echo "[HORIZON] Horizon is not present"
+fi
+sleep infinity

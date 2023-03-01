@@ -35,12 +35,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-#      - uses: docker/login-action@v2
-#        name: Login to Github Container Registry
-#        with:
-#          registry: ghcr.io
-#          username: ${{ github.actor }}
-#          password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/build-push-action@v3
         name: Build & Push
         with:
@@ -53,7 +47,6 @@ jobs:
           tags: |
             gone/node:${{ matrix.node }}-${{ matrix.yarn }}
             benzine/node:${{ matrix.node }}-${{ matrix.yarn }}
-#            ghcr.io/benzine-framework/node:${{ matrix.node }}-${{ matrix.yarn }}
           build-args: |
             NODE_VERSION=${{ matrix.node }}
             YARN_VERSION=${{ matrix.yarn }}

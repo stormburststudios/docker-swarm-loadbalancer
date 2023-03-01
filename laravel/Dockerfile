@@ -1,3 +1,4 @@
+ARG PHP_VERSION
 FROM benzine/php:nginx-${PHP_VERSION}
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \

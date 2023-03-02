@@ -11,6 +11,12 @@ touch /app/storage/logs/laravel.log
 chmod 777 -R /app/storage
 chmod +x /app/artisan
 
+php artisan package:discover
+if [ "${REGENERATE_KEYS,,}" = "on" ]; then
+  php artisan key:generate
+  php artisan passport:keys --force
+fi
+
 echo "[LARAVEL-FIXER] Waiting for mysql..."
 /usr/bin/wait-for-mysql
 echo "[LARAVEL-FIXER] Mysql Ready, Laravel Ready."

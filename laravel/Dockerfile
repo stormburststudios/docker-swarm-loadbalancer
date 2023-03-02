@@ -12,6 +12,7 @@ RUN apt-get update -qq && \
     apt-get autoremove -yqq && \
         apt-get clean && \
         rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log
+COPY nginx.runit /etc/service/nginx/run
 COPY laravel.runit /etc/service/laravel/run
 COPY laravel-horizon.runit /etc/service/horizon/run
 COPY laravel-horizon.finish /etc/service/horizon/finish

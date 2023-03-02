@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+if [ "${HTTP_ENABLE,,}" = "on" ]; then
+  echo "[NGINX] Starting Nginx"
+  /usr/sbin/nginx
+else
+  echo "[NGINX] HTTP_ENABLE not set, Nginx not running"
+  sleep infinity
+fi

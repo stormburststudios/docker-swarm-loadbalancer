@@ -2,35 +2,41 @@
 rm -f /var/lock/laravel_migration_underway \
       /var/lock/laravel_migration_complete
 
-# Give a moment for services to wake up
-echo "[MIGRATION] Waiting until Laravel Ready."
-sleep 3
-until [ -f /var/lock/laravel_ready ]
-do
-     sleep 1
-done
-echo "[MIGRATION] Laravel is ready, running migrations..."
+if [ "${MIGRATE_ENABLE,,}" = "on" ]; then
 
-cd /app
+  # Give a moment for services to wake up
+  echo "[MIGRATION] Waiting until Laravel Ready."
+  sleep 3
+  until [ -f /var/lock/laravel_ready ]
+  do
+       sleep 1
+  done
+  echo "[MIGRATION] Laravel is ready, running migrations..."
 
-# Run migration
-touch /var/lock/laravel_migration_underway
+  cd /app
 
-if [ "${MIGRATE_CLEAN,,}" = "on" ]; then
-    artisan migrate:fresh --force
-    artisan migrate --force # First run will fail due to permissions. We can ignore, but need to migrate again to finish.
+  # Run migration
+  touch /var/lock/laravel_migration_underway
+
+  if [ "${MIGRATE_CLEAN,,}" = "on" ]; then
+      artisan migrate:fresh --force
+      artisan migrate --force # First run will fail due to permissions. We can ignore, but need to migrate again to finish.
+  else
+      # If we run this on first commit, it is the same as migrate:fresh, first run may fail and we need to try one more time.
+      artisan migrate --force || artisan migrate --force
+  fi
+
+  if [ "${SEEDERS,,}" = "on" ]; then
+    artisan db:seed -q
+  fi
+
+  rm /var/lock/laravel_migration_underway
+  touch /var/lock/laravel_migration_complete
+  echo "[MIGRATION] Migration complete!";
+
 else
-    # If we run this on first commit, it is the same as migrate:fresh, first run may fail and we need to try one more time.
-    artisan migrate --force || artisan migrate --force
+  echo "[MIGRATION] Not enabled. Set MIGRATE_ENABLE = on to enable."
 fi
-
-if [ "${SEEDERS,,}" = "on" ]; then
-  artisan db:seed -q
-fi
-
-rm /var/lock/laravel_migration_underway
-touch /var/lock/laravel_migration_complete
-echo "[MIGRATION] Migration complete!";
 
 # Sleep forever (and sleep again in case the sleep process is killed)
 while true; do

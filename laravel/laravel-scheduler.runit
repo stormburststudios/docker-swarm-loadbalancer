@@ -1,12 +1,17 @@
 #!/bin/bash
 cd /app
-echo "[SCHEDULER] Waiting until Migration Complete."
-until [ -f /var/lock/laravel_migration_complete ]
-do
-   sleep 1
-done
-echo "[SCHEDULER] Migrations complete, starting scheduler"
-while true; do
-  artisan schedule:run
-  sleep 59;
-done
+if [ "${SCHEDULER_ENABLE,,}" = "on" ]; then
+
+  echo "[SCHEDULER] Waiting until Migration Complete."
+  until [ -f /var/lock/laravel_migration_complete ]
+  do
+     sleep 1
+  done
+  echo "[SCHEDULER] Migrations complete, starting scheduler"
+  while true; do
+    artisan schedule:run
+    sleep 59;
+  done
+else
+  echo "[SCHEDULER] Not enabled. To enable this feature, set SCHEDULER_ENABLE = on."
+fi

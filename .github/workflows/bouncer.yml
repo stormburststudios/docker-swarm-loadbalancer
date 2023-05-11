@@ -32,8 +32,7 @@ jobs:
         name: Build & Push
         with:
           context: bouncer
-          #platforms: linux/amd64,linux/arm64
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           pull: true
           push: true
           target: bouncer

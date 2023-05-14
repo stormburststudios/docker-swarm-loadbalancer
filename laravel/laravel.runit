@@ -21,6 +21,8 @@ echo "[LARAVEL-FIXER] Waiting for mysql..."
 /usr/bin/wait-for-mysql
 echo "[LARAVEL-FIXER] Mysql Ready, Laravel Ready."
 
+php artisan wipe
+
 touch /var/lock/laravel_ready
 
 # Output the laravel log to the docker terminal.

@@ -16,7 +16,7 @@
         "league/flysystem": "^2.1",
         "monolog/monolog": "^2.2",
         "bramus/monolog-colored-line-formatter": "~3.0",
-        "adambrett/shell-wrapper": "dev-master",
+        "adambrett/shell-wrapper": "~1.0",
         "league/flysystem-aws-s3-v3": "^2.1",
         "spatie/emoji": "^2.3",
         "ext-openssl": "*"

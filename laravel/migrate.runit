@@ -19,15 +19,15 @@ if [ "${MIGRATE_ENABLE,,}" = "on" ]; then
   touch /var/lock/laravel_migration_underway
 
   if [ "${MIGRATE_CLEAN,,}" = "on" ]; then
-      php artisan migrate:fresh --force
-      php artisan migrate --force # First run will fail due to permissions. We can ignore, but need to migrate again to finish.
+      php /app/artisan migrate:fresh --force
+      php /app/artisan migrate --force # First run will fail due to permissions. We can ignore, but need to migrate again to finish.
   else
       # If we run this on first commit, it is the same as migrate:fresh, first run may fail and we need to try one more time.
-      php artisan migrate --force || php artisan migrate --force
+      php /app/artisan migrate --force || php /app/artisan migrate --force
   fi
 
   if [ "${SEEDERS,,}" = "on" ]; then
-    php artisan db:seed -q
+    php /app/artisan db:seed -q
   fi
 
   rm /var/lock/laravel_migration_underway

@@ -14,10 +14,10 @@ if [ "${HORIZON_ENABLE,,}" = "on" ]; then
     fi
     if [ "${HORIZON_UI,,}" = "on" ]; then
       echo "[HORIZON] Publishing horizon frontend assets"
-      php artisan horizon:publish
+      php /app/artisan horizon:publish
     fi
     echo "[HORIZON] Running laravel horizon runner"
-    cpulimit -l 30 -- php artisan horizon
+    cpulimit -l 30 -- php /app/artisan horizon
     touch /var/lock/laravel_horizon_started
   else
     echo "[HORIZON] Horizon is not present."

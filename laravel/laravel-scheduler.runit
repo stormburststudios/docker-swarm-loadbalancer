@@ -10,7 +10,7 @@ if [ "${SCHEDULER_ENABLE,,}" = "on" ]; then
     echo "[SCHEDULER] Migrations complete, starting scheduler"
   fi
   while true; do
-    php artisan schedule:run
+    php /app/artisan schedule:run
     sleep 59;
   done
 else

@@ -2,42 +2,56 @@ version: "3.4"
 
 services:
   bouncer:
-    image: benzine/bouncer
+    build:
+      context: .
+      target: bouncer
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - BOUNCER_LETSENCRYPT_MODE=production
-      - BOUNCER_LETSENCRYPT_EMAIL=matthew@baggett.me
-      - BOUNCER_S3_ENDPOINT=http://grey.ooo:9000
-      - BOUNCER_S3_KEY_ID=geusebio
-      - BOUNCER_S3_KEY_SECRET=teblE0neTf2NQcVFaZIRkSF44RscyQ3G
-      - BOUNCER_S3_BUCKET=bouncer-certificates
-      - BOUNCER_S3_USE_PATH_STYLE_ENDPOINT="yes"
+#    environment:
+#      - BOUNCER_LETSENCRYPT_MODE=production
+#      - BOUNCER_LETSENCRYPT_EMAIL=matthew@baggett.me
+#      - BOUNCER_S3_ENDPOINT=http://grey.ooo:9000
+#      - BOUNCER_S3_KEY_ID=geusebio
+#      - BOUNCER_S3_KEY_SECRET=teblE0neTf2NQcVFaZIRkSF44RscyQ3G
+#      - BOUNCER_S3_BUCKET=bouncer-certificates
+#      - BOUNCER_S3_USE_PATH_STYLE_ENDPOINT="yes"
     ports:
-      - 80:80
-      - 443:443
+      - 127.0.0.5:80:80
+      - 127.0.0.5:443:443
+    depends_on:
+      - web-a
+      - web-b
+      - web-c
 
   web-a:
-    image: benzine/php:nginx
-    volumes:
-      - ./test/public-web-a:/app/public
+    build:
+      context: .
+      target: test-app-a
     environment:
       - BOUNCER_DOMAIN=a.web.grey.ooo
-      - BOUNCER_LETSENCRYPT=true
+      - BOUNCER_LETSENCRYPT=false
+      - BOUNCER_TARGET_PORT=80
+    ports:
+      - 127.0.0.5:81:80
 
   web-b:
-    image: benzine/php:nginx
-    volumes:
-      - ./test/public-web-b:/app/public
+    build:
+      context: .
+      target: test-app-b
     environment:
       - BOUNCER_DOMAIN=b.web.grey.ooo
-      - BOUNCER_LETSENCRYPT=true
+      - BOUNCER_LETSENCRYPT=false
+      - BOUNCER_TARGET_PORT=80
+    ports:
+      - 127.0.0.5:82:80
 
   web-c:
-    image: benzine/php:nginx
-    volumes:
-      - ./test/public-web-c:/app/public
+    build:
+      context: .
+      target: test-app-c
     environment:
       - BOUNCER_DOMAIN=c.web.grey.ooo
-      - BOUNCER_LETSENCRYPT=true
-
+      - BOUNCER_LETSENCRYPT=false
+      - BOUNCER_TARGET_PORT=80
+    ports:
+      - 127.0.0.5:83:80

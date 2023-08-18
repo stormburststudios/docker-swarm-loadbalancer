@@ -14,7 +14,7 @@
         "guzzlehttp/guzzle": "^7.3",
         "twig/twig": "^3.0",
         "league/flysystem": "^2.1",
-        "monolog/monolog": "^2.2",
+        "monolog/monolog": "^3.4",
         "bramus/monolog-colored-line-formatter": "~3.0",
         "adambrett/shell-wrapper": "~1.0",
         "league/flysystem-aws-s3-v3": "^2.1",

@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     name: Build Swarm Monitor
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Git Checkout
         uses: actions/checkout@v3

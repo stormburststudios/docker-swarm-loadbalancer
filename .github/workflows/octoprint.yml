@@ -12,7 +12,7 @@ on:
 jobs:
   octoprint-build:
     name: "Bake Octoprint"
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: docker/setup-qemu-action@v2
@@ -33,7 +33,7 @@ jobs:
           tags: matthewbaggett/octoprint:latest
   octoprint-mjpg-build:
     name: "Bake Octoprint for yuvu cameras"
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: docker/setup-qemu-action@v2

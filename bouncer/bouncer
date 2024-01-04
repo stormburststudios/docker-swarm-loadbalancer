@@ -395,6 +395,13 @@ class Bouncer
             $this->setForcedUpdateIntervalSeconds($this->environment['BOUNCER_FORCED_UPDATE_INTERVAL_SECONDS']);
         }
         $this->logger->info(sprintf('%s  Forced update interval is every %d seconds', Emoji::watch(), $this->getForcedUpdateIntervalSeconds()));
+
+        // Determine maximum notices for nginx config creation.
+        if (isset($this->environment['BOUNCER_MAXIMUM_NGINX_CONFIG_CREATION_NOTICES']) && is_numeric($this->environment['BOUNCER_MAXIMUM_NGINX_CONFIG_CREATION_NOTICES'])) {
+            $originalMaximumNginxConfigCreationNotices = $this->getMaximumNginxConfigCreationNotices();
+            $this->setMaximumNginxConfigCreationNotices($this->environment['BOUNCER_MAXIMUM_NGINX_CONFIG_CREATION_NOTICES']);
+            $this->logger->warning(sprintf('%s  Maximum Nginx config creation notices has been over-ridden: %d => %d', Emoji::upsideDownFace(), $originalMaximumNginxConfigCreationNotices, $this->getMaximumNginxConfigCreationNotices()));
+        }
     }
 
     /**

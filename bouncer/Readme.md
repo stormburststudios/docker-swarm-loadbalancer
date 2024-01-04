@@ -1,25 +1,26 @@
-# Automatic Swarm Nginx Loadbalancer
+# Automatic Swarm Nginx Load Balancer
 
 ## Environment variables
 This container has its own environment variables, AS WELL AS scanning for some environment variables associated with your services.
 These should not be confused.
 
-### Load balancer Configuration
+### Load Balancer Configuration
 #### Main configuration
-| Key                                    | Default | Options                                     | Behaviour                                                                                                                                                                     |
-|----------------------------------------|---------|---------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| DOCKER_HOST                            | false   |                                             | Define a http endpoint representing your docker socket. If this is null, it connects to /var/lib/docker.sock                                                                  |
-| GLOBAL_CERT                            | false   | Contents of an ssl certificate              | If you want to provide a single cert for all endpoints, perhaps with a catch-all that may be later overriden, you can provide the whole contents of a certificates file here. |
-| GLOBAL_CERT_KEY                        | false   | Contents of an ssl certificates private key | The private key related to GLOBAL CERT. These must be provided in tandem.                                                                                                     |
-| BOUNCER_FORCED_UPDATE_INTERVAL_SECONDS | false   | positive numbers                            | To force the bouncer to update on a schedule even if no changes are detected, measured in seconds                                                                             |
+| Key                                           | Default | Options                                     | Behaviour                                                                                                                                                                                                                            |
+|-----------------------------------------------|---------|---------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| DOCKER_HOST                                   | false   |                                             | Define a http endpoint representing your docker socket. If this is null, it connects to /var/lib/docker.sock                                                                                                                         |
+| GLOBAL_CERT                                   | false   | Contents of an ssl certificate              | If you want to provide a single cert for all endpoints, perhaps with a catch-all that may be later overriden, you can provide the whole contents of a certificates file here.                                                        |
+| GLOBAL_CERT_KEY                               | false   | Contents of an ssl certificates private key | The private key related to GLOBAL CERT. These must be provided in tandem.                                                                                                                                                            |
+| BOUNCER_FORCED_UPDATE_INTERVAL_SECONDS        | false   | positive numbers                            | To force the bouncer to update on a schedule even if no changes are detected, measured in seconds                                                                                                                                    |
+| BOUNCER_MAXIMUM_NGINX_CONFIG_CREATION_NOTICES | 15      | positive numbers                            | To limit the number lines of output regarding which domains have been configured. Any more domains than this count, and none will be output, instead replaced by "More than 15 Nginx configs generated.. Too many to show them all!" |
 
-#### For using with lets encrypt
+#### For using with Lets Encrypt:tm:
 | Key                       | Default   | Options                   | Behaviour                                                                            |
 |---------------------------|-----------|---------------------------|--------------------------------------------------------------------------------------|
 | BOUNCER_LETSENCRYPT_MODE  | 'staging' | 'staging' or 'production' | Determine if this is going to connect to a production or staging Lets Encrypt server | 
 | BOUNCER_LETSENCRYPT_EMAIL |           | 'bob@example.com'         | Email address to associate with lets encrypt                                         |
 
-#### For using S3 for generated cert synchronisation with Lets Encrypt
+#### For using S3-compatable storage for generated cert synchronisation with Lets Encrypt
 | Key                                | Default | Options         | Behaviour                                                                             |
 |------------------------------------|---------|-----------------|---------------------------------------------------------------------------------------|
 | BOUNCER_S3_BUCKET                  | false   |                 | enable S3 behaviour to store lets-encrypt generated certs                             |

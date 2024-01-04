@@ -18,7 +18,7 @@ on:
 jobs:
   build:
     name: "Bake Laravel Container"
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -49,7 +49,7 @@ jobs:
 
   latest:
     name: "Bake Laravel Container"
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [ build ]
     steps:
       - uses: docker/login-action@v2

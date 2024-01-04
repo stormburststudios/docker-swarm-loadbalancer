@@ -304,7 +304,7 @@ class BouncerTarget
             return true;
         }
 
-        // $this->logger->debug(sprintf('%s isEndpointValid: %s is a hostname does not resolve', Emoji::magnifyingGlassTiltedRight(), $this->getEndpointHostnameOrIp()));
+        $this->logger->warning(sprintf('%s isEndpointValid: %s is a hostname that does not resolve', Emoji::magnifyingGlassTiltedRight(), $this->getEndpointHostnameOrIp()));
 
         return false;
     }
@@ -564,16 +564,15 @@ class Bouncer
 
                     // $this->logger->debug(sprintf('Decided that %s has the target path %s', $bouncerTarget->getName(), $bouncerTarget->getTargetPath()));
 
-                    $valid = $bouncerTarget->isEndpointValid();
-                    // $this->logger->debug(sprintf(
-                    //    '%s Decided that %s has the endpoint %s and it %s.',
-                    //    Emoji::magnifyingGlassTiltedLeft(),
-                    //    $bouncerTarget->getName(),
-                    //    $bouncerTarget->getEndpointHostnameOrIp(),
-                    //    $valid ? 'is valid' : 'is not valid'
-                    // ));
-                    if ($valid) {
+                    if ($bouncerTarget->isEndpointValid()) {
                         $bouncerTargets[] = $bouncerTarget;
+                    }else{
+                        $this->logger->debug(sprintf(
+                           '%s Decided that %s has the endpoint %s and it is not valid.',
+                           Emoji::magnifyingGlassTiltedLeft(),
+                           $bouncerTarget->getName(),
+                           $bouncerTarget->getEndpointHostnameOrIp(),
+                        ));
                     }
                 }
             }

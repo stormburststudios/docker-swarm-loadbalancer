@@ -12,7 +12,7 @@ on:
 jobs:
   php-vanity-tags:
     name: Vanity Tags
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     env:
       latest-stable-version: "8.2"
     strategy:

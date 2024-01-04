@@ -32,7 +32,6 @@ These should not be confused.
 | BOUNCER_S3_PREFIX                  | false   |                 | Prefix file path in s3 bucket                                                         |
 
 ### Served Instance Configuration
-
 These environment variables need to be applied to the CONSUMING SERVICE and not the loadbalancer container itself.
 
 | Key                            | Example                                                                 | Behaviour                                                                                                     |

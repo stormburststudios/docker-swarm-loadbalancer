@@ -302,6 +302,18 @@ class BouncerTarget
 
         return false;
     }
+
+    public function getPresentationDomain(): string
+    {
+        return sprintf(
+            '%s://%s%s',
+            $this->isAllowNonSSL() ? 'http' : 'https',
+            $this->getUsername() && $this->getPassword() ?
+                    sprintf('%s:%s@', $this->getUsername(), $this->getPassword()) :
+                    '',
+            $this->getName()
+        );
+    }
 }
 
 class Bouncer
@@ -393,7 +405,11 @@ class Bouncer
         if (isset($this->environment['BOUNCER_FORCED_UPDATE_INTERVAL_SECONDS']) && is_numeric($this->environment['BOUNCER_FORCED_UPDATE_INTERVAL_SECONDS'])) {
             $this->setForcedUpdateIntervalSeconds($this->environment['BOUNCER_FORCED_UPDATE_INTERVAL_SECONDS']);
         }
-        $this->logger->info(sprintf('%s  Forced update interval is every %d seconds', Emoji::watch(), $this->getForcedUpdateIntervalSeconds()));
+        if ($this->getForcedUpdateIntervalSeconds() > 0) {
+            $this->logger->warning(sprintf('%s  Forced update interval is every %d seconds', Emoji::watch(), $this->getForcedUpdateIntervalSeconds()));
+        } else {
+            $this->logger->info(sprintf('%s  Forced update interval is disabled', Emoji::watch()));
+        }
 
         // Determine maximum notices for nginx config creation.
         if (isset($this->environment['BOUNCER_MAXIMUM_NGINX_CONFIG_CREATION_NOTICES']) && is_numeric($this->environment['BOUNCER_MAXIMUM_NGINX_CONFIG_CREATION_NOTICES'])) {
@@ -653,6 +669,27 @@ class Bouncer
         return json_decode($this->client->request('GET', "containers/{$id}/json")->getBody()->getContents(), true);
     }
 
+    private function dockerEnvFilter(?array $envs): array
+    {
+        if ($envs === null) {
+            return [];
+        }
+
+        return array_filter(array_map(function ($env) {
+            if (stripos($env, '=') !== false) {
+                [$envKey, $envVal] = explode('=', $env, 2);
+
+                if (strlen($envVal) > 65) {
+                    return sprintf('%s=CRC32(%s)', $envKey, crc32($envVal));
+                }
+
+                return sprintf('%s=%s', $envKey, $envVal);
+            }
+
+            return $env;
+        }, $envs));
+    }
+
     /**
      * Returns true when something has changed.
      *
@@ -685,19 +722,11 @@ class Bouncer
                 'created' => $inspect['Created'],
                 'image'   => $inspect['Image'],
                 'status'  => $inspect['State']['Status'],
-                'env'     => array_filter(array_map(function ($env) {
-                    if (stripos($env, '=') !== false) {
-                        [$envKey, $envVal] = explode('=', $env, 2);
-
-                        if (strlen($envVal) > 35) {
-                            return sprintf('%s=CRC32(%s)', $envKey, crc32($envVal));
-                        }
-
-                        return sprintf('%s=%s', $envKey, $envVal);
-                    }
-                }, $inspect['Config']['Env'])),
+                'env'     => $this->dockerEnvFilter($inspect['Config']['Env']),
             ];
-            sort($newContainerState[$inspect['Name']]['env']);
+            if (is_array($newContainerState[$name]['env'])) {
+                sort($newContainerState[$name]['env']);
+            }
         }
         ksort($newContainerState);
 
@@ -705,7 +734,7 @@ class Bouncer
         $containerStateDiff = $this->diff($this->previousContainerState, $newContainerState);
         if (!$isTainted && !empty($containerStateDiff)) {
             $this->logger->warning(sprintf('%s  Container state has changed', Emoji::warning()));
-            $this->logger->debug($containerStateDiff);
+            $this->logger->debug(sprintf("Changed state:\n%s", $containerStateDiff));
             $isTainted = true;
         }
         $this->previousContainerState = $newContainerState;
@@ -718,10 +747,19 @@ class Bouncer
                 $this->logger->warning(sprintf('Something happened while interrogating services.. This node is not a swarm node, cannot have services: %s', $services['message']));
             } else {
                 foreach ($services as $service) {
-                    $newSwarmState[$service['ID']] = [
-                        $service['Version']['Index'],
+                    $env                  = $service['Spec']['TaskTemplate']['ContainerSpec']['Env'] ?? [];
+                    $name                 = $service['Spec']['Name'];
+                    $newSwarmState[$name] = [
+                        'id'           => $service['ID'],
+                        'mode'         => isset($service['Spec']['Mode']['Replicated']) ?
+                            sprintf('replicated:%d', $service['Spec']['Mode']['Replicated']['Replicas']) :
+                            (isset($service['Spec']['Mode']['Global']) ? 'global' : 'none'),
+                        'created'      => $service['CreatedAt'],
+                        'image'        => $service['Spec']['TaskTemplate']['ContainerSpec']['Image'],
+                        'versionIndex' => $service['Version']['Index'],
+                        'updateStatus' => $service['UpdateStatus']['State'] ?? 'unknown',
+                        'env'          => $this->dockerEnvFilter($env),
                     ];
-                    ksort($newSwarmState[$service['ID']]);
                 }
             }
         }
@@ -731,7 +769,7 @@ class Bouncer
         $swarmStateDiff = $this->diff($this->previousSwarmState, $newSwarmState);
         if ($this->isSwarmMode() && !$isTainted && !empty($swarmStateDiff)) {
             $this->logger->warning(sprintf('%s  Swarm state has changed', Emoji::warning()));
-            $this->logger->debug($swarmStateDiff);
+            $this->logger->debug(sprintf("Changed state:\n%s", $swarmStateDiff));
             $isTainted = true;
         }
         $this->previousSwarmState = $newSwarmState;
@@ -883,15 +921,12 @@ class Bouncer
     }
 
     /**
-     * @return $this
+     * @var BouncerTarget[]
      */
     private function generateNginxConfigs(array $targets): self
     {
         // get the length of the longest name...
-        foreach ($targets as $target) {
-            $longestName[] = strlen($target->getName());
-        }
-        $longestName = max($longestName);
+        $longestName = max(array_map(fn (BouncerTarget $target) => strlen($target->getPresentationDomain()), $targets));
 
         foreach ($targets as $target) {
             $this->generateNginxConfig($target);
@@ -900,8 +935,8 @@ class Bouncer
                     '%s  Created Nginx config for %s',
                     Emoji::pencil(),
                     str_pad(
-                        'http://' . $target->getName(),
-                        $longestName + strlen('http://'),
+                        $target->getPresentationDomain(),
+                        $longestName,
                         ' ',
                         STR_PAD_LEFT
                     )

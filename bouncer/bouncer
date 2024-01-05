@@ -26,17 +26,17 @@ class BouncerTarget
     private string $id;
     private array $domains;
     private string $endpointHostnameOrIp;
-    private ?int $port = null;
+    private ?int $port        = null;
     private bool $letsEncrypt = false;
     private string $targetPath;
-    private bool $allowNonSSL = true;
-    private bool $useTemporaryCert = true;
-    private bool $useGlobalCert = false;
+    private bool $allowNonSSL           = true;
+    private bool $useTemporaryCert      = true;
+    private bool $useGlobalCert         = false;
     private bool $allowWebsocketSupport = true;
-    private bool $allowLargePayloads = false;
-    private ?int $proxyTimeoutSeconds = null;
-    private ?string $username = null;
-    private ?string $password = null;
+    private bool $allowLargePayloads    = false;
+    private ?int $proxyTimeoutSeconds   = null;
+    private ?string $username           = null;
+    private ?string $password           = null;
 
     public function __construct(
         private Logger $logger
@@ -46,25 +46,22 @@ class BouncerTarget
     public function __toArray()
     {
         return [
-            'id' => $this->getId(),
-            'name' => $this->getName(),
-            'domains' => $this->getDomains(),
-            'letsEncrypt' => $this->isLetsEncrypt(),
-            'targetPath' => $this->getTargetPath(),
-            'useTemporaryCert' => $this->isUseTemporaryCert(),
-            'useGlobalCert' => $this->isUseGlobalCert(),
-            'allowNonSSL' => $this->isAllowNonSSL(),
+            'id'                    => $this->getId(),
+            'name'                  => $this->getName(),
+            'domains'               => $this->getDomains(),
+            'letsEncrypt'           => $this->isLetsEncrypt(),
+            'targetPath'            => $this->getTargetPath(),
+            'useTemporaryCert'      => $this->isUseTemporaryCert(),
+            'useGlobalCert'         => $this->isUseGlobalCert(),
+            'allowNonSSL'           => $this->isAllowNonSSL(),
             'allowWebsocketSupport' => $this->isAllowWebsocketSupport(),
-            'allowLargePayloads' => $this->isAllowLargePayloads(),
-            'proxyTimeoutSeconds' => $this->getProxyTimeoutSeconds(),
-            'hasAuth' => $this->hasAuth(),
-            'authFile' => $this->getAuthFileName(),
+            'allowLargePayloads'    => $this->isAllowLargePayloads(),
+            'proxyTimeoutSeconds'   => $this->getProxyTimeoutSeconds(),
+            'hasAuth'               => $this->hasAuth(),
+            'authFile'              => $this->getAuthFileName(),
         ];
     }
 
-    /**
-     * @return null|string
-     */
     public function getUsername(): ?string
     {
         return $this->username;
@@ -72,8 +69,6 @@ class BouncerTarget
 
     /**
      * @param string
-     *
-     * @return BouncerTarget
      */
     public function setUsername(string $username): BouncerTarget
     {
@@ -82,19 +77,11 @@ class BouncerTarget
         return $this;
     }
 
-    /**
-     * @return null|string
-     */
     public function getPassword(): ?string
     {
         return $this->password;
     }
 
-    /**
-     * @param string $password
-     *
-     * @return BouncerTarget
-     */
     public function setPassword(string $password): BouncerTarget
     {
         $this->password = $password;
@@ -126,7 +113,7 @@ class BouncerTarget
     {
         $output = shell_exec(sprintf('htpasswd -nibB -C10 %s %s', $this->getUsername(), $this->getPassword()));
 
-        return trim($output)."\n";
+        return trim($output) . "\n";
     }
 
     public function getProxyTimeoutSeconds(): ?int
@@ -329,12 +316,12 @@ class Bouncer
     private Filesystem $providedCertificateStore;
     private Logger $logger;
     private array $previousContainerState = [];
-    private array $previousSwarmState = [];
+    private array $previousSwarmState     = [];
     private array $fileHashes;
-    private bool $swarmMode = false;
-    private bool $useGlobalCert = false;
-    private int $forcedUpdateIntervalSeconds = 0;
-    private ?int $lastUpdateEpoch = null;
+    private bool $swarmMode                        = false;
+    private bool $useGlobalCert                    = false;
+    private int $forcedUpdateIntervalSeconds       = 0;
+    private ?int $lastUpdateEpoch                  = null;
     private int $maximumNginxConfigCreationNotices = 15;
 
     public function __construct()
@@ -379,13 +366,13 @@ class Bouncer
             $this->certificateStoreRemote = new Filesystem(
                 new AwsS3V3Adapter(
                     new S3Client([
-                        'endpoint' => $this->environment['BOUNCER_S3_ENDPOINT'],
+                        'endpoint'                => $this->environment['BOUNCER_S3_ENDPOINT'],
                         'use_path_style_endpoint' => isset($this->environment['BOUNCER_S3_USE_PATH_STYLE_ENDPOINT']),
-                        'credentials' => [
-                            'key' => $this->environment['BOUNCER_S3_KEY_ID'],
+                        'credentials'             => [
+                            'key'    => $this->environment['BOUNCER_S3_KEY_ID'],
                             'secret' => $this->environment['BOUNCER_S3_KEY_SECRET'],
                         ],
-                        'region' => $this->environment['BOUNCER_S3_REGION'] ?? 'us-east',
+                        'region'  => $this->environment['BOUNCER_S3_REGION'] ?? 'us-east',
                         'version' => 'latest',
                     ]),
                     $this->environment['BOUNCER_S3_BUCKET'],
@@ -416,19 +403,11 @@ class Bouncer
         }
     }
 
-    /**
-     * @return int
-     */
     public function getMaximumNginxConfigCreationNotices(): int
     {
         return $this->maximumNginxConfigCreationNotices;
     }
 
-    /**
-     * @param int $maximumNginxConfigCreationNotices
-     *
-     * @return Bouncer
-     */
     public function setMaximumNginxConfigCreationNotices(int $maximumNginxConfigCreationNotices): Bouncer
     {
         $this->maximumNginxConfigCreationNotices = $maximumNginxConfigCreationNotices;
@@ -483,13 +462,13 @@ class Bouncer
 
         $containers = json_decode($this->client->request('GET', 'containers/json')->getBody()->getContents(), true);
         foreach ($containers as $container) {
-            $envs = [];
+            $envs    = [];
             $inspect = json_decode($this->client->request('GET', "containers/{$container['Id']}/json")->getBody()->getContents(), true);
             if (isset($inspect['Config']['Env'])) {
                 foreach ($inspect['Config']['Env'] as $environmentItem) {
                     if (stripos($environmentItem, '=') !== false) {
                         [$envKey, $envVal] = explode('=', $environmentItem, 2);
-                        $envs[$envKey] = $envVal;
+                        $envs[$envKey]     = $envVal;
                     } else {
                         $envs[$environmentItem] = true;
                     }
@@ -534,7 +513,7 @@ class Bouncer
     public function findContainersSwarmMode(): array
     {
         $bouncerTargets = [];
-        $services = json_decode($this->client->request('GET', 'services')->getBody()->getContents(), true);
+        $services       = json_decode($this->client->request('GET', 'services')->getBody()->getContents(), true);
 
         if (isset($services['message'])) {
             $this->logger->debug(sprintf('Something happened while interrogating services.. This node is not a swarm node, cannot have services: %s', $services['message']));
@@ -551,7 +530,7 @@ class Bouncer
                 }
                 foreach ($service['Spec']['TaskTemplate']['ContainerSpec']['Env'] as $env) {
                     [$eKey, $eVal] = explode('=', $env, 2);
-                    $envs[$eKey] = $eVal;
+                    $envs[$eKey]   = $eVal;
                 }
                 if (isset($envs['BOUNCER_DOMAIN'])) {
                     $bouncerTarget = (new BouncerTarget($this->logger))
@@ -697,16 +676,16 @@ class Bouncer
 
         // Standard Containers
         $newContainerState = [];
-        $containers = $this->dockerGetContainers();
+        $containers        = $this->dockerGetContainers();
         foreach ($containers as $container) {
-            $inspect = $this->dockerGetContainer($container['Id']);
-            $name = ltrim($inspect['Name'],"/");
+            $inspect                  = $this->dockerGetContainer($container['Id']);
+            $name                     = ltrim($inspect['Name'], '/');
             $newContainerState[$name] = [
-                'name' => $name,
+                'name'    => $name,
                 'created' => $inspect['Created'],
-                'image' => $inspect['Image'],
-                'status' => $inspect['State']['Status'],
-                'env' => array_filter(array_map(function ($env) {
+                'image'   => $inspect['Image'],
+                'status'  => $inspect['State']['Status'],
+                'env'     => array_filter(array_map(function ($env) {
                     if (stripos($env, '=') !== false) {
                         [$envKey, $envVal] = explode('=', $env, 2);
 
@@ -904,8 +883,6 @@ class Bouncer
     }
 
     /**
-     * @param BouncerTarget[] $target
-     *
      * @return $this
      */
     private function generateNginxConfigs(array $targets): self
@@ -923,7 +900,7 @@ class Bouncer
                     '%s  Created Nginx config for %s',
                     Emoji::pencil(),
                     str_pad(
-                        'http://'.$target->getName(),
+                        'http://' . $target->getName(),
                         $longestName + strlen('http://'),
                         ' ',
                         STR_PAD_LEFT
@@ -968,9 +945,9 @@ class Bouncer
                 if ($this->certificateStoreLocal->fileSize($testAgeFile) == 0) {
                     // File is empty, check its age instead.
                     $timeRemainingSeconds = $this->certificateStoreLocal->lastModified($testAgeFile) - time();
-                    $dubious = true;
+                    $dubious              = true;
                 } else {
-                    $ssl = openssl_x509_parse($this->certificateStoreLocal->read($testAgeFile));
+                    $ssl                  = openssl_x509_parse($this->certificateStoreLocal->read($testAgeFile));
                     $timeRemainingSeconds = $ssl['validTo_time_t'] - time();
                 }
                 if ($timeRemainingSeconds > 2592000) {
@@ -1039,7 +1016,7 @@ class Bouncer
 
     private function restartNginx(): void
     {
-        $shell = new Exec();
+        $shell   = new Exec();
         $command = new CommandBuilder('/usr/sbin/nginx');
         $command->addFlag('s', 'reload');
         $this->logger->info(sprintf('%s  Restarting nginx', Emoji::CHARACTER_TIMER_CLOCK));

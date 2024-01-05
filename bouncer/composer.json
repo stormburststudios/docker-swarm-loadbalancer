@@ -18,7 +18,9 @@
         "league/flysystem": "^2.5",
         "league/flysystem-aws-s3-v3": "^2.5",
         "monolog/monolog": "^3.5",
+        "phpspec/php-diff": "^1.1",
         "spatie/emoji": "^2.3",
+        "symfony/yaml": "^6.4",
         "twig/twig": "^3.8"
     },
     "authors": [

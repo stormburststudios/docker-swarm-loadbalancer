@@ -14,8 +14,10 @@ use League\Flysystem\FileAttributes;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use Monolog\Handler\StreamHandler;
+use Monolog\Level;
 use Monolog\Logger;
 use Spatie\Emoji\Emoji;
+use Symfony\Component\Yaml\Yaml;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
@@ -326,14 +328,12 @@ class Bouncer
     private ?Filesystem $certificateStoreRemote = null;
     private Filesystem $providedCertificateStore;
     private Logger $logger;
-    private string $instanceContainerStateHash = '';
     private array $previousContainerState = [];
-    private string $instanceSwarmStateHash = '';
     private array $previousSwarmState = [];
     private array $fileHashes;
     private bool $swarmMode = false;
     private bool $useGlobalCert = false;
-    private int $forcedUpdateIntervalSeconds = 600;
+    private int $forcedUpdateIntervalSeconds = 0;
     private ?int $lastUpdateEpoch = null;
     private int $maximumNginxConfigCreationNotices = 15;
 
@@ -343,9 +343,13 @@ class Bouncer
         ksort($this->environment);
 
         $this->logger = new Monolog\Logger('bouncer');
-        $this->logger->pushHandler(new StreamHandler('/var/log/bouncer.log', Logger::DEBUG));
-        $stdout = new StreamHandler('php://stdout', Logger::DEBUG);
-        $stdout->setFormatter(new ColoredLineFormatter(null, "%level_name%: %message% \n"));
+        $this->logger->pushHandler(new StreamHandler('/var/log/bouncer.log', Level::Debug));
+        $stdout = new StreamHandler('php://stdout', Level::Debug);
+        $stdout->setFormatter(new ColoredLineFormatter(
+            format: "%level_name%: %message% \n",
+            allowInlineLineBreaks: true,
+            ignoreEmptyContextAndExtra: true,
+        ));
         $this->logger->pushHandler($stdout);
 
         if (isset($this->environment['DOCKER_HOST'])) {
@@ -591,7 +595,8 @@ class Bouncer
 
     public function run(): void
     {
-        $this->logger->info(sprintf('%s  Starting Bouncer...', Emoji::CHARACTER_TIMER_CLOCK));
+        $gitHash = substr($this->environment['GIT_SHA'], 0, 7);
+        $this->logger->info(sprintf('%s  Starting Bouncer git=%s...', Emoji::CHARACTER_TIMER_CLOCK, $gitHash));
 
         try {
             $this->stateHasChanged();
@@ -676,10 +681,18 @@ class Bouncer
      */
     private function stateHasChanged(): bool
     {
-        if ($this->lastUpdateEpoch === null || $this->lastUpdateEpoch <= time() - $this->forcedUpdateIntervalSeconds) {
-            $this->logger->debug(sprintf('%s  Forced update interval has been reached, forcing update.', Emoji::watch()));
-
-            return true;
+        $isTainted = false;
+        if ($this->lastUpdateEpoch === null) {
+            $isTainted = true;
+        } elseif ($this->forcedUpdateIntervalSeconds > 0 && $this->lastUpdateEpoch <= time() - $this->forcedUpdateIntervalSeconds) {
+            $this->logger->warning(sprintf('%s  Forced update interval of %d seconds has been reached, forcing update.', Emoji::watch(), $this->forcedUpdateIntervalSeconds));
+            $isTainted = true;
+        } elseif ($this->previousContainerState === []) {
+            $this->logger->warning(sprintf('%s  Initial state has not been set, forcing update.', Emoji::watch()));
+            $isTainted = true;
+        } elseif ($this->previousSwarmState === []) {
+            $this->logger->warning(sprintf('%s  Initial swarm state has not been set, forcing update.', Emoji::watch()));
+            $isTainted = true;
         }
 
         // Standard Containers
@@ -687,33 +700,36 @@ class Bouncer
         $containers = $this->dockerGetContainers();
         foreach ($containers as $container) {
             $inspect = $this->dockerGetContainer($container['Id']);
-            $newContainerState[$inspect['Id']] = [
-                $inspect['Name'],
-                $inspect['Created'],
-                $inspect['Image'],
-                $inspect['State']['Status'],
-                $inspect['Config']['Env'],
+            $name = ltrim($inspect['Name'],"/");
+            $newContainerState[$name] = [
+                'name' => $name,
+                'created' => $inspect['Created'],
+                'image' => $inspect['Image'],
+                'status' => $inspect['State']['Status'],
+                'env' => array_filter(array_map(function ($env) {
+                    if (stripos($env, '=') !== false) {
+                        [$envKey, $envVal] = explode('=', $env, 2);
+
+                        if (strlen($envVal) > 35) {
+                            return sprintf('%s=CRC32(%s)', $envKey, crc32($envVal));
+                        }
+
+                        return sprintf('%s=%s', $envKey, $envVal);
+                    }
+                }, $inspect['Config']['Env'])),
             ];
-            ksort($newContainerState[$inspect['Id']]);
+            sort($newContainerState[$inspect['Name']]['env']);
         }
         ksort($newContainerState);
 
         // Calculate Container State Hash
-        $newContainerStateHash = sha1(json_encode($newContainerState));
-        if ($this->instanceContainerStateHash != $newContainerStateHash) {
-            \Kint::dump(array_diff(
-                message: 'Swarm State has changed',
-                previous: $this->previousContainerState,
-                new: $newContainerState,
-                diff: array_diff($this->previousContainerState, $newContainerState),
-                previousHash: $this->instanceContainerStateHash,
-                newHash: $newContainerStateHash,
-            ));
-            $this->instanceContainerStateHash = $newContainerStateHash;
-            $this->logger->debug(sprintf('%s  Container state has changed', Emoji::warning()));
-
-            return true;
+        $containerStateDiff = $this->diff($this->previousContainerState, $newContainerState);
+        if (!$isTainted && !empty($containerStateDiff)) {
+            $this->logger->warning(sprintf('%s  Container state has changed', Emoji::warning()));
+            $this->logger->debug($containerStateDiff);
+            $isTainted = true;
         }
+        $this->previousContainerState = $newContainerState;
 
         // Swarm Services
         $newSwarmState = [];
@@ -733,26 +749,29 @@ class Bouncer
         ksort($newSwarmState);
 
         // Calculate Swarm State Hash, if applicable
-        if ($this->isSwarmMode()) {
-            $newSwarmStateHash = sha1(json_encode($newSwarmState));
-            if ($this->instanceSwarmStateHash != $newSwarmStateHash) {
-                \Kint::dump(array_diff(
-                    message: 'Swarm State has changed',
-                    previous: $this->previousSwarmState,
-                    new: $newSwarmState,
-                    diff: array_diff($this->previousSwarmState, $newSwarmState),
-                    previousHash: $this->instanceSwarmStateHash,
-                    newHash: $newSwarmStateHash,
-                ));
-                $this->instanceSwarmStateHash = $newSwarmStateHash;
-                $this->previousSwarmState = $newSwarmState;
-                $this->logger->debug(sprintf('%s  Swarm state has changed', Emoji::warning()));
-
-                return true;
-            }
+        $swarmStateDiff = $this->diff($this->previousSwarmState, $newSwarmState);
+        if ($this->isSwarmMode() && !$isTainted && !empty($swarmStateDiff)) {
+            $this->logger->warning(sprintf('%s  Swarm state has changed', Emoji::warning()));
+            $this->logger->debug($swarmStateDiff);
+            $isTainted = true;
         }
+        $this->previousSwarmState = $newSwarmState;
 
-        return false;
+        return $isTainted;
+    }
+
+    private function diff($a, $b)
+    {
+        return (new Diff(
+            explode(
+                "\n",
+                Yaml::dump(input: $a, inline: 5, indent: 2)
+            ),
+            explode(
+                "\n",
+                Yaml::dump(input: $b, inline: 5, indent: 2)
+            )
+        ))->render(new Diff_Renderer_Text_Unified());
     }
 
     private function runLoop(): void
@@ -782,6 +801,15 @@ class Bouncer
             )
         );
 
+        // Use some bs to sort the targets by domain from right to left.
+        $sortedTargets = [];
+        foreach ($targets as $target) {
+            $sortedTargets[strrev($target->getName())] = $target;
+        }
+        ksort($sortedTargets);
+        $targets = array_values($sortedTargets);
+
+        // Wipe configs and rebuild
         $this->wipeNginxConfig();
 
         $this->logger->info(sprintf('%s Found %d services with BOUNCER_DOMAIN set', Emoji::CHARACTER_MAGNIFYING_GLASS_TILTED_LEFT, count($targets)));
@@ -799,7 +827,6 @@ class Bouncer
             sleep(5);
         }
         $this->lastUpdateEpoch = time();
-        $this->logger->info(sprintf('%s  Host Container state has changed', Emoji::CHARACTER_WARNING));
     }
 
     private function s3Enabled(): bool
@@ -883,10 +910,25 @@ class Bouncer
      */
     private function generateNginxConfigs(array $targets): self
     {
+        // get the length of the longest name...
+        foreach ($targets as $target) {
+            $longestName[] = strlen($target->getName());
+        }
+        $longestName = max($longestName);
+
         foreach ($targets as $target) {
             $this->generateNginxConfig($target);
             if (count($targets) <= $this->getMaximumNginxConfigCreationNotices()) {
-                $this->logger->info(sprintf('%s  Created Nginx config for http://%s', Emoji::pencil(), $target->getName()));
+                $this->logger->info(sprintf(
+                    '%s  Created Nginx config for %s',
+                    Emoji::pencil(),
+                    str_pad(
+                        'http://'.$target->getName(),
+                        $longestName + strlen('http://'),
+                        ' ',
+                        STR_PAD_LEFT
+                    )
+                ));
             }
         }
         if (count($targets) > $this->getMaximumNginxConfigCreationNotices()) {

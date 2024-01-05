@@ -1,4 +1,6 @@
 FROM benzine/php:cli-8.1 as bouncer
+ARG GIT_SHA
+ENV GIT_SHA=${GIT_SHA}
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
       org.opencontainers.image.source="https://github.com/benzine-framework/docker"
@@ -50,6 +52,7 @@ COPY NginxTemplate.twig /app/
 RUN sed -i '1s;^;daemon off\;\n;' /etc/nginx/nginx.conf
 RUN sed -i 's|include /etc/nginx/sites-enabled/*|include /etc/nginx/sites-enabled/*.conf|g' /etc/nginx/nginx.conf
 COPY bouncer /app
+COPY vendor /app/vendor
 COPY composer.* /app/
 COPY public /app/public
 RUN composer install && \

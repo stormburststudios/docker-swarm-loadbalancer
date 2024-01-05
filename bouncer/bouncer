@@ -61,7 +61,7 @@ class BouncerTarget
     }
 
     /**
-     * @return string|null
+     * @return null|string
      */
     public function getUsername(): ?string
     {
@@ -70,16 +70,18 @@ class BouncerTarget
 
     /**
      * @param string
+     *
      * @return BouncerTarget
      */
     public function setUsername(string $username): BouncerTarget
     {
         $this->username = $username;
+
         return $this;
     }
 
     /**
-     * @return string|null
+     * @return null|string
      */
     public function getPassword(): ?string
     {
@@ -88,11 +90,13 @@ class BouncerTarget
 
     /**
      * @param string $password
+     *
      * @return BouncerTarget
      */
     public function setPassword(string $password): BouncerTarget
     {
         $this->password = $password;
+
         return $this;
     }
 
@@ -101,24 +105,25 @@ class BouncerTarget
         return $this->setUsername($username)->setPassword($password);
     }
 
-    public function hasAuth() : bool
+    public function hasAuth(): bool
     {
         return $this->username != null && $this->password != null;
     }
 
-    public function getFileName() : string
+    public function getFileName(): string
     {
         return "{$this->getName()}.conf";
     }
 
-    public function getAuthFileName() : string
+    public function getAuthFileName(): string
     {
         return "{$this->getName()}.secret";
     }
 
-    public function getAuthFileData() : string
+    public function getAuthFileData(): string
     {
-        $output = shell_exec(sprintf("htpasswd -nibB -C10 %s %s",$this->getUsername(), $this->getPassword()));
+        $output = shell_exec(sprintf('htpasswd -nibB -C10 %s %s', $this->getUsername(), $this->getPassword()));
+
         return trim($output)."\n";
     }
 
@@ -156,7 +161,7 @@ class BouncerTarget
         $this->useGlobalCert = $useGlobalCert;
 
         // Global cert overrides temporary certs.
-        if($useGlobalCert) {
+        if ($useGlobalCert) {
             $this->setUseTemporaryCert(false);
         }
 
@@ -321,7 +326,10 @@ class Bouncer
     private ?Filesystem $certificateStoreRemote = null;
     private Filesystem $providedCertificateStore;
     private Logger $logger;
-    private string $instanceStateHash = '';
+    private string $instanceContainerStateHash = '';
+    private array $previousContainerState = [];
+    private string $instanceSwarmStateHash = '';
+    private array $previousSwarmState = [];
     private array $fileHashes;
     private bool $swarmMode = false;
     private bool $useGlobalCert = false;
@@ -461,9 +469,9 @@ class Bouncer
     }
 
     /**
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     *
      * @return BouncerTarget[]
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function findContainersContainerMode(): array
     {
@@ -549,7 +557,7 @@ class Bouncer
 
                     if ($bouncerTarget->isPortSet()) {
                         $bouncerTarget->setEndpointHostnameOrIp($service['Spec']['Name']);
-                    // $this->logger->info(sprintf('Ports for %s has been explicitly set to %s:%d.', $bouncerTarget->getName(), $bouncerTarget->getEndpointHostnameOrIp(), $bouncerTarget->getPort()));
+                        // $this->logger->info(sprintf('Ports for %s has been explicitly set to %s:%d.', $bouncerTarget->getName(), $bouncerTarget->getEndpointHostnameOrIp(), $bouncerTarget->getPort()));
                     } elseif (isset($service['Endpoint']['Ports'])) {
                         $bouncerTarget->setEndpointHostnameOrIp('172.17.0.1');
                         $bouncerTarget->setPort($service['Endpoint']['Ports'][0]['PublishedPort']);
@@ -566,12 +574,12 @@ class Bouncer
 
                     if ($bouncerTarget->isEndpointValid()) {
                         $bouncerTargets[] = $bouncerTarget;
-                    }else{
+                    } else {
                         $this->logger->debug(sprintf(
-                           '%s Decided that %s has the endpoint %s and it is not valid.',
-                           Emoji::magnifyingGlassTiltedLeft(),
-                           $bouncerTarget->getName(),
-                           $bouncerTarget->getEndpointHostnameOrIp(),
+                            '%s Decided that %s has the endpoint %s and it is not valid.',
+                            Emoji::magnifyingGlassTiltedLeft(),
+                            $bouncerTarget->getName(),
+                            $bouncerTarget->getEndpointHostnameOrIp(),
                         ));
                     }
                 }
@@ -611,7 +619,7 @@ class Bouncer
                     break;
 
                 case 'BOUNCER_AUTH':
-                    list($username, $password) = explode(":", $eVal);
+                    [$username, $password] = explode(':', $eVal);
                     $bouncerTarget->setAuth($username, $password);
 
                     break;
@@ -651,6 +659,16 @@ class Bouncer
         return $bouncerTarget;
     }
 
+    private function dockerGetContainers(): array
+    {
+        return json_decode($this->client->request('GET', 'containers/json')->getBody()->getContents(), true);
+    }
+
+    private function dockerGetContainer(string $id): array
+    {
+        return json_decode($this->client->request('GET', "containers/{$id}/json")->getBody()->getContents(), true);
+    }
+
     /**
      * Returns true when something has changed.
      *
@@ -659,42 +677,79 @@ class Bouncer
     private function stateHasChanged(): bool
     {
         if ($this->lastUpdateEpoch === null || $this->lastUpdateEpoch <= time() - $this->forcedUpdateIntervalSeconds) {
+            $this->logger->debug(sprintf('%s  Forced update interval has been reached, forcing update.', Emoji::watch()));
+
             return true;
         }
-        $newInstanceStates = [];
 
         // Standard Containers
-        $containers = json_decode($this->client->request('GET', 'containers/json')->getBody()->getContents(), true);
+        $newContainerState = [];
+        $containers = $this->dockerGetContainers();
         foreach ($containers as $container) {
-            $inspect = json_decode($this->client->request('GET', "containers/{$container['Id']}/json")->getBody()->getContents(), true);
-            $newInstanceStates['container-'.$inspect['Id']] = implode('::', [
+            $inspect = $this->dockerGetContainer($container['Id']);
+            $newContainerState[$inspect['Id']] = [
                 $inspect['Name'],
                 $inspect['Created'],
                 $inspect['Image'],
                 $inspect['State']['Status'],
-                sha1(implode('|', $inspect['Config']['Env'])),
-            ]);
+                $inspect['Config']['Env'],
+            ];
+            ksort($newContainerState[$inspect['Id']]);
+        }
+        ksort($newContainerState);
+
+        // Calculate Container State Hash
+        $newContainerStateHash = sha1(json_encode($newContainerState));
+        if ($this->instanceContainerStateHash != $newContainerStateHash) {
+            \Kint::dump(array_diff(
+                message: 'Swarm State has changed',
+                previous: $this->previousContainerState,
+                new: $newContainerState,
+                diff: array_diff($this->previousContainerState, $newContainerState),
+                previousHash: $this->instanceContainerStateHash,
+                newHash: $newContainerStateHash,
+            ));
+            $this->instanceContainerStateHash = $newContainerStateHash;
+            $this->logger->debug(sprintf('%s  Container state has changed', Emoji::warning()));
+
+            return true;
         }
 
         // Swarm Services
+        $newSwarmState = [];
         if ($this->isSwarmMode()) {
             $services = json_decode($this->client->request('GET', 'services')->getBody()->getContents(), true);
             if (isset($services['message'])) {
-                $this->logger->debug(sprintf('Something happened while interrogating services.. This node is not a swarm node, cannot have services: %s', $services['message']));
+                $this->logger->warning(sprintf('Something happened while interrogating services.. This node is not a swarm node, cannot have services: %s', $services['message']));
             } else {
                 foreach ($services as $service) {
-                    $newInstanceStates['service-'.$service['ID']] = implode('::', [
+                    $newSwarmState[$service['ID']] = [
                         $service['Version']['Index'],
-                    ]);
+                    ];
+                    ksort($newSwarmState[$service['ID']]);
                 }
             }
         }
-        $newStateHash = sha1(implode("\n", $newInstanceStates));
-        // $this->logger->debug(sprintf("Old state = %s. New State = %s.", substr($this->instanceStateHash,0,7), substr($newStateHash, 0,7)));
-        if ($this->instanceStateHash != $newStateHash) {
-            $this->instanceStateHash = $newStateHash;
+        ksort($newSwarmState);
 
-            return true;
+        // Calculate Swarm State Hash, if applicable
+        if ($this->isSwarmMode()) {
+            $newSwarmStateHash = sha1(json_encode($newSwarmState));
+            if ($this->instanceSwarmStateHash != $newSwarmStateHash) {
+                \Kint::dump(array_diff(
+                    message: 'Swarm State has changed',
+                    previous: $this->previousSwarmState,
+                    new: $newSwarmState,
+                    diff: array_diff($this->previousSwarmState, $newSwarmState),
+                    previousHash: $this->instanceSwarmStateHash,
+                    newHash: $newSwarmStateHash,
+                ));
+                $this->instanceSwarmStateHash = $newSwarmStateHash;
+                $this->previousSwarmState = $newSwarmState;
+                $this->logger->debug(sprintf('%s  Swarm state has changed', Emoji::warning()));
+
+                return true;
+            }
         }
 
         return false;
@@ -759,16 +814,17 @@ class Bouncer
             /** @var FileAttributes $file */
             if ($file->isFile()) {
                 $localPath = "archive/{$file->path()}";
-                if($file->fileSize() == 0){
-                    $this->logger->warning(sprintf(" > Downloading %s to %s was skipped, because it was empty", $file->path(), $localPath));
+                if ($file->fileSize() == 0) {
+                    $this->logger->warning(sprintf(' > Downloading %s to %s was skipped, because it was empty', $file->path(), $localPath));
+
                     continue;
                 }
-                $this->logger->debug(sprintf(" > Downloading %s to %s (%d bytes)", $file->path(), $localPath, $file->fileSize()));
+                $this->logger->debug(sprintf(' > Downloading %s to %s (%d bytes)', $file->path(), $localPath, $file->fileSize()));
                 $this->certificateStoreLocal->writeStream($localPath, $this->certificateStoreRemote->readStream($file->path()));
-                if($this->certificateStoreLocal->fileSize($localPath) == $this->certificateStoreRemote->fileSize($file->path())){
-                    $this->logger->debug(sprintf("   > Filesize for %s matches %s on remote (%d bytes)", $localPath, $file->path(), $this->certificateStoreLocal->fileSize($localPath)));
-                }else{
-                    $this->logger->critical(sprintf("   > Filesize for %s DOES NOT MATCH %s on remote (%d != %d bytes)", $localPath, $file->path(), $this->certificateStoreLocal->fileSize($localPath), $this->certificateStoreRemote->fileSize($file->path())));
+                if ($this->certificateStoreLocal->fileSize($localPath) == $this->certificateStoreRemote->fileSize($file->path())) {
+                    $this->logger->debug(sprintf('   > Filesize for %s matches %s on remote (%d bytes)', $localPath, $file->path(), $this->certificateStoreLocal->fileSize($localPath)));
+                } else {
+                    $this->logger->critical(sprintf('   > Filesize for %s DOES NOT MATCH %s on remote (%d != %d bytes)', $localPath, $file->path(), $this->certificateStoreLocal->fileSize($localPath), $this->certificateStoreRemote->fileSize($file->path())));
                 }
                 $this->fileHashes[$localPath] = sha1($this->certificateStoreLocal->read($localPath));
             }
@@ -783,7 +839,7 @@ class Bouncer
                 for ($i = 1; $i <= 9; ++$i) {
                     $livePath = str_replace("{$i}.pem", '.pem', $livePath);
                 }
-                $this->logger->debug(sprintf(" > Mirroring %s to %s (%d bytes)", $newLocalCert->path(), $livePath, $newLocalCert->fileSize()));
+                $this->logger->debug(sprintf(' > Mirroring %s to %s (%d bytes)', $newLocalCert->path(), $livePath, $newLocalCert->fileSize()));
                 $this->certificateStoreLocal->writeStream($livePath, $this->certificateStoreLocal->readStream($newLocalCert->path()));
             }
         }
@@ -808,10 +864,10 @@ class Bouncer
             /** @var FileAttributes $file */
             if ($file->isFile()) {
                 $remotePath = str_replace('archive/', '', $file->path());
-                if ($file->fileSize() == 0){
+                if ($file->fileSize() == 0) {
                     $this->logger->warning(sprintf(" > Skipping uploading {$file->path()}, file is garbage (empty)."));
                 } elseif (!$this->certificateStoreRemote->fileExists($remotePath) || $this->fileChanged($file->path())) {
-                    $this->logger->debug(sprintf(" > Uploading %s (%d bytes)", $file->path(), $file->fileSize()));
+                    $this->logger->debug(sprintf(' > Uploading %s (%d bytes)', $file->path(), $file->fileSize()));
                     $this->certificateStoreRemote->write($remotePath, $this->certificateStoreLocal->read($file->path()));
                 } else {
                     $this->logger->debug(sprintf(" > Skipping uploading {$file->path()}, file not changed."));
@@ -845,7 +901,7 @@ class Bouncer
     {
         $configData = $this->twig->render('NginxTemplate.twig', $target->__toArray());
         $this->configFilesystem->write($target->getFileName(), $configData);
-        if($target->hasAuth()){
+        if ($target->hasAuth()) {
             $this->configFilesystem->write($target->getAuthFileName(), $target->getAuthFileData());
         }
 
@@ -867,11 +923,11 @@ class Bouncer
             $testAgeFile = "/archive/{$target->getName()}/fullchain1.pem";
             if ($this->certificateStoreLocal->fileExists($testAgeFile)) {
                 $dubious = false;
-                if($this->certificateStoreLocal->fileSize($testAgeFile) == 0){
+                if ($this->certificateStoreLocal->fileSize($testAgeFile) == 0) {
                     // File is empty, check its age instead.
                     $timeRemainingSeconds = $this->certificateStoreLocal->lastModified($testAgeFile) - time();
                     $dubious = true;
-                }else{
+                } else {
                     $ssl = openssl_x509_parse($this->certificateStoreLocal->read($testAgeFile));
                     $timeRemainingSeconds = $ssl['validTo_time_t'] - time();
                 }
@@ -880,7 +936,7 @@ class Bouncer
                         '%s Skipping %s, certificate is %s for %d days',
                         Emoji::CHARACTER_PARTYING_FACE,
                         $target->getName(),
-                        $dubious ? "dubiously good" : "still good",
+                        $dubious ? 'dubiously good' : 'still good',
                         round($timeRemainingSeconds / 86400)
                     ));
 
@@ -895,10 +951,11 @@ class Bouncer
             $shell = new Exec();
 
             // Disable nginx tweaks
-            $this->logger->debug("Moving nginx tweak file..");
-            $disableNginxTweaksCommand = (new CommandBuilder("mv"))
-                ->addSubCommand("/etc/nginx/conf.d/tweak.conf")
-                ->addSubCommand("/etc/nginx/conf.d/tweak.disabled");
+            $this->logger->debug('Moving nginx tweak file..');
+            $disableNginxTweaksCommand = (new CommandBuilder('mv'))
+                ->addSubCommand('/etc/nginx/conf.d/tweak.conf')
+                ->addSubCommand('/etc/nginx/conf.d/tweak.disabled')
+            ;
             $shell->run($disableNginxTweaksCommand);
 
             // Generate letsencrypt cert
@@ -922,10 +979,11 @@ class Bouncer
             }
 
             // Re-enable nginx tweaks
-            $this->logger->debug("Moving nginx tweak file back..");
-            $disableNginxTweaksCommand = (new CommandBuilder("mv"))
-                ->addSubCommand("/etc/nginx/conf.d/tweak.disabled")
-                ->addSubCommand("/etc/nginx/conf.d/tweak.conf");
+            $this->logger->debug('Moving nginx tweak file back..');
+            $disableNginxTweaksCommand = (new CommandBuilder('mv'))
+                ->addSubCommand('/etc/nginx/conf.d/tweak.disabled')
+                ->addSubCommand('/etc/nginx/conf.d/tweak.conf')
+            ;
             $shell->run($disableNginxTweaksCommand);
 
             $target->setUseTemporaryCert(false);

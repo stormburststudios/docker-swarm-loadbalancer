@@ -675,7 +675,7 @@ class Bouncer
             return [];
         }
 
-        return array_filter(array_map(function ($env) {
+        $envs = array_filter(array_map(function ($env) {
             if (stripos($env, '=') !== false) {
                 [$envKey, $envVal] = explode('=', $env, 2);
 
@@ -688,6 +688,9 @@ class Bouncer
 
             return $env;
         }, $envs));
+
+        sort($envs);
+        return $envs;
     }
 
     /**

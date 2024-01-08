@@ -44,22 +44,21 @@ COPY bouncer.runit /etc/service/bouncer/run
 COPY logs-nginx-access.runit /etc/service/logs-nginx-access/run
 COPY logs-nginx-error.runit /etc/service/logs-nginx-error/run
 RUN chmod +x /etc/service/*/run
-COPY NginxDefault /etc/nginx/sites-enabled/default
-COPY NginxSSL /etc/nginx/sites-enabled/default-ssl
+COPY NginxDefault /etc/nginx/sites-enabled/default.conf
 COPY Nginx-tweak.conf /etc/nginx/conf.d/tweak.conf
 COPY NginxTemplate.twig /app/
 # Disable daemonising in nginx
-RUN sed -i '1s;^;daemon off\;\n;' /etc/nginx/nginx.conf
-RUN sed -i 's|include /etc/nginx/sites-enabled/*|include /etc/nginx/sites-enabled/*.conf|g' /etc/nginx/nginx.conf
+RUN sed -i '1s;^;daemon off\;\n;' /etc/nginx/nginx.conf && \
+    sed -i 's|include /etc/nginx/sites-enabled/*|include /etc/nginx/sites-enabled/*.conf|g' /etc/nginx/nginx.conf && \
+    rm /etc/nginx/sites-enabled/default && \
+    rm -R /etc/nginx/sites-available
 COPY bouncer /app
 COPY vendor /app/vendor
 COPY composer.* /app/
 COPY public /app/public
 RUN composer install && \
     chmod +x /app/bouncer && \
-    mkdir -p /var/log/bouncer && \
-    rm /etc/nginx/sites-enabled/default && \
-    cp /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+    mkdir -p /var/log/bouncer
 
 FROM benzine/php:nginx-8.1 as test-app-a
 COPY ./test/public-web-a /app/public

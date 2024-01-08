@@ -12,6 +12,7 @@ use GuzzleHttp\Exception\ServerException;
 use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use League\Flysystem\FileAttributes;
 use League\Flysystem\Filesystem;
+use League\Flysystem\FilesystemException;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;
@@ -307,7 +308,7 @@ class BouncerTarget
     {
         return sprintf(
             '%s://%s%s',
-            $this->isAllowNonSSL() ? 'http' : 'https',
+            'https',
             $this->getUsername() && $this->getPassword() ?
                     sprintf('%s:%s@', $this->getUsername(), $this->getPassword()) :
                     '',
@@ -690,6 +691,7 @@ class Bouncer
         }, $envs));
 
         sort($envs);
+
         return $envs;
     }
 
@@ -924,25 +926,32 @@ class Bouncer
     }
 
     /**
-     * @var BouncerTarget[]
+     * @param $targets BouncerTarget[]
      */
-    private function generateNginxConfigs(array $targets): self
+    private function generateNginxConfigs(array $targets): void
     {
         // get the length of the longest name...
-        $longestName = max(array_map(fn (BouncerTarget $target) => strlen($target->getPresentationDomain()), $targets));
+        $longestPresentationDomain = max(array_map(fn (BouncerTarget $target) => strlen($target->getPresentationDomain()), $targets));
+        $longestFile               = max(array_map(fn (BouncerTarget $target) => strlen($target->getFileName()), $targets));
 
         foreach ($targets as $target) {
             $this->generateNginxConfig($target);
             if (count($targets) <= $this->getMaximumNginxConfigCreationNotices()) {
                 $this->logger->info(sprintf(
-                    '%s  Created Nginx config for %s',
+                    '%s  Created Nginx config for %s <=> %s',
                     Emoji::pencil(),
                     str_pad(
+                        $target->getFileName(),
+                        $longestFile,
+                        ' ',
+                        STR_PAD_RIGHT
+                    ),
+                    str_pad(
                         $target->getPresentationDomain(),
-                        $longestName,
+                        $longestPresentationDomain,
                         ' ',
                         STR_PAD_LEFT
-                    )
+                    ),
                 ));
             }
         }
@@ -950,27 +959,23 @@ class Bouncer
             $this->logger->info(sprintf('%s  More than %d Nginx configs generated.. Too many to show them all!', Emoji::pencil(), $this->getMaximumNginxConfigCreationNotices()));
         }
         $this->logger->info(sprintf('%s  Created %d Nginx configs..', Emoji::pencil(), count($targets)));
-
-        return $this;
     }
 
-    private function generateNginxConfig(BouncerTarget $target): self
+    private function generateNginxConfig(BouncerTarget $target): void
     {
         $configData = $this->twig->render('NginxTemplate.twig', $target->__toArray());
         $this->configFilesystem->write($target->getFileName(), $configData);
         if ($target->hasAuth()) {
             $this->configFilesystem->write($target->getAuthFileName(), $target->getAuthFileData());
         }
-
-        return $this;
     }
 
     /**
      * @param BouncerTarget[] $targets
      *
-     * @return $this
+     * @throws FilesystemException
      */
-    private function generateLetsEncryptCerts(array $targets): self
+    private function generateLetsEncryptCerts(array $targets): void
     {
         foreach ($targets as $target) {
             if (!$target->isLetsEncrypt()) {
@@ -1048,8 +1053,6 @@ class Bouncer
         }
 
         $this->restartNginx();
-
-        return $this;
     }
 
     private function restartNginx(): void
@@ -1066,12 +1069,10 @@ class Bouncer
         $this->logger->debug('Purging existing config files ...');
         foreach ($this->configFilesystem->listContents('') as $file) {
             /** @var FileAttributes $file */
-            if ($file->isFile() && $file->path() != 'default' && $file->path() != 'default-ssl') {
+            if ($file->isFile() && $file->path() != 'default.conf' && $file->path() != 'default-ssl.conf') {
                 $this->configFilesystem->delete($file->path());
-                // $this->logger->debug(sprintf(' > %s', $file->path()));
             }
         }
-        // $this->logger->debug('Purge complete!');
     }
 }
 

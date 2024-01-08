@@ -36,6 +36,8 @@ jobs:
           username: ${{ secrets.GHCR_USERNAME }}
           password: ${{ secrets.GHCR_PASSWORD }}
       - uses: php-actions/composer@v6
+        with:
+          working_dir: bouncer
       - uses: docker/build-push-action@v3
         name: Build & Push
         with:

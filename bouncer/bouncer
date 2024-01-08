@@ -670,6 +670,24 @@ class Bouncer
         return json_decode($this->client->request('GET', "containers/{$id}/json")->getBody()->getContents(), true);
     }
 
+    private function dockerEnvHas(string $key, ?array $envs): bool
+    {
+        if ($envs === null) {
+            return false;
+        }
+
+        foreach ($envs as $env) {
+            if (stripos($env, '=') !== false) {
+                [$envKey, $envVal] = explode('=', $env, 2);
+                if ($envKey === $key) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     private function dockerEnvFilter(?array $envs): array
     {
         if ($envs === null) {
@@ -722,12 +740,17 @@ class Bouncer
         foreach ($containers as $container) {
             $inspect                  = $this->dockerGetContainer($container['Id']);
             $name                     = ltrim($inspect['Name'], '/');
+            $env                      = $inspect['Config']['Env'] ?? [];
+            if (!$this->dockerEnvHas('BOUNCER_DOMAIN', $env)) {
+                continue;
+            }
+
             $newContainerState[$name] = [
                 'name'    => $name,
                 'created' => $inspect['Created'],
                 'image'   => $inspect['Image'],
                 'status'  => $inspect['State']['Status'],
-                'env'     => $this->dockerEnvFilter($inspect['Config']['Env']),
+                'env'     => $this->dockerEnvFilter($env),
             ];
             if (is_array($newContainerState[$name]['env'])) {
                 sort($newContainerState[$name]['env']);
@@ -752,8 +775,11 @@ class Bouncer
                 $this->logger->warning(sprintf('Something happened while interrogating services.. This node is not a swarm node, cannot have services: %s', $services['message']));
             } else {
                 foreach ($services as $service) {
-                    $env                  = $service['Spec']['TaskTemplate']['ContainerSpec']['Env'] ?? [];
                     $name                 = $service['Spec']['Name'];
+                    $env                  = $service['Spec']['TaskTemplate']['ContainerSpec']['Env'] ?? [];
+                    if (!$this->dockerEnvHas('BOUNCER_DOMAIN', $env)) {
+                        continue;
+                    }
                     $newSwarmState[$name] = [
                         'id'           => $service['ID'],
                         'mode'         => isset($service['Spec']['Mode']['Replicated']) ?

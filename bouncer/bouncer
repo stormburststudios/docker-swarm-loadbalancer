@@ -741,9 +741,9 @@ class Bouncer
             $inspect                  = $this->dockerGetContainer($container['Id']);
             $name                     = ltrim($inspect['Name'], '/');
             $env                      = $inspect['Config']['Env'] ?? [];
-            if (!$this->dockerEnvHas('BOUNCER_DOMAIN', $env)) {
-                continue;
-            }
+            // if (!$this->dockerEnvHas('BOUNCER_DOMAIN', $env)) {
+            //    continue;
+            // }
 
             $newContainerState[$name] = [
                 'name'    => $name,
@@ -777,9 +777,9 @@ class Bouncer
                 foreach ($services as $service) {
                     $name                 = $service['Spec']['Name'];
                     $env                  = $service['Spec']['TaskTemplate']['ContainerSpec']['Env'] ?? [];
-                    if (!$this->dockerEnvHas('BOUNCER_DOMAIN', $env)) {
-                        continue;
-                    }
+                    // if (!$this->dockerEnvHas('BOUNCER_DOMAIN', $env)) {
+                    //    continue;
+                    // }
                     $newSwarmState[$name] = [
                         'id'           => $service['ID'],
                         'mode'         => isset($service['Spec']['Mode']['Replicated']) ?

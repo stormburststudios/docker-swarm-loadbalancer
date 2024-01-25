@@ -55,7 +55,7 @@ server {
 {% endif %}
 
     proxy_pass  {{ targetPath }};
-  %}
+  }
 }
 
 {% if not allowNonSSL %}

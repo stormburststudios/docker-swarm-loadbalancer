@@ -693,6 +693,7 @@ class Bouncer
         if (count($changedTargets) <= $this->getMaximumNginxConfigCreationNotices()) {
             foreach ($changedTargets as $target) {
                 $this->logger->info('{emoji}  Created {label}', ['emoji' => Emoji::pencil(), 'label' => $target->getLabel()]);
+                $this->logger->debug('{emoji}       -> {certs_dir}/{file}', ['emoji' => Emoji::pencil(), 'certs_dir' => Bouncer::FILESYSTEM_CONFIG_DIR, 'file' => $target->getFileName()]);
                 $this->logger->debug('{emoji}       -> {domain}', ['emoji' => Emoji::pencil(), 'domain' => $target->getPresentationDomain()]);
             }
         } else {

@@ -328,8 +328,8 @@ class Bouncer
     {
         foreach ($envs as $eKey => $eVal) {
             switch ($eKey) {
-                case 'BOUNCER_NAME':
-                    $bouncerTarget->setName($eVal);
+                case 'BOUNCER_LABEL':
+                    $bouncerTarget->setLabel($eVal);
 
                     break;
 
@@ -692,8 +692,7 @@ class Bouncer
         }
         if (count($changedTargets) <= $this->getMaximumNginxConfigCreationNotices()) {
             foreach ($changedTargets as $target) {
-                $this->logger->info('{emoji}  Created {name}', ['emoji' => Emoji::pencil(), 'name' => $target->getName()]);
-                $this->logger->debug('{emoji}       -> {certs_dir}/{file}', ['emoji' => Emoji::pencil(), 'certs_dir' => Bouncer::FILESYSTEM_CERTS_DIR, 'file' => $target->getFileName()]);
+                $this->logger->info('{emoji}  Created {label}', ['emoji' => Emoji::pencil(), 'label' => $target->getLabel()]);
                 $this->logger->debug('{emoji}       -> {domain}', ['emoji' => Emoji::pencil(), 'domain' => $target->getPresentationDomain()]);
             }
         } else {

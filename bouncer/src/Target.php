@@ -10,7 +10,7 @@ use Spatie\Emoji\Emoji;
 class Target
 {
     private string $id;
-    private ?string $name = null;
+    private ?string $label = null;
     private array $domains;
     private string $endpointHostnameOrIp;
     private ?int $port        = null;
@@ -37,6 +37,7 @@ class Target
         return [
             'id'                    => $this->getId(),
             'name'                  => $this->getName(),
+            'label'                 => $this->getLabel(),
             'domains'               => $this->getDomains(),
             'letsEncrypt'           => $this->isLetsEncrypt(),
             'targetPath'            => $this->getTargetPath(),
@@ -275,13 +276,19 @@ class Target
 
     public function getName()
     {
-        return $this->name ?? reset($this->domains);
+        return reset($this->domains);
     }
 
-    public function setName(string $name): self
+    public function getLabel()
     {
-        $this->name = $name;
+        return $this->label ?? $this->getLabel();
+    }
+
+    public function setLabel(string $label): self
+    {
+        $this->label = $label;
         $this->updateLogger();
+        $this->logger->debug('{emoji} Target label set to {label}', ['emoji' => Emoji::label(), 'label' => $label]);
 
         return $this;
     }

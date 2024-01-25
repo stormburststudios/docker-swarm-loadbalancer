@@ -8,8 +8,6 @@ LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
       org.opencontainers.image.source="https://github.com/benzine-framework/docker"
 
-COPY self-signed-certificates /certs
-
 # Install nginx, certbot
 RUN apt-get -qq update && \
     # Install pre-dependencies to use apt-key.
@@ -39,28 +37,35 @@ RUN apt-get -qq update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log
 
-VOLUME /etc/letsencrypt
-
+COPY self-signed-certificates /certs
 COPY nginx.runit /etc/service/nginx/run
 COPY logs.runit /etc/service/nginx-logs/run
 COPY bouncer.runit /etc/service/bouncer/run
+COPY bouncer.finish /etc/service/bouncer/finish
 COPY logs-nginx-access.runit /etc/service/logs-nginx-access/run
 COPY logs-nginx-error.runit /etc/service/logs-nginx-error/run
-RUN chmod +x /etc/service/*/run
+RUN chmod +x /etc/service/*/run /etc/service/*/finish
 COPY NginxDefault /etc/nginx/sites-enabled/default.conf
 COPY Nginx-tweak.conf /etc/nginx/conf.d/tweak.conf
-COPY NginxTemplate.twig /app/
 # Disable daemonising in nginx
 RUN sed -i '1s;^;daemon off\;\n;' /etc/nginx/nginx.conf && \
     sed -i 's|include /etc/nginx/sites-enabled/*|include /etc/nginx/sites-enabled/*.conf|g' /etc/nginx/nginx.conf && \
     rm /etc/nginx/sites-enabled/default && \
     rm -R /etc/nginx/sites-available
-COPY bouncer /app
+
 COPY vendor /app/vendor
 COPY composer.* /app/
+RUN composer install
+
 COPY public /app/public
-RUN composer install && \
-    chmod +x /app/bouncer && \
+COPY bin /app/bin
+COPY src /app/src
+COPY templates /app/templates
+
+VOLUME /etc/letsencrypt
+VOLUME /var/log/bouncer
+
+RUN chmod +x /app/bin/bouncer && \
     mkdir -p /var/log/bouncer
 
 FROM benzine/php:nginx-8.1 as test-app-a

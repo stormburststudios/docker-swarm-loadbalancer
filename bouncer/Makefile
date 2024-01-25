@@ -1,10 +1,10 @@
 all: fix build-n-push
 php-cs-fixer:
-	docker run --rm -v $(shell pwd):/data cytopia/php-cs-fixer fix --config=.php-cs-fixer.php bouncer
+	docker run --rm -v $(shell pwd):/data cytopia/php-cs-fixer fix
 
 fix: php-cs-fixer
 
-build-n-push:
+build-n-push: fix
 	docker build \
 		--build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
 		--build-arg GIT_SHA=$(shell git rev-parse HEAD) \

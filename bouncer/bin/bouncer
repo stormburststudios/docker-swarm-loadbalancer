@@ -1,0 +1,8 @@
+#!/usr/bin/env php
+<?php
+
+use Bouncer\Bouncer;
+define("APP_ROOT", realpath(__DIR__. "/.."));
+require_once APP_ROOT . '/vendor/autoload.php';
+
+(new Bouncer())->run();

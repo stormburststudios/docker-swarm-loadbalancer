@@ -1,11 +1,12 @@
-#!/usr/bin/env php
 <?php
-require_once 'vendor/autoload.php';
+
+declare(strict_types=1);
+
+namespace Bouncer;
 
 use AdamBrett\ShellWrapper\Command\Builder as CommandBuilder;
 use AdamBrett\ShellWrapper\Runners\Exec;
 use Aws\S3\S3Client;
-use Bramus\Monolog\Formatter\ColoredLineFormatter;
 use Carbon\Carbon;
 use GuzzleHttp\Client as Guzzle;
 use GuzzleHttp\Exception\ConnectException;
@@ -15,336 +16,22 @@ use League\Flysystem\FileAttributes;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemException;
 use League\Flysystem\Local\LocalFilesystemAdapter;
-use Monolog\Handler\StreamHandler;
-use Monolog\Level;
 use Monolog\Logger;
+use Bouncer\Logger\Formatter;
 use Spatie\Emoji\Emoji;
 use Symfony\Component\Yaml\Yaml;
-use Twig\Environment;
-use Twig\Loader\FilesystemLoader;
-
-class BouncerTarget
-{
-    private string $id;
-    private array $domains;
-    private string $endpointHostnameOrIp;
-    private ?int $port        = null;
-    private bool $letsEncrypt = false;
-    private string $targetPath;
-    private bool $allowNonSSL           = true;
-    private bool $useTemporaryCert      = true;
-    private bool $useGlobalCert         = false;
-    private bool $allowWebsocketSupport = true;
-    private bool $allowLargePayloads    = false;
-    private ?int $proxyTimeoutSeconds   = null;
-    private ?string $username           = null;
-    private ?string $password           = null;
-
-    private ?string $hostOverride = null;
-
-    public function __construct(
-        private Logger $logger
-    ) {
-    }
-
-    public function __toArray()
-    {
-        return [
-            'id'                    => $this->getId(),
-            'name'                  => $this->getName(),
-            'domains'               => $this->getDomains(),
-            'letsEncrypt'           => $this->isLetsEncrypt(),
-            'targetPath'            => $this->getTargetPath(),
-            'useTemporaryCert'      => $this->isUseTemporaryCert(),
-            'useGlobalCert'         => $this->isUseGlobalCert(),
-            'allowNonSSL'           => $this->isAllowNonSSL(),
-            'allowWebsocketSupport' => $this->isAllowWebsocketSupport(),
-            'allowLargePayloads'    => $this->isAllowLargePayloads(),
-            'proxyTimeoutSeconds'   => $this->getProxyTimeoutSeconds(),
-            'hasAuth'               => $this->hasAuth(),
-            'authFile'              => $this->getAuthFileName(),
-            'hasHostOverride'       => $this->hasHostOverride(),
-            'hostOverride'          => $this->getHostOverride(),
-        ];
-    }
-
-    public function getHostOverride(): ?string
-    {
-        return $this->hostOverride;
-    }
-
-    public function hasHostOverride(): bool
-    {
-        return $this->hostOverride !== null;
-    }
-
-    public function setHostOverride(string $hostOverride): BouncerTarget
-    {
-        $this->hostOverride = $hostOverride;
-
-        return $this;
-    }
-
-    public function getUsername(): ?string
-    {
-        return $this->username;
-    }
-
-    /**
-     * @param string
-     */
-    public function setUsername(string $username): BouncerTarget
-    {
-        $this->username = $username;
-
-        return $this;
-    }
-
-    public function getPassword(): ?string
-    {
-        return $this->password;
-    }
-
-    public function setPassword(string $password): BouncerTarget
-    {
-        $this->password = $password;
-
-        return $this;
-    }
-
-    public function setAuth(string $username, string $password): BouncerTarget
-    {
-        return $this->setUsername($username)->setPassword($password);
-    }
-
-    public function hasAuth(): bool
-    {
-        return $this->username != null && $this->password != null;
-    }
-
-    public function getFileName(): string
-    {
-        return "{$this->getName()}.conf";
-    }
-
-    public function getAuthFileName(): string
-    {
-        return "{$this->getName()}.secret";
-    }
-
-    public function getAuthFileData(): string
-    {
-        $output = shell_exec(sprintf('htpasswd -nibB -C10 %s %s', $this->getUsername(), $this->getPassword()));
-
-        return trim($output) . "\n";
-    }
-
-    public function getProxyTimeoutSeconds(): ?int
-    {
-        return $this->proxyTimeoutSeconds;
-    }
-
-    public function setProxyTimeoutSeconds(?int $proxyTimeoutSeconds): BouncerTarget
-    {
-        $this->proxyTimeoutSeconds = $proxyTimeoutSeconds;
-
-        return $this;
-    }
-
-    public function isUseTemporaryCert(): bool
-    {
-        return $this->useTemporaryCert;
-    }
-
-    public function setUseTemporaryCert(bool $useTemporaryCert): BouncerTarget
-    {
-        $this->useTemporaryCert = $useTemporaryCert;
-
-        return $this;
-    }
-
-    public function isUseGlobalCert(): bool
-    {
-        return $this->useGlobalCert;
-    }
-
-    public function setUseGlobalCert(bool $useGlobalCert): BouncerTarget
-    {
-        $this->useGlobalCert = $useGlobalCert;
-
-        // Global cert overrides temporary certs.
-        if ($useGlobalCert) {
-            $this->setUseTemporaryCert(false);
-        }
-
-        return $this;
-    }
-
-    public function isAllowWebsocketSupport(): bool
-    {
-        return $this->allowWebsocketSupport;
-    }
-
-    public function setAllowWebsocketSupport(bool $allowWebsocketSupport): BouncerTarget
-    {
-        $this->allowWebsocketSupport = $allowWebsocketSupport;
-
-        return $this;
-    }
-
-    public function isAllowLargePayloads(): bool
-    {
-        return $this->allowLargePayloads;
-    }
-
-    public function setAllowLargePayloads(bool $allowLargePayloads): BouncerTarget
-    {
-        $this->allowLargePayloads = $allowLargePayloads;
-
-        return $this;
-    }
-
-    public function getId(): string
-    {
-        return $this->id;
-    }
-
-    public function setId(string $id): BouncerTarget
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDomains(): array
-    {
-        return $this->domains;
-    }
-
-    /**
-     * @param string $domains
-     */
-    public function setDomains(array $domains): BouncerTarget
-    {
-        $this->domains = $domains;
-
-        return $this;
-    }
-
-    public function isLetsEncrypt(): bool
-    {
-        return $this->letsEncrypt;
-    }
-
-    public function setLetsEncrypt(bool $letsEncrypt): BouncerTarget
-    {
-        $this->letsEncrypt = $letsEncrypt;
-
-        return $this;
-    }
-
-    public function getTargetPath(): string
-    {
-        return $this->targetPath;
-    }
-
-    public function setTargetPath(string $targetPath): BouncerTarget
-    {
-        $this->targetPath = $targetPath;
-
-        return $this;
-    }
-
-    public function getEndpointHostnameOrIp(): string
-    {
-        return $this->endpointHostnameOrIp;
-    }
-
-    public function setEndpointHostnameOrIp(string $endpointHostnameOrIp): BouncerTarget
-    {
-        $this->endpointHostnameOrIp = $endpointHostnameOrIp;
-
-        return $this;
-    }
-
-    public function getPort(): ?int
-    {
-        return $this->port;
-    }
-
-    public function isPortSet(): bool
-    {
-        return $this->port !== null;
-    }
-
-    public function setPort(int $port): BouncerTarget
-    {
-        $this->port = $port;
-
-        return $this;
-    }
-
-    public function getName()
-    {
-        return reset($this->domains);
-    }
-
-    public function isAllowNonSSL(): bool
-    {
-        return $this->allowNonSSL;
-    }
-
-    public function setAllowNonSSL(bool $allowNonSSL): BouncerTarget
-    {
-        $this->allowNonSSL = $allowNonSSL;
-
-        return $this;
-    }
-
-    public function isEndpointValid(): bool
-    {
-        // Is it just an IP?
-        if (filter_var($this->getEndpointHostnameOrIp(), FILTER_VALIDATE_IP)) {
-            // $this->logger->debug(sprintf('%s isEndpointValid: %s is a normal IP', Emoji::magnifyingGlassTiltedRight(), $this->getEndpointHostnameOrIp()));
-
-            return true;
-        }
-
-        // Is it a Hostname that resolves?
-        $resolved = gethostbyname($this->getEndpointHostnameOrIp());
-        if (filter_var($resolved, FILTER_VALIDATE_IP)) {
-            // $this->logger->debug(sprintf('%s isEndpointValid: %s is a hostname that resolves to a normal IP %s', Emoji::magnifyingGlassTiltedRight(), $this->getEndpointHostnameOrIp(), $resolved));
-
-            return true;
-        }
-
-        $this->logger->warning(sprintf('%s isEndpointValid: %s is a hostname that does not resolve', Emoji::magnifyingGlassTiltedRight(), $this->getEndpointHostnameOrIp()));
-
-        return false;
-    }
-
-    public function getPresentationDomain(): string
-    {
-        return sprintf(
-            '%s://%s%s',
-            'https',
-            $this->getUsername() && $this->getPassword() ?
-                    sprintf('%s:%s@', $this->getUsername(), $this->getPassword()) :
-                    '',
-            $this->getName()
-        );
-    }
-}
+use Twig\Environment as Twig;
+use Twig\Loader\FilesystemLoader as TwigLoader;
+use GuzzleHttp\Exception\GuzzleException;
+use Monolog\Processor;
+use Bouncer\Settings\Settings;
 
 class Bouncer
 {
     private array $environment;
-    private Guzzle $client;
-    private FilesystemLoader $loader;
-    private Environment $twig;
+    private Guzzle $docker;
+    private TwigLoader $loader;
+    private Twig $twig;
     private Filesystem $configFilesystem;
     private Filesystem $certificateStoreLocal;
     private ?Filesystem $certificateStoreRemote = null;
@@ -358,34 +45,36 @@ class Bouncer
     private int $forcedUpdateIntervalSeconds       = 0;
     private ?int $lastUpdateEpoch                  = null;
     private int $maximumNginxConfigCreationNotices = 15;
+    private Settings $settings;
+
+    private const DEFAULT_DOCKER_SOCKET = '/var/run/docker.sock';
 
     public function __construct()
     {
         $this->environment = array_merge($_ENV, $_SERVER);
         ksort($this->environment);
 
-        $this->logger = new Monolog\Logger('bouncer');
-        $this->logger->pushHandler(new StreamHandler('/var/log/bouncer.log', Level::Debug));
-        $stdout = new StreamHandler('php://stdout', Level::Debug);
-        $stdout->setFormatter(new ColoredLineFormatter(
-            format: "%level_name%: %message% \n",
-            allowInlineLineBreaks: true,
-            ignoreEmptyContextAndExtra: true,
-        ));
-        $this->logger->pushHandler($stdout);
+        $this->settings = new Settings();
+
+        $this->logger = new \Bouncer\Logger\Logger(
+            settings: $this->settings,
+            processIdProcessor: new Processor\ProcessIdProcessor(),
+            memoryPeakUsageProcessor: new Processor\MemoryPeakUsageProcessor(),
+            psrLogMessageProcessor: new Processor\PsrLogMessageProcessor(),
+            coloredLineFormatter: new Formatter\ColourLine($this->settings),
+            lineFormatter: new Formatter\Line($this->settings),
+        );
 
         if (isset($this->environment['DOCKER_HOST'])) {
-            $this->logger->info(sprintf('%s Connecting to %s', Emoji::electricPlug(), $this->environment['DOCKER_HOST']));
-            $this->client = new Guzzle(['base_uri' => $this->environment['DOCKER_HOST']]);
+            $this->logger->info('{emoji} Connecting to {docker_host}', ['emoji' => Emoji::electricPlug(), 'docker_host' => $this->environment['DOCKER_HOST']]);
+            $this->docker = new Guzzle(['base_uri' => $this->environment['DOCKER_HOST']]);
         } else {
-            $this->logger->info(sprintf('%s Connecting to /var/run/docker.sock', Emoji::electricPlug()));
-            $this->client = new Guzzle(['base_uri' => 'http://localhost', 'curl' => [CURLOPT_UNIX_SOCKET_PATH => '/var/run/docker.sock']]);
+            $this->logger->info('{emoji} Connecting to {docker_host}', ['emoji' => Emoji::electricPlug(), 'docker_host' => Bouncer::DEFAULT_DOCKER_SOCKET]);
+            $this->docker = new Guzzle(['base_uri' => 'http://localhost', 'curl' => [CURLOPT_UNIX_SOCKET_PATH => Bouncer::DEFAULT_DOCKER_SOCKET]]);
         }
 
-        $this->loader = new FilesystemLoader([
-            __DIR__,
-        ]);
-        $this->twig = new Environment($this->loader);
+        $this->loader = new TwigLoader([__DIR__ . '/../templates']);
+        $this->twig   = new Twig($this->loader);
 
         // Set up Filesystem for sites-enabled path
         $this->configFilesystem = new Filesystem(new LocalFilesystemAdapter('/etc/nginx/sites-enabled'));
@@ -421,7 +110,7 @@ class Bouncer
             $this->setUseGlobalCert(true);
             $this->providedCertificateStore->write('global.crt', str_replace('\\n', "\n", trim($this->environment['GLOBAL_CERT'], '"')));
             $this->providedCertificateStore->write('global.key', str_replace('\\n', "\n", trim($this->environment['GLOBAL_CERT_KEY'], '"')));
-            $this->logger->info(sprintf("%s GLOBAL_CERT was set, so we're going to use a defined certificate!", Emoji::globeShowingEuropeAfrica()));
+            $this->logger->info("{emoji} GLOBAL_CERT was set, so we're going to use a defined certificate!", ['emoji' => Emoji::globeShowingEuropeAfrica()]);
         }
 
         // Determine forced update interval.
@@ -429,16 +118,17 @@ class Bouncer
             $this->setForcedUpdateIntervalSeconds($this->environment['BOUNCER_FORCED_UPDATE_INTERVAL_SECONDS']);
         }
         if ($this->getForcedUpdateIntervalSeconds() > 0) {
-            $this->logger->warning(sprintf('%s  Forced update interval is every %d seconds', Emoji::watch(), $this->getForcedUpdateIntervalSeconds()));
+            $this->logger->warning('{emoji}  Forced update interval is every {interval_seconds} seconds', ['emoji' => Emoji::watch(), 'interval_seconds' => $this->getForcedUpdateIntervalSeconds()]);
         } else {
-            $this->logger->info(sprintf('%s  Forced update interval is disabled', Emoji::watch()));
+            $this->logger->info('{emoji}  Forced update interval is disabled', ['emoji' => Emoji::watch()]);
         }
 
         // Determine maximum notices for nginx config creation.
         if (isset($this->environment['BOUNCER_MAXIMUM_NGINX_CONFIG_CREATION_NOTICES']) && is_numeric($this->environment['BOUNCER_MAXIMUM_NGINX_CONFIG_CREATION_NOTICES'])) {
+            $maxConfigCreationNotices                  = intval($this->environment['BOUNCER_MAXIMUM_NGINX_CONFIG_CREATION_NOTICES']);
             $originalMaximumNginxConfigCreationNotices = $this->getMaximumNginxConfigCreationNotices();
-            $this->setMaximumNginxConfigCreationNotices($this->environment['BOUNCER_MAXIMUM_NGINX_CONFIG_CREATION_NOTICES']);
-            $this->logger->warning(sprintf('%s  Maximum Nginx config creation notices has been over-ridden: %d => %d', Emoji::upsideDownFace(), $originalMaximumNginxConfigCreationNotices, $this->getMaximumNginxConfigCreationNotices()));
+            $this->setMaximumNginxConfigCreationNotices($maxConfigCreationNotices);
+            $this->logger->warning('{emoji}  Maximum Nginx config creation notices has been over-ridden: {original} => {new}', ['emoji' => Emoji::upsideDownFace(), 'original' => $originalMaximumNginxConfigCreationNotices, 'new' => $this->getMaximumNginxConfigCreationNotices()]);
         }
     }
 
@@ -491,18 +181,18 @@ class Bouncer
     }
 
     /**
-     * @return BouncerTarget[]
+     * @return Target[]
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      */
     public function findContainersContainerMode(): array
     {
         $bouncerTargets = [];
 
-        $containers = json_decode($this->client->request('GET', 'containers/json')->getBody()->getContents(), true);
+        $containers = json_decode($this->docker->request('GET', 'containers/json')->getBody()->getContents(), true);
         foreach ($containers as $container) {
             $envs    = [];
-            $inspect = json_decode($this->client->request('GET', "containers/{$container['Id']}/json")->getBody()->getContents(), true);
+            $inspect = json_decode($this->docker->request('GET', "containers/{$container['Id']}/json")->getBody()->getContents(), true);
             if (isset($inspect['Config']['Env'])) {
                 foreach ($inspect['Config']['Env'] as $environmentItem) {
                     if (stripos($environmentItem, '=') !== false) {
@@ -514,7 +204,7 @@ class Bouncer
                 }
             }
             if (isset($envs['BOUNCER_DOMAIN'])) {
-                $bouncerTarget = (new BouncerTarget($this->logger))
+                $bouncerTarget = (new Target($this->logger))
                     ->setId($inspect['Id'])
                 ;
                 $bouncerTarget = $this->parseContainerEnvironmentVariables($envs, $bouncerTarget);
@@ -552,10 +242,10 @@ class Bouncer
     public function findContainersSwarmMode(): array
     {
         $bouncerTargets = [];
-        $services       = json_decode($this->client->request('GET', 'services')->getBody()->getContents(), true);
+        $services       = json_decode($this->docker->request('GET', 'services')->getBody()->getContents(), true);
 
         if (isset($services['message'])) {
-            $this->logger->debug(sprintf('Something happened while interrogating services.. This node is not a swarm node, cannot have services: %s', $services['message']));
+            $this->logger->debug('{emoji} Something happened while interrogating services.. This node is not a swarm node, cannot have services: {message}', ['emoji' => Emoji::warning(), 'message' => $services['message']]);
         } else {
             foreach ($services as $service) {
                 $envs = [];
@@ -572,19 +262,19 @@ class Bouncer
                     $envs[$eKey]   = $eVal;
                 }
                 if (isset($envs['BOUNCER_DOMAIN'])) {
-                    $bouncerTarget = (new BouncerTarget($this->logger))
+                    $bouncerTarget = (new Target($this->logger))
                         ->setId($service['ID'])
                     ;
                     $bouncerTarget = $this->parseContainerEnvironmentVariables($envs, $bouncerTarget);
 
                     if ($bouncerTarget->isPortSet()) {
                         $bouncerTarget->setEndpointHostnameOrIp($service['Spec']['Name']);
-                        // $this->logger->info(sprintf('Ports for %s has been explicitly set to %s:%d.', $bouncerTarget->getName(), $bouncerTarget->getEndpointHostnameOrIp(), $bouncerTarget->getPort()));
+                        // $this->logger->info('{emoji} Ports for {target_name} has been explicitly set to {host}:{port}.', ['emoji' => Emoji::warning(), 'target_name' => $bouncerTarget->getName(), 'host' => $bouncerTarget->getEndpointHostnameOrIp(), 'port' => $bouncerTarget->getPort()]);
                     } elseif (isset($service['Endpoint']['Ports'])) {
                         $bouncerTarget->setEndpointHostnameOrIp('172.17.0.1');
-                        $bouncerTarget->setPort($service['Endpoint']['Ports'][0]['PublishedPort']);
+                        $bouncerTarget->setPort(intval($service['Endpoint']['Ports'][0]['PublishedPort']));
                     } else {
-                        $this->logger->warning(sprintf('Ports block missing for %s.', $bouncerTarget->getName()));
+                        $this->logger->warning('{emoji} Ports block missing for {target_name}.', ['emoji' => Emoji::warning(), 'target_name' => $bouncerTarget->getName()]);
 
                         continue;
                     }
@@ -592,17 +282,17 @@ class Bouncer
 
                     $bouncerTarget->setUseGlobalCert($this->isUseGlobalCert());
 
-                    // $this->logger->debug(sprintf('Decided that %s has the target path %s', $bouncerTarget->getName(), $bouncerTarget->getTargetPath()));
-
                     if ($bouncerTarget->isEndpointValid()) {
                         $bouncerTargets[] = $bouncerTarget;
                     } else {
-                        $this->logger->debug(sprintf(
-                            '%s Decided that %s has the endpoint %s and it is not valid.',
-                            Emoji::magnifyingGlassTiltedLeft(),
-                            $bouncerTarget->getName(),
-                            $bouncerTarget->getEndpointHostnameOrIp(),
-                        ));
+                        $this->logger->debug(
+                            '{emoji} Decided that {target_name} has the endpoint {endpoint} and it is not valid.',
+                            [
+                                'emoji'       => Emoji::magnifyingGlassTiltedLeft(),
+                                'target_name' => $bouncerTarget->getName(),
+                                'endpoint'    => $bouncerTarget->getEndpointHostnameOrIp(),
+                            ]
+                        );
                     }
                 }
             }
@@ -614,15 +304,15 @@ class Bouncer
     public function run(): void
     {
         $gitHash = substr($this->environment['GIT_SHA'], 0, 7);
-        $this->logger->info('{emoji}  Starting Bouncer git={git_sha}...', ['emoji' => Emoji::CHARACTER_TIMER_CLOCK, 'git_sha' => $gitHash]);
+        $this->logger->info('{emoji}  Starting Bouncer (Build {git_sha})...', ['emoji' => Emoji::timerClock(), 'git_sha' => '#' . $gitHash]);
 
         $buildDate = Carbon::parse($this->environment['BUILD_DATE']);
-        $this->logger->info('{emoji}  Built on {build_date}, {build_ago}', ['emoji' => Emoji::CHARACTER_TIMER_CLOCK, 'build_date' => $buildDate->toDateTimeString(), 'build_ago' => $buildDate->ago()]);
+        $this->logger->info('{emoji}  Built on {build_date}, {build_ago}', ['emoji' => Emoji::redHeart(), 'build_date' => $buildDate->toDateTimeString(), 'build_ago' => $buildDate->ago()]);
 
         try {
             $this->stateHasChanged();
         } catch (ConnectException $connectException) {
-            $this->logger->critical('{emoji} Could not connect to docker socket! Did you map it?', ['emoji' => Emoji::CHARACTER_CRYING_CAT]);
+            $this->logger->critical('{emoji} Could not connect to docker socket! Did you map it?', ['emoji' => Emoji::cryingCat()]);
 
             exit;
         }
@@ -631,7 +321,7 @@ class Bouncer
         }
     }
 
-    public function parseContainerEnvironmentVariables(array $envs, BouncerTarget $bouncerTarget): BouncerTarget
+    public function parseContainerEnvironmentVariables(array $envs, Target $bouncerTarget): Target
     {
         foreach ($envs as $eKey => $eVal) {
             switch ($eKey) {
@@ -661,7 +351,7 @@ class Bouncer
                     break;
 
                 case 'BOUNCER_TARGET_PORT':
-                    $bouncerTarget->setPort($eVal);
+                    $bouncerTarget->setPort(intval($eVal));
 
                     break;
 
@@ -681,7 +371,7 @@ class Bouncer
                     break;
 
                 case 'BOUNCER_PROXY_TIMEOUT_SECONDS':
-                    $bouncerTarget->setProxyTimeoutSeconds(is_numeric($eVal) ? $eVal : null);
+                    $bouncerTarget->setProxyTimeoutSeconds(is_numeric($eVal) ? intval($eVal) : null);
 
                     break;
             }
@@ -692,12 +382,12 @@ class Bouncer
 
     private function dockerGetContainers(): array
     {
-        return json_decode($this->client->request('GET', 'containers/json')->getBody()->getContents(), true);
+        return json_decode($this->docker->request('GET', 'containers/json')->getBody()->getContents(), true);
     }
 
     private function dockerGetContainer(string $id): array
     {
-        return json_decode($this->client->request('GET', "containers/{$id}/json")->getBody()->getContents(), true);
+        return json_decode($this->docker->request('GET', "containers/{$id}/json")->getBody()->getContents(), true);
     }
 
     private function dockerEnvHas(string $key, ?array $envs): bool
@@ -746,7 +436,7 @@ class Bouncer
     /**
      * Returns true when something has changed.
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      */
     private function stateHasChanged(): bool
     {
@@ -754,13 +444,13 @@ class Bouncer
         if ($this->lastUpdateEpoch === null) {
             $isTainted = true;
         } elseif ($this->forcedUpdateIntervalSeconds > 0 && $this->lastUpdateEpoch <= time() - $this->forcedUpdateIntervalSeconds) {
-            $this->logger->warning(sprintf('%s  Forced update interval of %d seconds has been reached, forcing update.', Emoji::watch(), $this->forcedUpdateIntervalSeconds));
+            $this->logger->warning('{emoji}  Forced update interval of {interval_seconds} seconds has been reached, forcing update.', ['emoji' => Emoji::watch(), 'interval_seconds' => $this->forcedUpdateIntervalSeconds]);
             $isTainted = true;
         } elseif ($this->previousContainerState === []) {
-            $this->logger->warning(sprintf('%s  Initial state has not been set, forcing update.', Emoji::watch()));
+            $this->logger->warning('{emoji}  Initial state has not been set, forcing update.', ['emoji' => Emoji::watch()]);
             $isTainted = true;
         } elseif ($this->previousSwarmState === []) {
-            $this->logger->warning(sprintf('%s  Initial swarm state has not been set, forcing update.', Emoji::watch()));
+            $this->logger->warning('{emoji}  Initial swarm state has not been set, forcing update.', ['emoji' => Emoji::watch()]);
             $isTainted = true;
         }
 
@@ -791,8 +481,8 @@ class Bouncer
         // Calculate Container State Hash
         $containerStateDiff = $this->diff($this->previousContainerState, $newContainerState);
         if (!$isTainted && !empty($containerStateDiff)) {
-            $this->logger->warning(sprintf('%s  Container state has changed', Emoji::warning()));
-            $this->logger->debug(sprintf("Changed state:\n%s", $containerStateDiff));
+            $this->logger->warning('{emoji}  Container state has changed', ['emoji' => Emoji::warning()]);
+            echo $containerStateDiff;
             $isTainted = true;
         }
         $this->previousContainerState = $newContainerState;
@@ -800,9 +490,9 @@ class Bouncer
         // Swarm Services
         $newSwarmState = [];
         if ($this->isSwarmMode()) {
-            $services = json_decode($this->client->request('GET', 'services')->getBody()->getContents(), true);
+            $services = json_decode($this->docker->request('GET', 'services')->getBody()->getContents(), true);
             if (isset($services['message'])) {
-                $this->logger->warning(sprintf('Something happened while interrogating services.. This node is not a swarm node, cannot have services: %s', $services['message']));
+                $this->logger->warning('{emoji} Something happened while interrogating services.. This node is not a swarm node, cannot have services: {message}', ['emoji' => Emoji::warning(), 'message' => $services['message']]);
             } else {
                 foreach ($services as $service) {
                     $name                 = $service['Spec']['Name'];
@@ -829,8 +519,8 @@ class Bouncer
         // Calculate Swarm State Hash, if applicable
         $swarmStateDiff = $this->diff($this->previousSwarmState, $newSwarmState);
         if ($this->isSwarmMode() && !$isTainted && !empty($swarmStateDiff)) {
-            $this->logger->warning(sprintf('%s  Swarm state has changed', Emoji::warning()));
-            $this->logger->debug(sprintf("Changed state:\n%s", $swarmStateDiff));
+            $this->logger->warning('{emoji}  Swarm state has changed', ['emoji' => Emoji::warning()]);
+            echo $swarmStateDiff;
             $isTainted = true;
         }
         $this->previousSwarmState = $newSwarmState;
@@ -840,7 +530,7 @@ class Bouncer
 
     private function diff($a, $b)
     {
-        return (new Diff(
+        return (new \Diff(
             explode(
                 "\n",
                 Yaml::dump(input: $a, inline: 5, indent: 2)
@@ -849,7 +539,7 @@ class Bouncer
                 "\n",
                 Yaml::dump(input: $b, inline: 5, indent: 2)
             )
-        ))->render(new Diff_Renderer_Text_Unified());
+        ))->render(new \Diff_Renderer_Text_Unified());
     }
 
     private function runLoop(): void
@@ -859,18 +549,18 @@ class Bouncer
         }
 
         try {
-            $determineSwarmMode = json_decode($this->client->request('GET', 'swarm')->getBody()->getContents(), true);
+            $determineSwarmMode = json_decode($this->docker->request('GET', 'swarm')->getBody()->getContents(), true);
             $this->setSwarmMode(!isset($determineSwarmMode['message']));
         } catch (ServerException $exception) {
             $this->setSwarmMode(false);
         } catch (ConnectException $exception) {
-            $this->logger->critical(sprintf('%s Unable to connect to docker socket!', Emoji::warning()));
+            $this->logger->critical('{emoji} Unable to connect to docker socket!', ['emoji' => Emoji::warning()]);
             $this->logger->critical($exception->getMessage());
 
             exit(1);
         }
 
-        $this->logger->info(sprintf('%s Swarm mode is %s.', Emoji::CHARACTER_HONEYBEE, $this->isSwarmMode() ? 'enabled' : 'disabled'));
+        $this->logger->info('{emoji} Swarm mode is {enabled}.', ['emoji' => Emoji::honeybee(), 'enabled' => $this->isSwarmMode() ? 'enabled' : 'disabled']);
 
         $targets = array_values(
             array_merge(
@@ -890,7 +580,7 @@ class Bouncer
         // Wipe configs and rebuild
         $this->wipeNginxConfig();
 
-        $this->logger->info(sprintf('%s Found %d services with BOUNCER_DOMAIN set', Emoji::CHARACTER_MAGNIFYING_GLASS_TILTED_LEFT, count($targets)));
+        $this->logger->info('{emoji} Found {num_services} services with BOUNCER_DOMAIN set', ['emoji' => Emoji::magnifyingGlassTiltedLeft(), 'num_services' => count($targets)]);
         $this->generateNginxConfigs($targets);
         $this->generateLetsEncryptCerts($targets);
         if ($this->s3Enabled()) {
@@ -964,60 +654,62 @@ class Bouncer
 
     private function writeCertificatesToS3(): void
     {
-        $this->logger->info(sprintf('%s  Uploading Certificates to S3', Emoji::CHARACTER_UP_ARROW));
+        $this->logger->info('{emoji}  Uploading Certificates to S3', ['emoji' => Emoji::CHARACTER_UP_ARROW]);
         foreach ($this->certificateStoreLocal->listContents('/archive', true) as $file) {
             /** @var FileAttributes $file */
             if ($file->isFile()) {
                 $remotePath = str_replace('archive/', '', $file->path());
                 if ($file->fileSize() == 0) {
-                    $this->logger->warning(sprintf(" > Skipping uploading {$file->path()}, file is garbage (empty)."));
+                    $this->logger->warning(' > Skipping uploading {file}, file is garbage (empty).', ['file' => $file->path()]);
                 } elseif (!$this->certificateStoreRemote->fileExists($remotePath) || $this->fileChanged($file->path())) {
-                    $this->logger->debug(sprintf(' > Uploading %s (%d bytes)', $file->path(), $file->fileSize()));
+                    $this->logger->debug(' > Uploading {file} ({bytes} bytes)', ['file' => $file->path(), 'bytes' => $file->fileSize()]);
                     $this->certificateStoreRemote->write($remotePath, $this->certificateStoreLocal->read($file->path()));
                 } else {
-                    $this->logger->debug(sprintf(" > Skipping uploading {$file->path()}, file not changed."));
+                    $this->logger->debug(' > Skipping uploading {file}, file not changed.', ['file' => $file->path()]);
                 }
             }
         }
     }
 
     /**
-     * @param $targets BouncerTarget[]
+     * @param $targets Target[]
      */
     private function generateNginxConfigs(array $targets): void
     {
         // get the length of the longest name...
-        $longestPresentationDomain = max(array_map(fn (BouncerTarget $target) => strlen($target->getPresentationDomain()), $targets));
-        $longestFile               = max(array_map(fn (BouncerTarget $target) => strlen($target->getFileName()), $targets));
+        $longestPresentationDomain = max(array_map(fn (Target $target) => strlen($target->getPresentationDomain()), $targets));
+        $longestFile               = max(array_map(fn (Target $target) => strlen($target->getFileName()), $targets));
 
         foreach ($targets as $target) {
             $this->generateNginxConfig($target);
             if (count($targets) <= $this->getMaximumNginxConfigCreationNotices()) {
-                $this->logger->info(sprintf(
-                    '%s  Created Nginx config for %s <=> %s',
-                    Emoji::pencil(),
-                    str_pad(
-                        $target->getFileName(),
-                        $longestFile,
-                        ' ',
-                        STR_PAD_RIGHT
-                    ),
-                    str_pad(
-                        $target->getPresentationDomain(),
-                        $longestPresentationDomain,
-                        ' ',
-                        STR_PAD_LEFT
-                    ),
-                ));
+                $this->logger->info(
+                    '{emoji}  Created Nginx config for {file} <=> {domain}',
+                    [
+                        'emoji' => Emoji::pencil(),
+                        'file'  => str_pad(
+                            $target->getFileName(),
+                            $longestFile,
+                            ' ',
+                            STR_PAD_RIGHT
+                        ),
+                        'domain' => str_pad(
+                            $target->getPresentationDomain(),
+                            $longestPresentationDomain,
+                            ' ',
+                            STR_PAD_LEFT
+                        ),
+                    ]
+                );
             }
         }
         if (count($targets) > $this->getMaximumNginxConfigCreationNotices()) {
-            $this->logger->info(sprintf('%s  More than %d Nginx configs generated.. Too many to show them all!', Emoji::pencil(), $this->getMaximumNginxConfigCreationNotices()));
+            $this->logger->info('{emoji}  More than {num_max} Nginx configs generated.. Too many to show them all!', ['emoji' => Emoji::pencil(), 'num_max' => $this->getMaximumNginxConfigCreationNotices()]);
         }
-        $this->logger->info(sprintf('%s  Created %d Nginx configs..', Emoji::pencil(), count($targets)));
+        $this->logger->info('{emoji}  Created {num_created} Nginx configs..', ['emoji' => Emoji::pencil(), 'num_created' => count($targets)]);
     }
 
-    private function generateNginxConfig(BouncerTarget $target): void
+    private function generateNginxConfig(Target $target): void
     {
         $configData = $this->twig->render('NginxTemplate.twig', $target->__toArray());
         $this->configFilesystem->write($target->getFileName(), $configData);
@@ -1027,7 +719,7 @@ class Bouncer
     }
 
     /**
-     * @param BouncerTarget[] $targets
+     * @param Target[] $targets
      *
      * @throws FilesystemException
      */
@@ -1050,13 +742,15 @@ class Bouncer
                     $timeRemainingSeconds = $ssl['validTo_time_t'] - time();
                 }
                 if ($timeRemainingSeconds > 2592000) {
-                    $this->logger->info(sprintf(
-                        '%s Skipping %s, certificate is %s for %d days',
-                        Emoji::CHARACTER_PARTYING_FACE,
-                        $target->getName(),
-                        $dubious ? 'dubiously good' : 'still good',
-                        round($timeRemainingSeconds / 86400)
-                    ));
+                    $this->logger->info(
+                        '{emoji} Skipping {target_name}, certificate is {validity} for {duration_days} days',
+                        [
+                            'emoji'         => Emoji::CHARACTER_PARTYING_FACE,
+                            'target_name'   => $target->getName(),
+                            'validity'      => $dubious ? 'dubiously good' : 'still good',
+                            'duration_days' => round($timeRemainingSeconds / 86400),
+                        ]
+                    );
 
                     $target->setUseTemporaryCert(false);
                     $this->generateNginxConfig($target);
@@ -1069,7 +763,7 @@ class Bouncer
             $shell = new Exec();
 
             // Disable nginx tweaks
-            $this->logger->debug('Moving nginx tweak file..');
+            $this->logger->debug('{emoji} Moving nginx tweak file out of the way..', ['emoji' => Emoji::rightArrow()]);
             $disableNginxTweaksCommand = (new CommandBuilder('mv'))
                 ->addSubCommand('/etc/nginx/conf.d/tweak.conf')
                 ->addSubCommand('/etc/nginx/conf.d/tweak.disabled')
@@ -1087,17 +781,17 @@ class Bouncer
             $command->addFlag('n');
             $command->addFlag('m', $this->environment['BOUNCER_LETSENCRYPT_EMAIL']);
             $command->addArgument('agree-tos');
-            $this->logger->info(sprintf('%s Generating letsencrypt for %s - %s', Emoji::CHARACTER_PENCIL, $target->getName(), $command->__toString()));
+            $this->logger->info('{emoji} Generating letsencrypt for {target_name} - {command}', ['emoji' => Emoji::pencil(), 'target_name' => $target->getName(), 'command' => $command->__toString()]);
             $shell->run($command);
 
             if ($shell->getReturnValue() == 0) {
-                $this->logger->info(sprintf('%s Generating successful', Emoji::CHARACTER_PARTY_POPPER));
+                $this->logger->info('{emoji} Generating successful', ['emoji' => Emoji::partyPopper()]);
             } else {
-                $this->logger->critical(sprintf('%s Generating failed!', Emoji::CHARACTER_WARNING));
+                $this->logger->critical('{emoji} Generating failed!', ['emoji' => Emoji::warning()]);
             }
 
             // Re-enable nginx tweaks
-            $this->logger->debug('Moving nginx tweak file back..');
+            $this->logger->debug('{emoji} Moving nginx tweak file back in place..', ['emoji' => Emoji::leftArrow()]);
             $disableNginxTweaksCommand = (new CommandBuilder('mv'))
                 ->addSubCommand('/etc/nginx/conf.d/tweak.disabled')
                 ->addSubCommand('/etc/nginx/conf.d/tweak.conf')
@@ -1116,13 +810,13 @@ class Bouncer
         $shell   = new Exec();
         $command = new CommandBuilder('/usr/sbin/nginx');
         $command->addFlag('s', 'reload');
-        $this->logger->info(sprintf('%s  Restarting nginx', Emoji::CHARACTER_TIMER_CLOCK));
+        $this->logger->info('{emoji}  Restarting nginx', ['emoji' => Emoji::timerClock()]);
         $shell->run($command);
     }
 
     private function wipeNginxConfig(): void
     {
-        $this->logger->debug('Purging existing config files ...');
+        $this->logger->debug('{emoji} Purging existing config files ...', ['emoji' => Emoji::bomb()]);
         foreach ($this->configFilesystem->listContents('') as $file) {
             /** @var FileAttributes $file */
             if ($file->isFile() && $file->path() != 'default.conf' && $file->path() != 'default-ssl.conf') {
@@ -1131,5 +825,3 @@ class Bouncer
         }
     }
 }
-
-(new Bouncer())->run();

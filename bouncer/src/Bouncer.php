@@ -687,9 +687,11 @@ class Bouncer
         $changedTargets = [];
         foreach ($targets as $target) {
             if ($this->generateNginxConfig($target)) {
-                $changedTargets[] = $target;
+                $changedTargets[strrev($target->getName())] = $target;
             }
         }
+        ksort($changedTargets);
+        $changedTargets = array_values($changedTargets);
         if (count($changedTargets) <= $this->getMaximumNginxConfigCreationNotices()) {
             foreach ($changedTargets as $target) {
                 $this->logger->info('{emoji}  Created {label}', ['emoji' => Emoji::pencil(), 'label' => $target->getLabel()]);

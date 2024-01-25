@@ -688,6 +688,9 @@ class Bouncer
                 $changedTargets[strrev($target->getName())] = $target;
             }
         }
+        /**
+         * @var Target[] $changedTargets
+         */
         ksort($changedTargets);
         $changedTargets = array_values($changedTargets);
 
@@ -703,7 +706,7 @@ class Bouncer
                 $context = [
                     'label'      => $target->getLabel(),
                     'domain'     => $target->getPresentationdomain(),
-                    'file'       => $target->getFileName(),
+                    'file'       => $target->getNginxConfigFileName(),
                     'config_dir' => Bouncer::FILESYSTEM_CONFIG_DIR,
                 ];
                 $this->logger->info('{emoji}  Created {label}', $context + ['emoji' => Emoji::pencil()]);

@@ -47,7 +47,10 @@ class Bouncer
     private int $maximumNginxConfigCreationNotices = 15;
     private Settings $settings;
 
-    private const DEFAULT_DOCKER_SOCKET = '/var/run/docker.sock';
+    private const DEFAULT_DOCKER_SOCKET          = '/var/run/docker.sock';
+    private const FILESYSTEM_CONFIG_DIR          = '/etc/nginx/sites-enabled';
+    private const FILESYSTEM_CERTS_DIR           = '/etc/nginx/certs';
+    private const FILESYSTEM_CERTS_PROVIDED_DIR  = '/certs';
 
     public function __construct()
     {
@@ -77,13 +80,13 @@ class Bouncer
         $this->twig   = new Twig($this->loader);
 
         // Set up Filesystem for sites-enabled path
-        $this->configFilesystem = new Filesystem(new LocalFilesystemAdapter('/etc/nginx/sites-enabled'));
+        $this->configFilesystem = new Filesystem(new LocalFilesystemAdapter(Bouncer::FILESYSTEM_CONFIG_DIR));
 
         // Set up Local certificate store
-        $this->certificateStoreLocal = new Filesystem(new LocalFilesystemAdapter('/etc/letsencrypt'));
+        $this->certificateStoreLocal = new Filesystem(new LocalFilesystemAdapter(Bouncer::FILESYSTEM_CERTS_DIR));
 
         // Set up Local certificate store for certificates provided to us
-        $this->providedCertificateStore = new Filesystem(new LocalFilesystemAdapter('/certs'));
+        $this->providedCertificateStore = new Filesystem(new LocalFilesystemAdapter(Bouncer::FILESYSTEM_CERTS_PROVIDED_DIR));
 
         // Set up Remote certificate store, if configured
         if (isset($this->environment['BOUNCER_S3_BUCKET'])) {
@@ -681,46 +684,44 @@ class Bouncer
      */
     private function generateNginxConfigs(array $targets): void
     {
-        // get the length of the longest name...
-        $longestPresentationDomain = max(array_map(fn (Target $target) => strlen($target->getPresentationDomain()), $targets));
-        $longestFile               = max(array_map(fn (Target $target) => strlen($target->getFileName()), $targets));
-
+        $changedTargets = [];
         foreach ($targets as $target) {
-            $this->generateNginxConfig($target);
-            if (count($targets) <= $this->getMaximumNginxConfigCreationNotices()) {
-                $this->logger->info(
-                    '{emoji}  Created Nginx config for {file} <=> {domain}',
-                    [
-                        'emoji' => Emoji::pencil(),
-                        'file'  => str_pad(
-                            $target->getFileName(),
-                            $longestFile,
-                            ' ',
-                            STR_PAD_RIGHT
-                        ),
-                        'domain' => str_pad(
-                            $target->getPresentationDomain(),
-                            $longestPresentationDomain,
-                            ' ',
-                            STR_PAD_LEFT
-                        ),
-                    ]
-                );
+            if ($this->generateNginxConfig($target)) {
+                $changedTargets[] = $target;
             }
         }
-        if (count($targets) > $this->getMaximumNginxConfigCreationNotices()) {
+        if (count($changedTargets) <= $this->getMaximumNginxConfigCreationNotices()) {
+            foreach ($changedTargets as $target) {
+                $this->logger->info('{emoji}  Created {name}', ['emoji' => Emoji::pencil(), 'name' => $target->getName()]);
+                $this->logger->debug('{emoji}       -> {certs_dir}/{file}', ['emoji' => Emoji::pencil(), 'certs_dir' => Bouncer::FILESYSTEM_CERTS_DIR, 'file' => $target->getFileName()]);
+                $this->logger->debug('{emoji}       -> {domain}', ['emoji' => Emoji::pencil(), 'domain' => $target->getPresentationDomain()]);
+            }
+        } else {
             $this->logger->info('{emoji}  More than {num_max} Nginx configs generated.. Too many to show them all!', ['emoji' => Emoji::pencil(), 'num_max' => $this->getMaximumNginxConfigCreationNotices()]);
         }
-        $this->logger->info('{emoji}  Created {num_created} Nginx configs..', ['emoji' => Emoji::pencil(), 'num_created' => count($targets)]);
+        $this->logger->info('{emoji}  Updated {num_created} Nginx configs, {num_changed} changed..', ['emoji' => Emoji::pencil(), 'num_created' => count($targets), 'num_changed' => count($changedTargets)]);
     }
 
-    private function generateNginxConfig(Target $target): void
+    private function generateNginxConfig(Target $target): bool
     {
-        $configData = $this->twig->render('NginxTemplate.twig', $target->__toArray());
-        $this->configFilesystem->write($target->getFileName(), $configData);
-        if ($target->hasAuth()) {
-            $this->configFilesystem->write($target->getAuthFileName(), $target->getAuthFileData());
+        $configData     = $this->twig->render('NginxTemplate.twig', $target->__toArray());
+        $changed        = false;
+        $configFileHash = $this->configFilesystem->fileExists($target->getFileName()) ? sha1($this->configFilesystem->read($target->getFileName())) : null;
+
+        if (sha1($configData) != $configFileHash) {
+            $this->configFilesystem->write($target->getFileName(), $configData);
+            $changed = true;
         }
+
+        if ($target->hasAuth()) {
+            $authFileHash   = $this->configFilesystem->fileExists($target->getAuthFileName()) ? sha1($this->configFilesystem->read($target->getAuthFileName())) : null;
+            if (sha1($target->getAuthFileData()) != $authFileHash) {
+                $this->configFilesystem->write($target->getAuthFileName(), $target->getAuthFileData());
+                $changed = true;
+            }
+        }
+
+        return $changed;
     }
 
     /**

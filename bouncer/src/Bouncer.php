@@ -303,11 +303,11 @@ class Bouncer
 
     public function run(): void
     {
-        $gitHash = substr($this->environment['GIT_SHA'], 0, 7);
-        $this->logger->info('{emoji}  Starting Bouncer (Build {git_sha})...', ['emoji' => Emoji::timerClock(), 'git_sha' => '#' . $gitHash]);
-
-        $buildDate = Carbon::parse($this->environment['BUILD_DATE']);
-        $this->logger->info('{emoji}  Built on {build_date}, {build_ago}', ['emoji' => Emoji::redHeart(), 'build_date' => $buildDate->toDateTimeString(), 'build_ago' => $buildDate->ago()]);
+        $gitHash    = substr($this->environment['GIT_SHA'], 0, 7);
+        $buildDate  = Carbon::parse($this->environment['BUILD_DATE']);
+        $gitMessage = trim($this->environment['GIT_COMMIT_MESSAGE']);
+        $this->logger->info('{emoji}  Starting Bouncer. Built on {build_date}, {build_ago}', ['emoji' => Emoji::redHeart(), 'build_date' => $buildDate->toDateTimeString(), 'build_ago' => $buildDate->ago()]);
+        $this->logger->info('{emoji} Build #{git_sha}: "{git_message}"', ['emoji' => Emoji::memo(), 'git_sha' => $gitHash, 'git_message' => $gitMessage]);
 
         try {
             $this->stateHasChanged();
@@ -325,6 +325,11 @@ class Bouncer
     {
         foreach ($envs as $eKey => $eVal) {
             switch ($eKey) {
+                case 'BOUNCER_NAME':
+                    $bouncerTarget->setName($eVal);
+
+                    break;
+
                 case 'BOUNCER_DOMAIN':
                     $domains = explode(',', $eVal);
                     array_walk($domains, function (&$domain, $key): void {

@@ -47,7 +47,7 @@ class Settings implements SettingsInterface
                 'path'                  => Settings::getEnvironment('LOG_FILE', '/var/log/bouncer/bouncer.log'),
                 'level'                 => Level::fromName(Settings::getEnvironment('LOG_LEVEL', 'DEBUG')),
                 'line_format'           => Settings::getEnvironment('LOG_LINE_FORMAT', '[%datetime%] %level_name%: %channel%: %message%') . "\n",
-                'max_level_name_length' => 9,
+                'max_level_name_length' => Settings::getEnvironment('LOG_LEVEL_NAME_LENGTH', 4),
                 'coloured_output'       => Settings::isEnabled('LOG_COLOUR', true),
             ],
         ];

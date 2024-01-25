@@ -47,7 +47,9 @@ jobs:
           push: true
           target: bouncer
           build-args: |
-            GIT_SHA=${{ github.sha }}
+            GIT_SHA="${{ github.sha }}"
+            BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+            GIT_COMMIT_MESSAGE="$(git log -1 --pretty=%B)"
           tags: |
             benzine/bouncer
             ghcr.io/benzine-framework/bouncer:latest

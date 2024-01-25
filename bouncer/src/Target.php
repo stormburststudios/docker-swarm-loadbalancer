@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Bouncer;
 
-use Monolog\Logger;
+use Bouncer\Logger\Logger;
 use Spatie\Emoji\Emoji;
 
 class Target
 {
     private string $id;
+    private ?string $name = null;
     private array $domains;
     private string $endpointHostnameOrIp;
     private ?int $port        = null;
@@ -214,6 +215,7 @@ class Target
     public function setDomains(array $domains): self
     {
         $this->domains = $domains;
+        $this->updateLogger();
 
         return $this;
     }
@@ -273,7 +275,15 @@ class Target
 
     public function getName()
     {
-        return reset($this->domains);
+        return $this->name ?? reset($this->domains);
+    }
+
+    public function setName(string $name): self
+    {
+        $this->name = $name;
+        $this->updateLogger();
+
+        return $this;
     }
 
     public function isAllowNonSSL(): bool
@@ -284,6 +294,18 @@ class Target
     public function setAllowNonSSL(bool $allowNonSSL): self
     {
         $this->allowNonSSL = $allowNonSSL;
+
+        return $this;
+    }
+
+    public function getLogger(): Logger
+    {
+        return $this->logger;
+    }
+
+    public function updateLogger(): self
+    {
+        $this->logger = $this->logger->withName($this->getName());
 
         return $this;
     }

@@ -301,7 +301,7 @@ class Target
     {
         $this->label = $label;
         $this->updateLogger();
-        $this->logger->debug('{emoji} Target label set to {label}', ['emoji' => Emoji::label(), 'label' => $label]);
+        // $this->logger->debug('{emoji} Target label set to {label}', ['emoji' => Emoji::label(), 'label' => $label]);
 
         return $this;
     }

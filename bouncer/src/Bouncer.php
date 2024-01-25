@@ -692,11 +692,25 @@ class Bouncer
         }
         ksort($changedTargets);
         $changedTargets = array_values($changedTargets);
+
+        // @todo MB: it'd be nice if this'd explode the domains and tree-walk them like:
+        // com
+        //  |- example
+        //  |   |- www
+        //  |   |- api
+        // and so on.
+
         if (count($changedTargets) <= $this->getMaximumNginxConfigCreationNotices()) {
             foreach ($changedTargets as $target) {
-                $this->logger->info('{emoji}  Created {label}', ['emoji' => Emoji::pencil(), 'label' => $target->getLabel()]);
-                $this->logger->debug('{emoji}       -> {certs_dir}/{file}', ['emoji' => Emoji::pencil(), 'certs_dir' => Bouncer::FILESYSTEM_CONFIG_DIR, 'file' => $target->getFileName()]);
-                $this->logger->debug('{emoji}       -> {domain}', ['emoji' => Emoji::pencil(), 'domain' => $target->getPresentationDomain()]);
+                $context = [
+                    'label'      => $target->getLabel(),
+                    'domain'     => $target->getPresentationdomain(),
+                    'file'       => $target->getFileName(),
+                    'config_dir' => Bouncer::FILESYSTEM_CONFIG_DIR,
+                ];
+                $this->logger->info('{emoji}  Created {label}', $context + ['emoji' => Emoji::pencil()]);
+                $this->logger->debug('         -> {config_dir}/{file}', $context);
+                $this->logger->debug('         -> {domain}', $context);
             }
         } else {
             $this->logger->info('{emoji}  More than {num_max} Nginx configs generated.. Too many to show them all!', ['emoji' => Emoji::pencil(), 'num_max' => $this->getMaximumNginxConfigCreationNotices()]);
@@ -716,7 +730,7 @@ class Bouncer
         }
 
         if ($target->hasAuth()) {
-            $authFileHash   = $this->configFilesystem->fileExists($target->getAuthFileName()) ? $this->configFilesystem->read($target->getAuthFileName()) : null;
+            $authFileHash   = $this->configFilesystem->fileExists($target->getAuthFileName()) ? $this->configFilesystem->read($target->getAuthFileName() . '.hash') : null;
             if ($target->getAuthHash() != $authFileHash) {
                 $this->configFilesystem->write($target->getAuthFileName() . '.hash', $target->getAuthHash());
                 $this->configFilesystem->write($target->getAuthFileName(), $target->getAuthFileData());

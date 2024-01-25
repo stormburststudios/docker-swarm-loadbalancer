@@ -325,7 +325,7 @@ class Target
 
     public function updateLogger(): self
     {
-        $this->logger = $this->logger->withName($this->getName());
+        $this->logger = $this->logger->withName($this->getLabel());
 
         return $this;
     }

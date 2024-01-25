@@ -716,8 +716,9 @@ class Bouncer
         }
 
         if ($target->hasAuth()) {
-            $authFileHash   = $this->configFilesystem->fileExists($target->getAuthFileName()) ? sha1($this->configFilesystem->read($target->getAuthFileName())) : null;
-            if (sha1($target->getAuthFileData()) != $authFileHash) {
+            $authFileHash   = $this->configFilesystem->fileExists($target->getAuthFileName()) ? $this->configFilesystem->read($target->getAuthFileName()) : null;
+            if ($target->getAuthHash() != $authFileHash) {
+                $this->configFilesystem->write($target->getAuthFileName() . '.hash', $target->getAuthHash());
                 $this->configFilesystem->write($target->getAuthFileName(), $target->getAuthFileData());
                 $changed = true;
             }

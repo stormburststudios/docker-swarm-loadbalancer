@@ -98,6 +98,19 @@ class Target
         return $this;
     }
 
+    public function getAuth(): array
+    {
+        return [
+            'username' => $this->getUsername(),
+            'password' => $this->getPassword(),
+        ];
+    }
+
+    public function getAuthHash(): string
+    {
+        return sha1(implode(':', $this->getAuth()));
+    }
+
     public function setAuth(string $username, string $password): self
     {
         return $this->setUsername($username)->setPassword($password);

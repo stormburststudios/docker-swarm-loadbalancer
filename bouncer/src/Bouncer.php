@@ -69,10 +69,10 @@ class Bouncer
         );
 
         if (isset($this->environment['DOCKER_HOST'])) {
-            $this->logger->info('{emoji} Connecting to {docker_host}', ['emoji' => Emoji::electricPlug(), 'docker_host' => $this->environment['DOCKER_HOST']]);
+            $this->logger->info('Connecting to {docker_host}', ['emoji' => Emoji::electricPlug(), 'docker_host' => $this->environment['DOCKER_HOST']]);
             $this->docker = new Guzzle(['base_uri' => $this->environment['DOCKER_HOST']]);
         } else {
-            $this->logger->info('{emoji} Connecting to {docker_host}', ['emoji' => Emoji::electricPlug(), 'docker_host' => Bouncer::DEFAULT_DOCKER_SOCKET]);
+            $this->logger->info('Connecting to {docker_host}', ['emoji' => Emoji::electricPlug(), 'docker_host' => Bouncer::DEFAULT_DOCKER_SOCKET]);
             $this->docker = new Guzzle(['base_uri' => 'http://localhost', 'curl' => [CURLOPT_UNIX_SOCKET_PATH => Bouncer::DEFAULT_DOCKER_SOCKET]]);
         }
 
@@ -113,7 +113,7 @@ class Bouncer
             $this->setUseGlobalCert(true);
             $this->providedCertificateStore->write('global.crt', str_replace('\\n', "\n", trim($this->environment['GLOBAL_CERT'], '"')));
             $this->providedCertificateStore->write('global.key', str_replace('\\n', "\n", trim($this->environment['GLOBAL_CERT_KEY'], '"')));
-            $this->logger->info("{emoji} GLOBAL_CERT was set, so we're going to use a defined certificate!", ['emoji' => Emoji::globeShowingEuropeAfrica()]);
+            $this->logger->info("GLOBAL_CERT was set, so we're going to use a defined certificate!", ['emoji' => Emoji::globeShowingEuropeAfrica()]);
         }
 
         // Determine forced update interval.
@@ -121,9 +121,9 @@ class Bouncer
             $this->setForcedUpdateIntervalSeconds($this->environment['BOUNCER_FORCED_UPDATE_INTERVAL_SECONDS']);
         }
         if ($this->getForcedUpdateIntervalSeconds() > 0) {
-            $this->logger->warning('{emoji}  Forced update interval is every {interval_seconds} seconds', ['emoji' => Emoji::watch(), 'interval_seconds' => $this->getForcedUpdateIntervalSeconds()]);
+            $this->logger->warning(' Forced update interval is every {interval_seconds} seconds', ['emoji' => Emoji::watch(), 'interval_seconds' => $this->getForcedUpdateIntervalSeconds()]);
         } else {
-            $this->logger->info('{emoji}  Forced update interval is disabled', ['emoji' => Emoji::watch()]);
+            $this->logger->info(' Forced update interval is disabled', ['emoji' => Emoji::watch()]);
         }
 
         // Determine maximum notices for nginx config creation.
@@ -131,7 +131,7 @@ class Bouncer
             $maxConfigCreationNotices                  = intval($this->environment['BOUNCER_MAXIMUM_NGINX_CONFIG_CREATION_NOTICES']);
             $originalMaximumNginxConfigCreationNotices = $this->getMaximumNginxConfigCreationNotices();
             $this->setMaximumNginxConfigCreationNotices($maxConfigCreationNotices);
-            $this->logger->warning('{emoji}  Maximum Nginx config creation notices has been over-ridden: {original} => {new}', ['emoji' => Emoji::upsideDownFace(), 'original' => $originalMaximumNginxConfigCreationNotices, 'new' => $this->getMaximumNginxConfigCreationNotices()]);
+            $this->logger->warning(' Maximum Nginx config creation notices has been over-ridden: {original} => {new}', ['emoji' => Emoji::upsideDownFace(), 'original' => $originalMaximumNginxConfigCreationNotices, 'new' => $this->getMaximumNginxConfigCreationNotices()]);
         }
     }
 
@@ -248,7 +248,7 @@ class Bouncer
         $services       = json_decode($this->docker->request('GET', 'services')->getBody()->getContents(), true);
 
         if (isset($services['message'])) {
-            $this->logger->debug('{emoji} Something happened while interrogating services.. This node is not a swarm node, cannot have services: {message}', ['emoji' => Emoji::warning(), 'message' => $services['message']]);
+            $this->logger->debug('Something happened while interrogating services.. This node is not a swarm node, cannot have services: {message}', ['emoji' => Emoji::warning(), 'message' => $services['message']]);
         } else {
             foreach ($services as $service) {
                 $envs = [];
@@ -272,12 +272,12 @@ class Bouncer
 
                     if ($bouncerTarget->isPortSet()) {
                         $bouncerTarget->setEndpointHostnameOrIp($service['Spec']['Name']);
-                        // $this->logger->info('{emoji} Ports for {target_name} has been explicitly set to {host}:{port}.', ['emoji' => Emoji::warning(), 'target_name' => $bouncerTarget->getName(), 'host' => $bouncerTarget->getEndpointHostnameOrIp(), 'port' => $bouncerTarget->getPort()]);
+                        // $this->logger->info('Ports for {target_name} has been explicitly set to {host}:{port}.', ['emoji' => Emoji::warning(), 'target_name' => $bouncerTarget->getName(), 'host' => $bouncerTarget->getEndpointHostnameOrIp(), 'port' => $bouncerTarget->getPort()]);
                     } elseif (isset($service['Endpoint']['Ports'])) {
                         $bouncerTarget->setEndpointHostnameOrIp('172.17.0.1');
                         $bouncerTarget->setPort(intval($service['Endpoint']['Ports'][0]['PublishedPort']));
                     } else {
-                        $this->logger->warning('{emoji} Ports block missing for {target_name}.', ['emoji' => Emoji::warning(), 'target_name' => $bouncerTarget->getName()]);
+                        $this->logger->warning('Ports block missing for {target_name}.', ['emoji' => Emoji::warning(), 'target_name' => $bouncerTarget->getName()]);
 
                         continue;
                     }
@@ -289,7 +289,7 @@ class Bouncer
                         $bouncerTargets[] = $bouncerTarget;
                     } else {
                         $this->logger->debug(
-                            '{emoji} Decided that {target_name} has the endpoint {endpoint} and it is not valid.',
+                            'Decided that {target_name} has the endpoint {endpoint} and it is not valid.',
                             [
                                 'emoji'       => Emoji::magnifyingGlassTiltedLeft(),
                                 'target_name' => $bouncerTarget->getName(),
@@ -309,13 +309,13 @@ class Bouncer
         $gitHash    = substr($this->environment['GIT_SHA'], 0, 7);
         $buildDate  = Carbon::parse($this->environment['BUILD_DATE']);
         $gitMessage = trim($this->environment['GIT_COMMIT_MESSAGE']);
-        $this->logger->info('{emoji}  Starting Bouncer. Built on {build_date}, {build_ago}', ['emoji' => Emoji::redHeart(), 'build_date' => $buildDate->toDateTimeString(), 'build_ago' => $buildDate->ago()]);
-        $this->logger->info('{emoji} Build #{git_sha}: "{git_message}"', ['emoji' => Emoji::memo(), 'git_sha' => $gitHash, 'git_message' => $gitMessage]);
+        $this->logger->info(' Starting Bouncer. Built on {build_date}, {build_ago}', ['emoji' => Emoji::redHeart(), 'build_date' => $buildDate->toDateTimeString(), 'build_ago' => $buildDate->ago()]);
+        $this->logger->info('Build #{git_sha}: "{git_message}"', ['emoji' => Emoji::memo(), 'git_sha' => $gitHash, 'git_message' => $gitMessage]);
 
         try {
             $this->stateHasChanged();
         } catch (ConnectException $connectException) {
-            $this->logger->critical('{emoji} Could not connect to docker socket! Did you map it?', ['emoji' => Emoji::cryingCat()]);
+            $this->logger->critical('Could not connect to docker socket! Did you map it?', ['emoji' => Emoji::cryingCat()]);
 
             exit;
         }
@@ -452,13 +452,13 @@ class Bouncer
         if ($this->lastUpdateEpoch === null) {
             $isTainted = true;
         } elseif ($this->forcedUpdateIntervalSeconds > 0 && $this->lastUpdateEpoch <= time() - $this->forcedUpdateIntervalSeconds) {
-            $this->logger->warning('{emoji}  Forced update interval of {interval_seconds} seconds has been reached, forcing update.', ['emoji' => Emoji::watch(), 'interval_seconds' => $this->forcedUpdateIntervalSeconds]);
+            $this->logger->warning(' Forced update interval of {interval_seconds} seconds has been reached, forcing update.', ['emoji' => Emoji::watch(), 'interval_seconds' => $this->forcedUpdateIntervalSeconds]);
             $isTainted = true;
         } elseif ($this->previousContainerState === []) {
-            $this->logger->warning('{emoji}  Initial state has not been set, forcing update.', ['emoji' => Emoji::watch()]);
+            $this->logger->warning(' Initial state has not been set, forcing update.', ['emoji' => Emoji::watch()]);
             $isTainted = true;
         } elseif ($this->previousSwarmState === []) {
-            $this->logger->warning('{emoji}  Initial swarm state has not been set, forcing update.', ['emoji' => Emoji::watch()]);
+            $this->logger->warning(' Initial swarm state has not been set, forcing update.', ['emoji' => Emoji::watch()]);
             $isTainted = true;
         }
 
@@ -489,7 +489,7 @@ class Bouncer
         // Calculate Container State Hash
         $containerStateDiff = $this->diff($this->previousContainerState, $newContainerState);
         if (!$isTainted && !empty($containerStateDiff)) {
-            $this->logger->warning('{emoji}  Container state has changed', ['emoji' => Emoji::warning()]);
+            $this->logger->warning(' Container state has changed', ['emoji' => Emoji::warning()]);
             echo $containerStateDiff;
             $isTainted = true;
         }
@@ -500,7 +500,7 @@ class Bouncer
         if ($this->isSwarmMode()) {
             $services = json_decode($this->docker->request('GET', 'services')->getBody()->getContents(), true);
             if (isset($services['message'])) {
-                $this->logger->warning('{emoji} Something happened while interrogating services.. This node is not a swarm node, cannot have services: {message}', ['emoji' => Emoji::warning(), 'message' => $services['message']]);
+                $this->logger->warning('Something happened while interrogating services.. This node is not a swarm node, cannot have services: {message}', ['emoji' => Emoji::warning(), 'message' => $services['message']]);
             } else {
                 foreach ($services as $service) {
                     $name                 = $service['Spec']['Name'];
@@ -527,7 +527,7 @@ class Bouncer
         // Calculate Swarm State Hash, if applicable
         $swarmStateDiff = $this->diff($this->previousSwarmState, $newSwarmState);
         if ($this->isSwarmMode() && !$isTainted && !empty($swarmStateDiff)) {
-            $this->logger->warning('{emoji}  Swarm state has changed', ['emoji' => Emoji::warning()]);
+            $this->logger->warning(' Swarm state has changed', ['emoji' => Emoji::warning()]);
             echo $swarmStateDiff;
             $isTainted = true;
         }
@@ -562,13 +562,13 @@ class Bouncer
         } catch (ServerException $exception) {
             $this->setSwarmMode(false);
         } catch (ConnectException $exception) {
-            $this->logger->critical('{emoji} Unable to connect to docker socket!', ['emoji' => Emoji::warning()]);
+            $this->logger->critical('Unable to connect to docker socket!', ['emoji' => Emoji::warning()]);
             $this->logger->critical($exception->getMessage());
 
             exit(1);
         }
 
-        $this->logger->info('{emoji} Swarm mode is {enabled}.', ['emoji' => Emoji::honeybee(), 'enabled' => $this->isSwarmMode() ? 'enabled' : 'disabled']);
+        $this->logger->info('Swarm mode is {enabled}.', ['emoji' => Emoji::honeybee(), 'enabled' => $this->isSwarmMode() ? 'enabled' : 'disabled']);
 
         $targets = array_values(
             array_merge(
@@ -586,7 +586,7 @@ class Bouncer
         $targets = array_values($sortedTargets);
 
         // Re-generate nginx configs
-        $this->logger->info('{emoji} Found {num_services} services with BOUNCER_DOMAIN set', ['emoji' => Emoji::magnifyingGlassTiltedLeft(), 'num_services' => count($targets)]);
+        $this->logger->info('Found {num_services} services with BOUNCER_DOMAIN set', ['emoji' => Emoji::magnifyingGlassTiltedLeft(), 'num_services' => count($targets)]);
         $this->generateNginxConfigs($targets);
         $this->generateLetsEncryptCerts($targets);
         if ($this->s3Enabled()) {
@@ -660,7 +660,7 @@ class Bouncer
 
     private function writeCertificatesToS3(): void
     {
-        $this->logger->info('{emoji}  Uploading Certificates to S3', ['emoji' => Emoji::CHARACTER_UP_ARROW]);
+        $this->logger->info(' Uploading Certificates to S3', ['emoji' => Emoji::CHARACTER_UP_ARROW]);
         foreach ($this->certificateStoreLocal->listContents('/archive', true) as $file) {
             /** @var FileAttributes $file */
             if ($file->isFile()) {
@@ -709,14 +709,14 @@ class Bouncer
                     'file'       => $target->getNginxConfigFileName(),
                     'config_dir' => Bouncer::FILESYSTEM_CONFIG_DIR,
                 ];
-                $this->logger->info('{emoji}  Created {label}', $context + ['emoji' => Emoji::pencil()]);
+                $this->logger->info(' Created {label}', $context + ['emoji' => Emoji::pencil()]);
                 $this->logger->debug('         -> {config_dir}/{file}', $context);
                 $this->logger->debug('         -> {domain}', $context);
             }
         } else {
-            $this->logger->info('{emoji}  More than {num_max} Nginx configs generated.. Too many to show them all!', ['emoji' => Emoji::pencil(), 'num_max' => $this->getMaximumNginxConfigCreationNotices()]);
+            $this->logger->info(' More than {num_max} Nginx configs generated.. Too many to show them all!', ['emoji' => Emoji::pencil(), 'num_max' => $this->getMaximumNginxConfigCreationNotices()]);
         }
-        $this->logger->info('{emoji}  Updated {num_created} Nginx configs, {num_changed} changed..', ['emoji' => Emoji::pencil(), 'num_created' => count($targets), 'num_changed' => count($changedTargets)]);
+        $this->logger->info(' Updated {num_created} Nginx configs, {num_changed} changed..', ['emoji' => Emoji::pencil(), 'num_created' => count($targets), 'num_changed' => count($changedTargets)]);
 
         $this->pruneNonExistentConfigs($targets);
     }
@@ -734,7 +734,7 @@ class Bouncer
         }
         foreach ($this->configFilesystem->listContents('/') as $file) {
             if (!in_array($file['path'], $expectedFiles)) {
-                $this->logger->info('{emoji}  Removing {file}', ['emoji' => Emoji::wastebasket(), 'file' => $file['path']]);
+                $this->logger->info(' Removing {file}', ['emoji' => Emoji::wastebasket(), 'file' => $file['path']]);
                 $this->configFilesystem->delete($file['path']);
             }
         }
@@ -788,7 +788,7 @@ class Bouncer
                 }
                 if ($timeRemainingSeconds > 2592000) {
                     $this->logger->info(
-                        '{emoji} Skipping {target_name}, certificate is {validity} for {duration_days} days',
+                        'Skipping {target_name}, certificate is {validity} for {duration_days} days',
                         [
                             'emoji'         => Emoji::CHARACTER_PARTYING_FACE,
                             'target_name'   => $target->getName(),
@@ -808,7 +808,7 @@ class Bouncer
             $shell = new Exec();
 
             // Disable nginx tweaks
-            $this->logger->debug('{emoji} Moving nginx tweak file out of the way..', ['emoji' => Emoji::rightArrow()]);
+            $this->logger->debug('Moving nginx tweak file out of the way..', ['emoji' => Emoji::rightArrow()]);
             $disableNginxTweaksCommand = (new CommandBuilder('mv'))
                 ->addSubCommand('/etc/nginx/conf.d/tweak.conf')
                 ->addSubCommand('/etc/nginx/conf.d/tweak.disabled')
@@ -826,17 +826,17 @@ class Bouncer
             $command->addFlag('n');
             $command->addFlag('m', $this->environment['BOUNCER_LETSENCRYPT_EMAIL']);
             $command->addArgument('agree-tos');
-            $this->logger->info('{emoji} Generating letsencrypt for {target_name} - {command}', ['emoji' => Emoji::pencil(), 'target_name' => $target->getName(), 'command' => $command->__toString()]);
+            $this->logger->info('Generating letsencrypt for {target_name} - {command}', ['emoji' => Emoji::pencil(), 'target_name' => $target->getName(), 'command' => $command->__toString()]);
             $shell->run($command);
 
             if ($shell->getReturnValue() == 0) {
-                $this->logger->info('{emoji} Generating successful', ['emoji' => Emoji::partyPopper()]);
+                $this->logger->info('Generating successful', ['emoji' => Emoji::partyPopper()]);
             } else {
-                $this->logger->critical('{emoji} Generating failed!', ['emoji' => Emoji::warning()]);
+                $this->logger->critical('Generating failed!', ['emoji' => Emoji::warning()]);
             }
 
             // Re-enable nginx tweaks
-            $this->logger->debug('{emoji} Moving nginx tweak file back in place..', ['emoji' => Emoji::leftArrow()]);
+            $this->logger->debug('Moving nginx tweak file back in place..', ['emoji' => Emoji::leftArrow()]);
             $disableNginxTweaksCommand = (new CommandBuilder('mv'))
                 ->addSubCommand('/etc/nginx/conf.d/tweak.disabled')
                 ->addSubCommand('/etc/nginx/conf.d/tweak.conf')
@@ -855,13 +855,13 @@ class Bouncer
         $shell   = new Exec();
         $command = new CommandBuilder('/usr/sbin/nginx');
         $command->addFlag('s', 'reload');
-        $this->logger->info('{emoji}  Restarting nginx', ['emoji' => Emoji::timerClock()]);
+        $this->logger->info(' Restarting nginx', ['emoji' => Emoji::timerClock()]);
         $shell->run($command);
     }
 
     private function wipeNginxConfig(): void
     {
-        $this->logger->debug('{emoji} Purging existing config files ...', ['emoji' => Emoji::bomb()]);
+        $this->logger->debug('Purging existing config files ...', ['emoji' => Emoji::bomb()]);
         foreach ($this->configFilesystem->listContents('') as $file) {
             /** @var FileAttributes $file */
             if ($file->isFile() && $file->path() != 'default.conf' && $file->path() != 'default-ssl.conf') {

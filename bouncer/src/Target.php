@@ -318,7 +318,7 @@ class Target
     {
         $this->label = $label;
         $this->updateLogger();
-        // $this->logger->debug('{emoji} Target label set to {label}', ['emoji' => Emoji::label(), 'label' => $label]);
+        // $this->logger->debug('Target label set to {label}', ['emoji' => Emoji::label(), 'label' => $label]);
 
         return $this;
     }
@@ -364,7 +364,7 @@ class Target
             return true;
         }
 
-        $this->logger->warning('{emoji} isEndpointValid: {endpoint} is a hostname that does not resolve', ['emoji' => Emoji::magnifyingGlassTiltedRight(), 'endpoint' => $this->getEndpointHostnameOrIp()]);
+        $this->logger->warning('isEndpointValid: {endpoint} is a hostname that does not resolve', ['emoji' => Emoji::magnifyingGlassTiltedRight(), 'endpoint' => $this->getEndpointHostnameOrIp()]);
 
         return false;
     }

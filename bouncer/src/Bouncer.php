@@ -585,9 +585,7 @@ class Bouncer
         ksort($sortedTargets);
         $targets = array_values($sortedTargets);
 
-        // Wipe configs and rebuild
-        $this->wipeNginxConfig();
-
+        // Re-generate nginx configs
         $this->logger->info('{emoji} Found {num_services} services with BOUNCER_DOMAIN set', ['emoji' => Emoji::magnifyingGlassTiltedLeft(), 'num_services' => count($targets)]);
         $this->generateNginxConfigs($targets);
         $this->generateLetsEncryptCerts($targets);
@@ -716,24 +714,45 @@ class Bouncer
             $this->logger->info('{emoji}  More than {num_max} Nginx configs generated.. Too many to show them all!', ['emoji' => Emoji::pencil(), 'num_max' => $this->getMaximumNginxConfigCreationNotices()]);
         }
         $this->logger->info('{emoji}  Updated {num_created} Nginx configs, {num_changed} changed..', ['emoji' => Emoji::pencil(), 'num_created' => count($targets), 'num_changed' => count($changedTargets)]);
+
+        $this->pruneNonExistentConfigs($targets);
+    }
+
+    /**
+     * @param $targets Target[]
+     */
+    protected function pruneNonExistentConfigs(array $targets): void
+    {
+        $expectedFiles = [
+            'default.conf',
+        ];
+        foreach ($targets as $target) {
+            $expectedFiles = array_merge($expectedFiles, $target->getExpectedFiles());
+        }
+        foreach ($this->configFilesystem->listContents('/') as $file) {
+            if (!in_array($file['path'], $expectedFiles)) {
+                $this->logger->info('{emoji}  Removing {file}', ['emoji' => Emoji::wastebasket(), 'file' => $file['path']]);
+                $this->configFilesystem->delete($file['path']);
+            }
+        }
     }
 
     private function generateNginxConfig(Target $target): bool
     {
         $configData     = $this->twig->render('NginxTemplate.twig', $target->__toArray());
         $changed        = false;
-        $configFileHash = $this->configFilesystem->fileExists($target->getFileName()) ? sha1($this->configFilesystem->read($target->getFileName())) : null;
+        $configFileHash = $this->configFilesystem->fileExists($target->getNginxConfigFileName()) ? sha1($this->configFilesystem->read($target->getNginxConfigFileName())) : null;
 
         if (sha1($configData) != $configFileHash) {
-            $this->configFilesystem->write($target->getFileName(), $configData);
+            $this->configFilesystem->write($target->getNginxConfigFileName(), $configData);
             $changed = true;
         }
 
         if ($target->hasAuth()) {
-            $authFileHash   = $this->configFilesystem->fileExists($target->getAuthFileName()) ? $this->configFilesystem->read($target->getAuthFileName() . '.hash') : null;
+            $authFileHash   = $this->configFilesystem->fileExists($target->getBasicAuthFileName()) ? $this->configFilesystem->read($target->getBasicAuthHashFileName()) : null;
             if ($target->getAuthHash() != $authFileHash) {
-                $this->configFilesystem->write($target->getAuthFileName() . '.hash', $target->getAuthHash());
-                $this->configFilesystem->write($target->getAuthFileName(), $target->getAuthFileData());
+                $this->configFilesystem->write($target->getBasicAuthHashFileName(), $target->getAuthHash());
+                $this->configFilesystem->write($target->getBasicAuthFileName(), $target->getBasicAuthFileData());
                 $changed = true;
             }
         }

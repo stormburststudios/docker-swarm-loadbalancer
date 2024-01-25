@@ -48,7 +48,7 @@ class Target
             'allowLargePayloads'    => $this->isAllowLargePayloads(),
             'proxyTimeoutSeconds'   => $this->getProxyTimeoutSeconds(),
             'hasAuth'               => $this->hasAuth(),
-            'authFile'              => $this->getAuthFileName(),
+            'authFile'              => $this->getBasicAuthFileName(),
             'hasHostOverride'       => $this->hasHostOverride(),
             'hostOverride'          => $this->getHostOverride(),
         ];
@@ -121,21 +121,38 @@ class Target
         return $this->username != null && $this->password != null;
     }
 
-    public function getFileName(): string
+    public function getNginxConfigFileName(): string
     {
         return "{$this->getName()}.conf";
     }
 
-    public function getAuthFileName(): string
+    public function getBasicAuthFileName(): string
     {
         return "{$this->getName()}.secret";
     }
 
-    public function getAuthFileData(): string
+    public function getBasicAuthHashFileName(): string
+    {
+        return "{$this->getBasicAuthFileName()}.hash";
+    }
+
+    public function getBasicAuthFileData(): string
     {
         $output = shell_exec(sprintf('htpasswd -nibB -C10 %s %s', $this->getUsername(), $this->getPassword()));
 
         return trim($output) . "\n";
+    }
+
+    /**
+     * Return an array of files that should exist for this target.
+     */
+    public function getExpectedFiles(): array
+    {
+        return array_filter([
+            $this->getNginxConfigFileName(),
+            $this->hasAuth() ? $this->getBasicAuthFileName() : null,
+            $this->hasAuth() ? $this->getBasicAuthHashFileName() : null,
+        ]);
     }
 
     public function getProxyTimeoutSeconds(): ?int

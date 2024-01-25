@@ -294,7 +294,7 @@ class Target
 
     public function getLabel()
     {
-        return $this->label ?? $this->getLabel();
+        return $this->label ?? $this->getName();
     }
 
     public function setLabel(string $label): self

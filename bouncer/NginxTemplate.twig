@@ -30,7 +30,11 @@ server {
     proxy_set_header X-Real-IP  $remote_addr;
     proxy_set_header X-Forwarded-For $remote_addr;
     proxy_set_header X-Forwarded-Proto https;
+{% if hasHostOverride %}
+    proxy_set_header Host {{ hostOverride }};
+{% else %}
     proxy_set_header Host $host;
+{% endif %}
 
 {% if hasAuth %}
     auth_basic           "closed site";
@@ -51,7 +55,7 @@ server {
 {% endif %}
 
     proxy_pass  {{ targetPath }};
-  }
+  %}
 }
 
 {% if not allowNonSSL %}

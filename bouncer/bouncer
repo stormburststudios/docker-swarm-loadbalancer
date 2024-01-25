@@ -6,6 +6,7 @@ use AdamBrett\ShellWrapper\Command\Builder as CommandBuilder;
 use AdamBrett\ShellWrapper\Runners\Exec;
 use Aws\S3\S3Client;
 use Bramus\Monolog\Formatter\ColoredLineFormatter;
+use Carbon\Carbon;
 use GuzzleHttp\Client as Guzzle;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\ServerException;
@@ -39,6 +40,8 @@ class BouncerTarget
     private ?string $username           = null;
     private ?string $password           = null;
 
+    private ?string $hostOverride = null;
+
     public function __construct(
         private Logger $logger
     ) {
@@ -60,7 +63,26 @@ class BouncerTarget
             'proxyTimeoutSeconds'   => $this->getProxyTimeoutSeconds(),
             'hasAuth'               => $this->hasAuth(),
             'authFile'              => $this->getAuthFileName(),
+            'hasHostOverride'       => $this->hasHostOverride(),
+            'hostOverride'          => $this->getHostOverride(),
         ];
+    }
+
+    public function getHostOverride(): ?string
+    {
+        return $this->hostOverride;
+    }
+
+    public function hasHostOverride(): bool
+    {
+        return $this->hostOverride !== null;
+    }
+
+    public function setHostOverride(string $hostOverride): BouncerTarget
+    {
+        $this->hostOverride = $hostOverride;
+
+        return $this;
     }
 
     public function getUsername(): ?string
@@ -592,12 +614,15 @@ class Bouncer
     public function run(): void
     {
         $gitHash = substr($this->environment['GIT_SHA'], 0, 7);
-        $this->logger->info(sprintf('%s  Starting Bouncer git=%s...', Emoji::CHARACTER_TIMER_CLOCK, $gitHash));
+        $this->logger->info('{emoji}  Starting Bouncer git={git_sha}...', ['emoji' => Emoji::CHARACTER_TIMER_CLOCK, 'git_sha' => $gitHash]);
+
+        $buildDate = Carbon::parse($this->environment['BUILD_DATE']);
+        $this->logger->info('{emoji}  Built on {build_date}, {build_ago}', ['emoji' => Emoji::CHARACTER_TIMER_CLOCK, 'build_date' => $buildDate->toDateTimeString(), 'build_ago' => $buildDate->ago()]);
 
         try {
             $this->stateHasChanged();
         } catch (ConnectException $connectException) {
-            $this->logger->critical(sprintf('%s Could not connect to docker socket! Did you map it?', Emoji::CHARACTER_CRYING_CAT));
+            $this->logger->critical('{emoji} Could not connect to docker socket! Did you map it?', ['emoji' => Emoji::CHARACTER_CRYING_CAT]);
 
             exit;
         }
@@ -622,6 +647,11 @@ class Bouncer
                 case 'BOUNCER_AUTH':
                     [$username, $password] = explode(':', $eVal);
                     $bouncerTarget->setAuth($username, $password);
+
+                    break;
+
+                case 'BOUNCER_HOST_OVERRIDE':
+                    $bouncerTarget->setHostOverride($eVal);
 
                     break;
 

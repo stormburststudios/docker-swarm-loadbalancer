@@ -6,6 +6,7 @@ fix: php-cs-fixer
 
 build-n-push:
 	docker build \
+		--build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
 		--build-arg GIT_SHA=$(shell git rev-parse HEAD) \
 		--tag benzine/bouncer \
 		--tag ghcr.io/benzine-framework/bouncer \

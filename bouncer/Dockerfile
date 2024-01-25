@@ -1,6 +1,9 @@
 FROM benzine/php:cli-8.1 as bouncer
+ARG BUILD_DATE
 ARG GIT_SHA
-ENV GIT_SHA=${GIT_SHA}
+ENV BUILD_DATE=${BUILD_DATE} \
+    GIT_SHA=${GIT_SHA}
+
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
       org.opencontainers.image.source="https://github.com/benzine-framework/docker"

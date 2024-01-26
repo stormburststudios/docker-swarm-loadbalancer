@@ -14,7 +14,8 @@ jobs:
     name: Vanity Tags
     runs-on: ubuntu-latest
     env:
-      latest-stable-version: "8.2"
+      latest-stable-version: "8.3"
+      base_tag: "benzine/php"
     strategy:
       fail-fast: false
       matrix:
@@ -22,18 +23,27 @@ jobs:
           - cli
           - nginx
           - apache
+        output_tag:
+          - "benzine/php"
+          - "gone/php"
+          - "ghcr.io/benzine-framework/php"
     steps:
-      - uses: docker/login-action@v2
-        name: Login to Docker Hub
+      - name: "Setup: Login to Docker Hub"
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-      - name: Retag benzine/php:${{ matrix.variant }}-${{ env.latest-stable-version }} to benzine/php:${{ matrix.variant }}
+
+      - name: "Setup: Login to GHCR"
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_PASSWORD }}
+
+      - name: "Retag ${{ env.base_tag }}:${{ matrix.variant }}-${{ env.latest-stable-version }} to ${{ matrix.output_tag }}:${{ matrix.variant }}"
         run: |
-          docker pull benzine/php:${{ matrix.variant }}-${{ env.latest-stable-version }}
-          docker tag benzine/php:${{ matrix.variant }}-${{ env.latest-stable-version }} benzine/php:${{ matrix.variant }}
-          docker push benzine/php:${{ matrix.variant }}
-          docker tag benzine/php:${{ matrix.variant }}-${{ env.latest-stable-version }} gone/php:${{ matrix.variant }}-${{ env.latest-stable-version }}
-          docker push gone/php:${{ matrix.variant }}-${{ env.latest-stable-version }}
-          docker tag benzine/php:${{ matrix.variant }}-${{ env.latest-stable-version }} gone/php:${{ matrix.variant }}
-          docker push gone/php:${{ matrix.variant }}
+          docker pull ${{ env.base_tag }}:${{ matrix.variant }}-${{ env.latest-stable-version }}
+          docker tag ${{ env.base_tag }}:${{ matrix.variant }}-${{ env.latest-stable-version }} ${{ matrix.output_tag }}:${{ matrix.variant }}
+          docker push ${{ matrix.output_tag }}:${{ matrix.variant }}
+          

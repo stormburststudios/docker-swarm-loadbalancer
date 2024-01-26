@@ -26,26 +26,35 @@ jobs:
           - "8.0"
           - "8.1"
           - "8.2"
+          - "8.3"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: laravel
+
       - uses: docker/setup-qemu-action@v2
+
       - uses: docker/setup-buildx-action@v2
+
       - uses: docker/login-action@v2
         name: Login to Docker Hub
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
       - uses: docker/build-push-action@v3
         name: Build & Push
         with:
           context: laravel
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ !env.ACT && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
           pull: true
-          push: true
+          push: ${{ !env.ACT && true || false }}
           build-args: |
             PHP_VERSION=${{ matrix.version }}
           tags: |
             matthewbaggett/laravel:${{ matrix.version }}
+          cache-from: ${{ !env.ACT && 'type=gha' || 'type=local,src=.cache' }}
+          cache-to: ${{ !env.ACT && 'type=gha,mode=max' || 'type=local,dest=.cache' }}
 
   laravel-tag-latest:
     name: "Bake Laravel Container"
@@ -57,7 +66,9 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-      - run: | 
+      - name: "Retag matthewbaggett/laravel:${{ matrix.version }} to matthewbaggett/laravel:latest"
+        if: ${{ !env.ACT }}
+        run: | 
           docker pull matthewbaggett/laravel:8.2
           docker tag matthewbaggett/laravel:8.2 matthewbaggett/laravel:latest
           docker push matthewbaggett/laravel:latest

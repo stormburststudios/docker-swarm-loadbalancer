@@ -1,7 +1,4 @@
 #!/bin/bash
-MARSHALL_VERSION=$(cat /etc/marshall_version)
-MARSHALL_BUILD_DATE=$(cat /etc/marshall_build_date)
-MARSHALL_BUILD_HOST=$(cat /etc/marshall_build_host)
 UBUNTU_VERSION=$(cat /etc/os-release | grep VERSION= | cut -d'=' -f2 | sed -e 's/\"//g')
 PHP_VERSION=$(/usr/bin/php --version | head -n 1 | cut -d' ' -f2 | cut -d'-' -f1);
 COMPOSER_VERSION=$(/usr/local/bin/composer --version | cut -d' ' -f 3);
@@ -42,7 +39,7 @@ echo
 # @todo This bombs out if it can't read from a restricted repo. Revise later.
 #if [ -f /app/composer.json ]; then
 #    if [ -f /app/composer.lock ]; then
-#        echo -e "Outdated ${COLOUR_FAIL}Composer${COLOUR_NONE} packages:"
+#        echo -e "Outdated ${COLOUR_FAIL}Composer${COLOUR_RESET} packages:"
 #        /usr/local/bin/composer outdated
 #    fi
 #fi

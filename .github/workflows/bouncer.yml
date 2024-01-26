@@ -82,7 +82,7 @@ jobs:
           target: bouncer
           build-args: |
             GIT_SHA="${{ github.sha }}"
-            BUILD_DATE="${{ steps.date.outputs.datetime }}"
+            BUILD_DATE="${{ steps.date.outputs.container_build_datetime }}"
             GIT_COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
           tags: |
             benzine/bouncer

@@ -73,7 +73,7 @@ jobs:
         run: composer install --ignore-platform-reqs
 
       - name: "Build: Build & Push image to GHCR & Docker Hub"
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: bouncer
           platforms: linux/amd64,linux/arm64

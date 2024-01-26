@@ -19,7 +19,7 @@ on:
       - completed
 
 jobs:
-  php-build-flavours:
+  php-flavours-build:
     name: "Build PHP Flavours"
     runs-on: ubuntu-latest
     strategy:

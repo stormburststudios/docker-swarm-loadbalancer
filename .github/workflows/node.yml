@@ -16,7 +16,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  node-build-flavours:
+  node-flavours-build:
     name: "Build Node Flavours"
     runs-on: ubuntu-latest
     strategy:

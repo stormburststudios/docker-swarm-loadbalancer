@@ -16,7 +16,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  MQTT-build:
+  mqtt-build:
     name: "MQTT"
     runs-on: ubuntu-latest
     steps:

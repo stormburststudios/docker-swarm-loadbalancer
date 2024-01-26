@@ -17,7 +17,7 @@ on:
 
 jobs:
 
-  build:
+  marshall-build:
     name: "Build Marshall"
     runs-on: ubuntu-latest
     steps:

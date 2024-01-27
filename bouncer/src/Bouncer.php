@@ -310,7 +310,7 @@ class Bouncer
         $buildDate  = Carbon::parse($this->environment['BUILD_DATE']);
         $gitMessage = trim($this->environment['GIT_COMMIT_MESSAGE']);
         $this->logger->info(' Starting Bouncer. Built on {build_date}, {build_ago}', ['emoji' => Emoji::redHeart(), 'build_date' => $buildDate->toDateTimeString(), 'build_ago' => $buildDate->ago()]);
-        $this->logger->info('Build #{git_sha}: "{git_message}"', ['emoji' => Emoji::memo(), 'git_sha' => $gitHash, 'git_message' => $gitMessage]);
+        $this->logger->info(' Build #{git_sha}: "{git_message}"', ['emoji' => Emoji::memo(), 'git_sha' => $gitHash, 'git_message' => $gitMessage]);
 
         try {
             $this->stateHasChanged();
@@ -489,7 +489,7 @@ class Bouncer
         // Calculate Container State Hash
         $containerStateDiff = $this->diff($this->previousContainerState, $newContainerState);
         if (!$isTainted && !empty($containerStateDiff)) {
-            if($this->settings->get('logger/show_state_deltas', false)) {
+            if($this->settings->if('logger/show_state_deltas')) {
                 $this->logger->warning(' Container state has changed', ['emoji' => Emoji::warning()]);
                 echo $containerStateDiff;
             }
@@ -529,7 +529,7 @@ class Bouncer
         // Calculate Swarm State Hash, if applicable
         $swarmStateDiff = $this->diff($this->previousSwarmState, $newSwarmState);
         if ($this->isSwarmMode() && !$isTainted && !empty($swarmStateDiff)) {
-            if($this->settings->get('logger/show_state_deltas', false)){
+            if($this->settings->if('logger/show_state_deltas')){
                 $this->logger->warning(' Swarm state has changed', ['emoji' => Emoji::warning()]);
                 echo $swarmStateDiff;
             }

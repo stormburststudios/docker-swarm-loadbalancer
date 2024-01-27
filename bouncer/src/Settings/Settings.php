@@ -49,9 +49,10 @@ class Settings implements SettingsInterface
                 'line_format'           => Settings::getEnvironment('LOG_LINE_FORMAT', '[%datetime%] %context.emoji% %level_name%: %channel%: %message%') . "\n",
                 'max_level_name_length' => Settings::getEnvironment('LOG_LEVEL_NAME_LENGTH', 4),
                 'coloured_output'       => Settings::isEnabled('LOG_COLOUR', true),
-                'show_state_deltas'     => Settings::isEnabled('LOG_SHOW_STATE_DELTAS', false),
+                'show_state_deltas'     => Settings::isEnabled('LOG_SHOW_STATE_DELTAS'),
             ],
         ];
+        \Kint::dump($this->settings);
     }
 
     public function get(string $key = '', mixed $default = null): mixed

@@ -713,14 +713,14 @@ class Bouncer
                     'file'       => $target->getNginxConfigFileName(),
                     'config_dir' => Bouncer::FILESYSTEM_CONFIG_DIR,
                 ];
-                $this->logger->info(' Created {label}', $context + ['emoji' => Emoji::pencil()]);
-                $this->logger->debug('         -> {config_dir}/{file}', $context);
-                $this->logger->debug('         -> {domain}', $context);
+                $this->logger->info('Created {label}', $context + ['emoji' => Emoji::pencil() . " "]);
+                $this->logger->debug('  -> {config_dir}/{file}', $context);
+                $this->logger->debug('  -> {domain}', $context);
             }
         } else {
-            $this->logger->info(' More than {num_max} Nginx configs generated.. Too many to show them all!', ['emoji' => Emoji::pencil(), 'num_max' => $this->getMaximumNginxConfigCreationNotices()]);
+            $this->logger->info(' More than {num_max} Nginx configs generated.. Too many to show them all!', ['emoji' => Emoji::pencil() . " ", 'num_max' => $this->getMaximumNginxConfigCreationNotices()]);
         }
-        $this->logger->info(' Updated {num_created} Nginx configs, {num_changed} changed..', ['emoji' => Emoji::pencil(), 'num_created' => count($targets), 'num_changed' => count($changedTargets)]);
+        $this->logger->info('Updated {num_created} Nginx configs, {num_changed} changed..', ['emoji' => Emoji::pencil() . " ", 'num_created' => count($targets), 'num_changed' => count($changedTargets)]);
 
         $this->pruneNonExistentConfigs($targets);
     }
@@ -830,7 +830,7 @@ class Bouncer
             $command->addFlag('n');
             $command->addFlag('m', $this->environment['BOUNCER_LETSENCRYPT_EMAIL']);
             $command->addArgument('agree-tos');
-            $this->logger->info('Generating letsencrypt for {target_name} - {command}', ['emoji' => Emoji::pencil(), 'target_name' => $target->getName(), 'command' => $command->__toString()]);
+            $this->logger->info('Generating letsencrypt for {target_name} - {command}', ['emoji' => Emoji::pencil() . " ", 'target_name' => $target->getName(), 'command' => $command->__toString()]);
             $shell->run($command);
 
             if ($shell->getReturnValue() == 0) {
@@ -859,7 +859,7 @@ class Bouncer
         $shell   = new Exec();
         $command = new CommandBuilder('/usr/sbin/nginx');
         $command->addFlag('s', 'reload');
-        $this->logger->info(' Restarting nginx', ['emoji' => Emoji::timerClock()]);
+        $this->logger->info('Restarting nginx', ['emoji' => Emoji::timerClock() . " "]);
         $shell->run($command);
     }
 

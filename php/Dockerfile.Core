@@ -29,10 +29,6 @@ RUN echo "APT::Acquire::Retries \"5\";" > /etc/apt/apt.conf.d/80-retries && \
         && \
     apt-get autoremove -yqq && \
     apt-get clean && \
-    curl https://getcomposer.org/composer-stable.phar --output /usr/local/bin/composer && \
-    chmod +x /usr/local/bin/composer /usr/bin/install-report && \
-    composer self-update ${COMPOSER_UPDATE_FLAGS} && \
-    /usr/bin/install-report && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log && \
     rm -rf  /usr/bin/mariabackup \
             /usr/bin/mysql_embedded \
@@ -51,3 +47,10 @@ RUN echo "APT::Acquire::Retries \"5\";" > /etc/apt/apt.conf.d/80-retries && \
             /usr/bin/mysqlshow \
             /usr/bin/mysqlslap \
             /usr/bin/mytop
+
+RUN chmod +x /usr/bin/install-report && \
+    /usr/bin/install-report
+
+RUN curl https://getcomposer.org/composer-stable.phar --output /usr/local/bin/composer && \
+    chmod +x /usr/local/bin/composer /usr/bin/install-report && \
+    composer self-update ${COMPOSER_UPDATE_FLAGS}

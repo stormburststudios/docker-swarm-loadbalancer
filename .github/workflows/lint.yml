@@ -25,6 +25,6 @@ jobs:
           - bouncer/Dockerfile
     steps:
       - uses: actions/checkout@v3
-      - uses: hadolint/hadolint-action@v3
+      - uses: hadolint/hadolint-action@v3.1.0 # Yes you have to be version-specific, because they don't publish v3
         with:
           dockerfile: ./${{ matrix.dockerfile }}

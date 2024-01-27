@@ -489,8 +489,10 @@ class Bouncer
         // Calculate Container State Hash
         $containerStateDiff = $this->diff($this->previousContainerState, $newContainerState);
         if (!$isTainted && !empty($containerStateDiff)) {
-            $this->logger->warning(' Container state has changed', ['emoji' => Emoji::warning()]);
-            echo $containerStateDiff;
+            if($this->settings->get('logger/show_state_deltas', false)) {
+                $this->logger->warning(' Container state has changed', ['emoji' => Emoji::warning()]);
+                echo $containerStateDiff;
+            }
             $isTainted = true;
         }
         $this->previousContainerState = $newContainerState;
@@ -527,8 +529,10 @@ class Bouncer
         // Calculate Swarm State Hash, if applicable
         $swarmStateDiff = $this->diff($this->previousSwarmState, $newSwarmState);
         if ($this->isSwarmMode() && !$isTainted && !empty($swarmStateDiff)) {
-            $this->logger->warning(' Swarm state has changed', ['emoji' => Emoji::warning()]);
-            echo $swarmStateDiff;
+            if($this->settings->get('logger/show_state_deltas', false)){
+                $this->logger->warning(' Swarm state has changed', ['emoji' => Emoji::warning()]);
+                echo $swarmStateDiff;
+            }
             $isTainted = true;
         }
         $this->previousSwarmState = $newSwarmState;

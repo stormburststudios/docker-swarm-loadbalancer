@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      max-parallel: ${{ !env.ACT && 15 || 1 }}
+      max-parallel: 15
       matrix:
         variant:
           - cli

@@ -20,7 +20,7 @@ jobs:
     name: "Redis with Healthchecks"
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: ${{ !env.ACT && 15 || 1 }}
+      max-parallel: 15
       matrix:
         redis:
           - 3

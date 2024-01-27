@@ -22,7 +22,7 @@ jobs:
     name: "Build PHP Core"
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: ${{ !env.ACT && 15 || 1 }}
+      max-parallel: 15
       fail-fast: false
       matrix:
         version:

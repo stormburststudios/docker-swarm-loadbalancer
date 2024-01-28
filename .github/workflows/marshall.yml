@@ -70,5 +70,5 @@ jobs:
             MARSHALL_VERSION=${{ steps.environment.outputs.marshall_version }}
             MARSHALL_BUILD_DATE=${{ steps.environment.outputs.marshall_build_date }}
             MARSHALL_BUILD_HOST=${{ steps.environment.outputs.marshall_build_host }}
-          cache-from: ${{ !env.ACT && 'type=gha' || 'type=local,src=.github/cache' }}
-          cache-to: ${{ !env.ACT && 'type=gha,mode=max' || 'type=local,dest=.github/cache' }}
+          cache-from: ${{ !env.ACT && 'type=gha' || 'type=local,src=.github/cache/docker' }}
+          cache-to: ${{ !env.ACT && 'type=gha,mode=max' || 'type=local,dest=.github/cache/docker' }}

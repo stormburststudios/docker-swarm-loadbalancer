@@ -97,7 +97,7 @@ jobs:
           tags: |
             ${{ !env.ACT && format('benzine/mitmproxy:{0}',matrix.mitmproxy) || '' }}
             ${{ format('ghcr.io/benzine-framework/mitmproxy:{0}', matrix.mitmproxy) }}
-          cache-from: ${{ !env.ACT && 'type=gha' || 'type=local,src=.github/cache' }}
-          cache-to: ${{ !env.ACT && 'type=gha,mode=max' || 'type=local,dest=.github/cache' }}
+          cache-from: ${{ !env.ACT && 'type=gha' || '' }}
+          cache-to: ${{ !env.ACT && 'type=gha,mode=max' || '' }}
 
 

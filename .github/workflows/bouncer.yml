@@ -94,5 +94,5 @@ jobs:
           tags: |
             ${{ !env.ACT && 'benzine/bouncer:latest' || '' }}
             ${{ !env.ACT && 'ghcr.io/benzine-framework/bouncer:latest' || 'ghcr.io/benzine-framework/bouncer:devel' }}
-          cache-from: ${{ !env.ACT && 'type=gha' || 'type=local,src=.cache' }}
-          cache-to: ${{ !env.ACT && 'type=gha,mode=max' || 'type=local,dest=.cache' }}
+          cache-from: ${{ !env.ACT && 'type=gha' || 'type=local,src=.github/cache' }}
+          cache-to: ${{ !env.ACT && 'type=gha,mode=max' || 'type=local,dest=.github/cache' }}

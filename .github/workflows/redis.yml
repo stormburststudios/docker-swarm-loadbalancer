@@ -81,7 +81,7 @@ jobs:
           tags: |
             ${{ !env.ACT && format('benzine/redis:{0}',matrix.redis) || '' }}
             ${{ format('ghcr.io/benzine-framework/redis:{0}', matrix.redis) }}
-          cache-from: ${{ !env.ACT && 'type=gha' || 'type=local,src=.cache' }}
-          cache-to: ${{ !env.ACT && 'type=gha,mode=max' || 'type=local,dest=.cache' }}
+          cache-from: ${{ !env.ACT && 'type=gha' || 'type=local,src=.github/cache' }}
+          cache-to: ${{ !env.ACT && 'type=gha,mode=max' || 'type=local,dest=.github/cache' }}
 
 

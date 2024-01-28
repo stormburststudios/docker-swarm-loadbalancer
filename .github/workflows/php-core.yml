@@ -105,5 +105,5 @@ jobs:
             benzine/php:core-${{ matrix.version }}
           build-args: |
             ${{ steps.build_args.outputs.result }}
-          cache-from: ${{ !env.ACT && 'type=gha' || 'type=local,src=.cache' }}
-          cache-to: ${{ !env.ACT && 'type=gha,mode=max' || 'type=local,dest=.cache' }}
+          cache-from: ${{ !env.ACT && 'type=gha' || 'type=local,src=.github/cache' }}
+          cache-to: ${{ !env.ACT && 'type=gha,mode=max' || 'type=local,dest=.github/cache' }}

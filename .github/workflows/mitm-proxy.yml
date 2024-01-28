@@ -20,6 +20,7 @@ jobs:
     name: "MITM proxy with Healthchecks"
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       max-parallel: 15
       matrix:
         mitmproxy:
@@ -69,7 +70,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           sparse-checkout: |
-            mitmproxy
+            mitm-proxy
 
       - name: "Setup: Login to Docker Hub"
         if: ${{ !env.ACT }}
@@ -91,6 +92,10 @@ jobs:
           context: mitm-proxy
           build-contexts: |
             mitmproxy/mitmproxy=docker-image://mitmproxy/mitmproxy:${{ matrix.mitmproxy }}
+          build-args: |
+            MITMPROXY_VERSION=${{ matrix.mitmproxy }}
+            GIT_SHA=${{ github.sha }}
+            BUILD_DATE=${{ github.event.repository.pushed_at }}
           platforms: ${{ (!env.ACT && !(startsWith('6.',matrix.mitmproxy) || startsWith('5.', matrix.mitmproxy))) && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
           pull: true
           push: true

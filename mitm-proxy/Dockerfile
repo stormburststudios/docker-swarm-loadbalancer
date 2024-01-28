@@ -1,9 +1,17 @@
 # From upstream redis
 # hadolint ignore=DL3007
 FROM mitmproxy/mitmproxy
+ARG BUILD_DATE
+ARG GIT_SHA
+ARG MITM_VERSION
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
-      org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
-      org.opencontainers.image.source="https://github.com/benzine-framework/docker"
+      org.opencontainers.image.source="https://github.com/benzine-framework/docker/mitm-proxy" \
+      org.opencontainers.image.title="mitm-proxy with healthcheck" \
+      org.opencontainers.image.created="${BUILD_DATE}" \
+      org.opencontainers.image.version="${MITM_VERSION}" \
+      org.opencontainers.image.revision="${GIT_SHA}" \
+      org.opencontainers.image.vendor="Benzine" \
+      org.opencontainers.image.authors="Matthew Baggett <matthew@baggett.me>"
 
 # Install curl
 # hadolint ignore=DL3018,DL4006
@@ -31,5 +39,5 @@ RUN os=$(grep "^ID=" < /etc/os-release | cut -f2 -d'=') && \
     fi
 
 # Add healthcheck
-#HEALTHCHECK --interval=30s --timeout=3s \
-#  CMD redis-cli PING
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD curl -I -x http://localhost:8080 -k https://www.google.com || exit 1

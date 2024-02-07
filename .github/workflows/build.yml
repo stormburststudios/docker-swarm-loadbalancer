@@ -32,7 +32,7 @@ jobs:
 
   php:
     needs: marshall
-    name: PHP Core
+    name: PHP
     uses: ./.github/workflows/php.yml
     secrets: inherit
     permissions:

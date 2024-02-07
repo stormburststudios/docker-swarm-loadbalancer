@@ -327,6 +327,10 @@ class Bouncer
     public function parseContainerEnvironmentVariables(array $envs, Target $bouncerTarget): Target
     {
         foreach ($envs as $eKey => $eVal) {
+            if(empty($eVal)){
+                $this->logger->warning("{key} set for {target} is empty, skipping.", ['key' => $eKey, 'emoji' => Emoji::warning(), 'target' => $bouncerTarget->getName()]);
+                continue;
+            }
             switch ($eKey) {
                 case 'BOUNCER_LABEL':
                     $bouncerTarget->setLabel($eVal);

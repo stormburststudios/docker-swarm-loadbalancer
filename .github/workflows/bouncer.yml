@@ -7,7 +7,7 @@ permissions:
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - bouncer/**
       - .github/workflows/bouncer.yml

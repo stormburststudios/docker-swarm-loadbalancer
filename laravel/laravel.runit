@@ -12,9 +12,9 @@ chmod 777 -R /app/storage
 chmod +x /app/artisan
 
 php /app/artisan package:discover
-if [ "${REGENERATE_KEYS,,}" = "on" ]; then
-  php /app/artisan key:generate
-  php /app/artisan passport:keys --force
+if [[ ${REGENERATE_KEYS,,} == "on" ]]; then
+	php /app/artisan key:generate
+	php /app/artisan passport:keys --force
 fi
 
 echo "[LARAVEL-FIXER] Waiting for mysql..."
@@ -30,5 +30,5 @@ tail -n0 -f /app/storage/logs/laravel-*.log /app/storage/logs/laravel.log &
 
 # Sleep forever (and sleep again incase the sleep process is killed)
 while true; do
-  sleep infinity
+	sleep infinity
 done

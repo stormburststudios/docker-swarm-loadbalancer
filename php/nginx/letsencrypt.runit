@@ -1,55 +1,55 @@
 #!/usr/bin/env bash
-if [ -z "$LETSENCRYPT_DOMAINS" ]; then
-  echo "LetsEncrypt not enabled"
-  while true; do
-    sleep infinity
-  done
+if [[ -z ${LETSENCRYPT_DOMAINS} ]]; then
+	echo "LetsEncrypt not enabled"
+	while true; do
+		sleep infinity
+	done
 fi
 
-if [ -z "$LETSENCRYPT_EMAIL" ]; then
-  echo "LetsEncrypt not enabled - You must set LETSENCRYPT_EMAIL"
-  while true; do
-    sleep infinity
-  done
+if [[ -z ${LETSENCRYPT_EMAIL} ]]; then
+	echo "LetsEncrypt not enabled - You must set LETSENCRYPT_EMAIL"
+	while true; do
+		sleep infinity
+	done
 fi
 
-if [ "${LETSENCRYPT_MODE,,}" = "production" ]; then
-    echo -e "LetsEncrypt is running against the \e[32mPRODUCTION\e[0m servers."
-    LETSENCRYPT_MODE=""
+if [[ ${LETSENCRYPT_MODE,,} == "production" ]]; then
+	echo -e "LetsEncrypt is running against the \e[32mPRODUCTION\e[0m servers."
+	LETSENCRYPT_MODE=""
 else
-    echo -e "LetsEncrypt is running against the \e[31mSTAGING\e[0m servers."
-    LETSENCRYPT_MODE="--test-cert"
+	echo -e "LetsEncrypt is running against the \e[31mSTAGING\e[0m servers."
+	LETSENCRYPT_MODE="--test-cert"
 fi
 echo -e "To change this, change the value of LETSENCRYPT_MODE"
 
 # Give Nginx a moment to start before we kill it again.
-sleep 30;
+sleep 30
 
 echo -e "Certbot is running for \e[33m${LETSENCRYPT_EMAIL}\e[0m / \e[33m${LETSENCRYPT_DOMAINS}\e[0m..."
-( \
-  set -x; \
-  certbot \
-    certonly \
-      --nginx \
-      $LETSENCRYPT_MODE \
-      -d $LETSENCRYPT_DOMAINS \
-      -n \
-      -m $LETSENCRYPT_EMAIL \
-      --agree-tos \
+(
+	set -x
+	certbot \
+		certonly \
+		--nginx \
+		"${LETSENCRYPT_MODE}" \
+		-d "${LETSENCRYPT_DOMAINS}" \
+		-n \
+		-m "${LETSENCRYPT_EMAIL}" \
+		--agree-tos
 )
 
 echo -e "Certbot complete!"
 
 # replace the self-certs with these lovely new certs.
-if [ -f "/etc/letsencrypt/live/${LETSENCRYPT_DOMAINS}/fullchain.pem" ]; then
-  sed -i     "s|ssl_certificate .*|ssl_certificate     /etc/letsencrypt/live/${LETSENCRYPT_DOMAINS}/fullchain.pem;|g" /etc/nginx/sites-enabled/default-ssl
-  sed -i "s|ssl_certificate_key .*|ssl_certificate_key /etc/letsencrypt/live/${LETSENCRYPT_DOMAINS}/privkey.pem;|g" /etc/nginx/sites-enabled/default-ssl
+if [[ -f "/etc/letsencrypt/live/${LETSENCRYPT_DOMAINS}/fullchain.pem" ]]; then
+	sed -i "s|ssl_certificate .*|ssl_certificate     /etc/letsencrypt/live/${LETSENCRYPT_DOMAINS}/fullchain.pem;|g" /etc/nginx/sites-enabled/default-ssl
+	sed -i "s|ssl_certificate_key .*|ssl_certificate_key /etc/letsencrypt/live/${LETSENCRYPT_DOMAINS}/privkey.pem;|g" /etc/nginx/sites-enabled/default-ssl
 
-  echo "Reloading Nginx"
-  nginx -s reload
-  # Sleep for 24 hours and try again tomorrow with a renewal, just in case.
-  sleep 86400
+	echo "Reloading Nginx"
+	nginx -s reload
+	# Sleep for 24 hours and try again tomorrow with a renewal, just in case.
+	sleep 86400
 else
-  echo -e "LetsEncrypt \e[31mFAILED TO GENERATE CERTS\e[0m. Will try again in an hour."
-  sleep 3600
+	echo -e "LetsEncrypt \e[31mFAILED TO GENERATE CERTS\e[0m. Will try again in an hour."
+	sleep 3600
 fi

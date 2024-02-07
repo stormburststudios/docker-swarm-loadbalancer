@@ -1,6 +1,4 @@
-# From upstream redis
-# hadolint ignore=DL3007
-FROM mitmproxy/mitmproxy
+FROM mitmproxy:version
 ARG BUILD_DATE
 ARG GIT_SHA
 ARG MITM_VERSION
@@ -37,6 +35,8 @@ RUN os=$(grep "^ID=" < /etc/os-release | cut -f2 -d'=') && \
         echo "Unknown OS: $os"; \
       exit 1; \
     fi
+
+USER mitmproxy
 
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=3s \

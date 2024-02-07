@@ -1,5 +1,4 @@
-ARG PHP_VERSION
-FROM benzine/php:nginx-${PHP_VERSION}
+FROM php:nginx
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
       org.opencontainers.image.source="https://github.com/benzine-framework/docker"
@@ -20,3 +19,8 @@ COPY laravel-scheduler.runit /etc/service/scheduler/run
 COPY migrate.runit /etc/service/migrate/run
 COPY wait-for-mysql /usr/bin/wait-for-mysql
 RUN chmod +x /etc/service/*/run /etc/service/*/finish /usr/bin/wait-for-mysql
+HEALTHCHECK --interval=10s --timeout=3s \
+    CMD curl -f http://localhost/ || exit 1
+
+RUN adduser laravel
+USER laravel

@@ -1,12 +1,12 @@
-# hadolint ignore=DL3007
-FROM benzine/marshall:latest AS nodejs
+FROM marshall:build AS nodejs
 
 ARG NODE_VERSION
 ARG YARN_VERSION
 ARG PATH="/app/node_modules/.bin:${PATH}"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-RUN mkdir ~/.gnupg && \
+RUN adduser node && \
+    mkdir ~/.gnupg && \
     echo "disable-ipv6" >> ~/.gnupg/dirmngr.conf && \
     apt-get -qq update && \
     apt-get -yqq install --no-install-recommends \
@@ -58,21 +58,27 @@ RUN mkdir ~/.gnupg && \
     gpg --batch --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "$key" || \
     gpg --batch --keyserver hkp://pgp.mit.edu:80 --recv-keys "$key" ; \
   done \
-  && curl -fsSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz" \
-  && curl -fsSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz.asc" \
-  && gpg --batch --verify yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz \
+  && curl -fsSLO --compressed "https://github.com/yarnpkg/yarn/releases/download/v$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz" \
   && mkdir -p /opt \
   && tar -xzf yarn-v$YARN_VERSION.tar.gz -C /opt/ \
   && ln -s /opt/yarn-v$YARN_VERSION/bin/yarn /usr/local/bin/yarn \
   && ln -s /opt/yarn-v$YARN_VERSION/bin/yarnpkg /usr/local/bin/yarnpkg \
-  && rm yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz \
+  && rm yarn-v$YARN_VERSION.tar.gz \
   \
   && apt-get autoremove -y \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log
 
+# Healthcheck is nonsensical for this container.
+HEALTHCHECK NONE
+
+# Back to userland
+USER node
+
 FROM nodejs AS nodejs-compiler
 
+# Install dependencies
+USER root
 RUN apt-get -qq update && \
     apt-get -yqq install --no-install-recommends \
         python \
@@ -81,3 +87,9 @@ RUN apt-get -qq update && \
     apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log
+
+# Healthcheck is nonsensical for this container.
+HEALTHCHECK NONE
+
+# Back to userland
+USER node

@@ -1,0 +1,121 @@
+name: Build
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions: read-all
+
+jobs:
+  qc-before:
+    name: QC Trunk
+    uses: ./.github/workflows/trunk.check.yml
+    secrets: inherit
+    permissions: write-all
+
+  marshall:
+    needs: qc-before
+    name: Marshall
+    uses: ./.github/workflows/marshall.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      packages: write
+
+  php:
+    needs: marshall
+    name: PHP Core
+    uses: ./.github/workflows/php.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      packages: write
+
+  #laravel:
+  #  needs: php
+  #  name: PHP Vanity Tags
+  #  uses: ./.github/workflows/laravel.yml
+  #  secrets: inherit
+  #  permissions:
+  #    contents: read
+  #    packages: write
+
+  bouncer:
+    needs: php
+    name: Nginx Load Balancer (Bouncer)
+    uses: ./.github/workflows/bouncer.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      packages: write
+
+  mitm-proxy:
+    needs: qc-before
+    name: Man-in-the-middle proxy w/Healthchecks
+    uses: ./.github/workflows/mitm-proxy.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      packages: write
+
+  mqtt:
+    needs: qc-before
+    name: MQTT w/Healthchecks
+    uses: ./.github/workflows/mqtt.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      packages: write
+
+  mysql-proxy:
+    needs: qc-before
+    name: MySQL Proxy
+    uses: ./.github/workflows/mysql-proxy.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      packages: write
+
+  #node:
+  #  needs: marshall
+  #  name: Node
+  #  uses: ./.github/workflows/node.yml
+  #  secrets: inherit
+  #  permissions:
+  #    contents: read
+  #    packages: write
+
+  redis:
+    needs: qc-before
+    name: Redis w/Healthchecks
+    uses: ./.github/workflows/redis.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      packages: write
+
+  swarm-monitor:
+    needs: php
+    name: Swarm Monitor
+    uses: ./.github/workflows/swarm-monitor.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      packages: write
+
+  wordpress:
+    needs: php
+    name: Wordpress
+    uses: ./.github/workflows/wordpress.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      packages: write

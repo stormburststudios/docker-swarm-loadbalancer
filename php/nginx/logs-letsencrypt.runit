@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
 if [[ -f /var/log/letsencrypt/letsencrypt.log ]]; then
-    tail -f /var/log/letsencrypt/letsencrypt.log
-else
-    sleep 1
+	tail -f /var/log/letsencrypt/letsencrypt.log
 fi

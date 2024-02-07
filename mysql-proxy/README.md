@@ -1,10 +1,11 @@
 # MySQL Proxy
 
-# Usage with docker-compose
+## Usage with docker-compose
 
 without
-```
-version: '2'
+
+```yaml
+version: "2"
 
 services:
   db:
@@ -22,8 +23,9 @@ services:
 ```
 
 within
-```
-version: '2'
+
+```yaml
+version: "2"
 
 services:
   mysql:
@@ -47,7 +49,7 @@ services:
     ports:
       - "3308:3306" #for external connection
     restart: always
-    volumes: 
+    volumes:
       - ../mysql-proxy-conf:/opt/mysql-proxy/conf
     environment:
       PROXY_DB_PORT: 3306
@@ -58,9 +60,11 @@ services:
       - mysql
 ```
 
-# Query to stdout
+## Query to stdout
+
 For `docker-compose up` without `-d` (`../mysql-proxy/main.lua`)
-```
+
+```lua
 function read_query(packet)
    if string.byte(packet) == proxy.COM_QUERY then
 	print(string.sub(packet, 2))
@@ -68,24 +72,23 @@ function read_query(packet)
 end
 ```
 
-# Query logging for mysql-proxy 
+## Query logging for mysql-proxy
 
-```
-...
-    volumes:
-      - ../mysql-proxy-conf:/opt/mysql-proxy/conf
-      - ../mysql-proxy-logs:/opt/mysql-proxy/logs
-    environment:
-      PROXY_DB_PORT: 3306
-      REMOTE_DB_HOST: mysql
-      REMOTE_DB_PORT: 3306
-      LUA_SCRIPT: "/opt/mysql-proxy/conf/log.lua"
-      LOG_FILE: "/opt/mysql-proxy/logs/mysql.log"
-...
+```yaml
+volumes:
+  - ../mysql-proxy-conf:/opt/mysql-proxy/conf
+  - ../mysql-proxy-logs:/opt/mysql-proxy/logs
+environment:
+  PROXY_DB_PORT: 3306
+  REMOTE_DB_HOST: mysql
+  REMOTE_DB_PORT: 3306
+  LUA_SCRIPT: "/opt/mysql-proxy/conf/log.lua"
+  LOG_FILE: "/opt/mysql-proxy/logs/mysql.log"
 ```
 
 `/mysql-proxy-conf/log.lua` https://gist.github.com/simonw/1039751
-```
+
+```lua
 local log_file = os.getenv("LOG_FILE")
 
 local fh = io.open(log_file, "a+")
@@ -93,24 +96,26 @@ local fh = io.open(log_file, "a+")
 function read_query( packet )
     if string.byte(packet) == proxy.COM_QUERY then
         local query = string.sub(packet, 2)
-        fh:write( string.format("%s %6d -- %s \n", 
-            os.date('%Y-%m-%d %H:%M:%S'), 
-            proxy.connection.server["thread_id"], 
-            query)) 
+        fh:write( string.format("%s %6d -- %s \n",
+            os.date('%Y-%m-%d %H:%M:%S'),
+            proxy.connection.server["thread_id"],
+            query))
         fh:flush()
     end
 end
 ```
-# thanks
+
+## thanks
 
 https://hub.docker.com/r/zwxajh/mysql-proxy
 https://hub.docker.com/r/gediminaspuksmys/mysqlproxy/
 
-# logrotate
+## logrotate
+
 The image can be expand with `logrotate`
 Config file `/etc/logrotate.d/mysql-proxy` (approximate)
 
-```
+```text
 /opt/mysql-proxy/mysql.log {
 	weekly
 	missingok
@@ -118,19 +123,21 @@ Config file `/etc/logrotate.d/mysql-proxy` (approximate)
 	compress
 	delaycompress
 	notifempty
-	create 666 root root 
+	create 666 root root
 	postrotate
 		/etc/init.d/mysql-proxy reload > /dev/null
 	endscript
 }
 ```
 
-# troubleshooting
+## troubleshooting
+
 If you can't create the chain `mysql` -> `mysql-proxy` -> `external client liten 0.0.0.0:3308`
 check extends ports on the `mysql` service and/or add `expose` directly
-```
-    expose:
-      - "3306" #for service mysql-proxy
+
+```yaml
+expose:
+  - "3306" #for service mysql-proxy
 ```
 
-> note: Log send to file with delay (buffering mechanism). You can restart the container for get the log immediately. 
+> note: Log send to file with delay (buffering mechanism). You can restart the container for get the log immediately.

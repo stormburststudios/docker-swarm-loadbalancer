@@ -1,0 +1,2 @@
+#!/bin/bash
+echo "Oh no! rsyslog has crashed!"

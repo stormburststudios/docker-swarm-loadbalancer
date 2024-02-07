@@ -1,36 +1,38 @@
 #!/usr/bin/env bash
 
-env | sed "s/\(.*\)=\(.*\)/env[\1]='\2'/" > /etc/php/{{PHP}}/fpm/conf.d/env.conf
+# Load envs into PHP-fpm's env.conf.
+# shellcheck disable=SC1083,SC2312
+env | sed "s/\(.*\)=\(.*\)/env[\1]='\2'/" >/etc/php/{{PHP}}/fpm/conf.d/env.conf
 
-if [ "${DEBUG_MODE,,}" = "on" ]; then
-    ENABLE_DEBUG_MODE=true
-    PHP_MEMORY_LIMIT="${PHP_MEMORY_LIMIT:-1024M}"
+if [[ ${DEBUG_MODE,,} == "on" ]]; then
+	ENABLE_DEBUG_MODE=true
+	PHP_MEMORY_LIMIT="${PHP_MEMORY_LIMIT:-1024M}"
 else
-    ENABLE_DEBUG_MODE=false
-    PHP_MEMORY_LIMIT="${PHP_MEMORY_LIMIT:-128M}"
+	ENABLE_DEBUG_MODE=false
+	PHP_MEMORY_LIMIT="${PHP_MEMORY_LIMIT:-128M}"
 fi
 
-PHP_CLI_MEMORY_LIMIT="${PHP_CLI_MEMORY_LIMIT:-$PHP_MEMORY_LIMIT}"
+PHP_CLI_MEMORY_LIMIT="${PHP_CLI_MEMORY_LIMIT:-${PHP_MEMORY_LIMIT}}"
 
 sed -i "s|memory_limit = .*|memory_limit = ${PHP_MEMORY_LIMIT}|g" /etc/php/{{PHP}}/fpm/php.ini
 sed -i "s|\[memory_limit\] = .*|\[memory_limit\] = ${PHP_MEMORY_LIMIT}|g" /etc/php/{{PHP}}/fpm/pool.d/www.conf
 sed -i "s|memory_limit = .*|memory_limit = ${PHP_CLI_MEMORY_LIMIT}|g" /etc/php/{{PHP}}/cli/php.ini
 
-if [ $ENABLE_DEBUG_MODE = true ]; then
-    echo -e "#Controlled via DEBUG_MODE environment variable\nzend_extension=xdebug.so\n[xdebug]\n\
+if [[ ${ENABLE_DEBUG_MODE} == true ]]; then
+	echo -e "#Controlled via DEBUG_MODE environment variable\nzend_extension=xdebug.so\n[xdebug]\n\
     xdebug.mode=debug\n\
     xdebug.discover_client_host=true\n\
-    xdebug.client_host=host.docker.internal\n" > /etc/php/{{PHP}}/mods-available/xdebug.ini
-    ln -s /etc/php/{{PHP}}/mods-available/xdebug.ini /etc/php/{{PHP}}/fpm/conf.d/20-xdebug.ini || true
-    sed -i "s|php_flag\[display_errors\].*|php_flag\[display_errors\] = on|g" /etc/php/{{PHP}}/fpm/pool.d/www.conf
-    echo -e "PHP is running in \e[31mDEBUG MODE\e[0m\nError output will be VISIBLE."
+    xdebug.client_host=host.docker.internal\n" >/etc/php/{{PHP}}/mods-available/xdebug.ini
+	ln -s /etc/php/{{PHP}}/mods-available/xdebug.ini /etc/php/{{PHP}}/fpm/conf.d/20-xdebug.ini || true
+	sed -i "s|php_flag\[display_errors\].*|php_flag\[display_errors\] = on|g" /etc/php/{{PHP}}/fpm/pool.d/www.conf
+	echo -e "PHP is running in \e[31mDEBUG MODE\e[0m\nError output will be VISIBLE."
 else
-    rm -f /etc/php/{{PHP}}/mods-available/xdebug.ini /etc/php/{{PHP}}/fpm/conf.d/*-xdebug.ini
-    touch /etc/php/{{PHP}}/mods-available/xdebug.ini
-    sed -i "s|php_flag\[display_errors\].*|php_flag\[display_errors\] = off|g" /etc/php/{{PHP}}/fpm/pool.d/www.conf
-    echo -e "PHP is running in \e[32mPRODUCTION MODE\e[0m\nError output will be suppressed."
+	rm -f /etc/php/{{PHP}}/mods-available/xdebug.ini /etc/php/{{PHP}}/fpm/conf.d/*-xdebug.ini
+	touch /etc/php/{{PHP}}/mods-available/xdebug.ini
+	sed -i "s|php_flag\[display_errors\].*|php_flag\[display_errors\] = off|g" /etc/php/{{PHP}}/fpm/pool.d/www.conf
+	echo -e "PHP is running in \e[32mPRODUCTION MODE\e[0m\nError output will be suppressed."
 fi
 echo "To change this, change the value of DEBUG_MODE to either 'on' or 'off'"
 
+# shellcheck disable=SC2288
 /usr/sbin/php-fpm{{PHP}} -F -R
-

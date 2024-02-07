@@ -1,24 +1,25 @@
 name: Build Nginx + LetsEncrypt Bouncer
 
+permissions:
+  contents: read
+  packages: write
+
 on:
   push:
-    paths:
-      - '.github/workflows/bouncer.yml'
-      - 'bouncer/**'
-  pull_request:
     branches:
-      - '!dependabot/**'
-  workflow_run:
-    workflows:
-      - Build PHP Flavours
-    branches: [ 'master', 'feature/**' ]
-    types:
-      - completed
+      - main
+    paths:
+      - bouncer/**
+      - .github/workflows/bouncer.yml
+  workflow_call:
   workflow_dispatch:
+
+env:
+  should_push: ${{ github.ref == 'refs/heads/main' }}
 
 jobs:
   bouncer-build:
-    name: "Bake Bouncer Container"
+    name: Bake Bouncer Container
     runs-on: ubuntu-latest
     steps:
       - name: "Setup: Get Date"
@@ -48,17 +49,16 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: "Setup: Login to Docker Hub"
-        if: ${{ !env.ACT }}
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          username: matthewbaggett
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
       - name: "Setup: Login to GHCR"
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ secrets.GHCR_USERNAME }}
+          username: matthewbaggett
           password: ${{ secrets.GHCR_PASSWORD }}
 
       - name: "Setup: Checkout Source"
@@ -86,6 +86,7 @@ jobs:
           target: bouncer
           platforms: ${{ !env.ACT && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
           pull: true
+          #push: ${{ env.should_push && !env.ACT }}
           push: true
           build-args: |
             GIT_SHA=${{ github.sha }}
@@ -94,5 +95,16 @@ jobs:
           tags: |
             ${{ !env.ACT && 'benzine/bouncer:latest' || '' }}
             ${{ !env.ACT && 'ghcr.io/benzine-framework/bouncer:latest' || 'ghcr.io/benzine-framework/bouncer:devel' }}
-          cache-from: ${{ !env.ACT && 'type=gha' || 'type=local,src=.github/cache/docker' }}
-          cache-to: ${{ !env.ACT && 'type=gha,mode=max' || 'type=local,dest=.github/cache/docker' }}
+          cache-from: ${{ !env.ACT && 'type=gha' || 'type=local,src=/tmp' }}
+          cache-to: ${{ !env.ACT && 'type=gha,mode=max' || 'type=local,dest=/tmp' }}
+          build-contexts: |
+            php:cli=docker-image://ghcr.io/benzine-framework/php:cli-8.2
+
+      - name: "Validate build"
+        shell: bash
+        run: |
+          docker \
+            run \
+              --rm \
+              ghcr.io/benzine-framework/bouncer:latest \
+                /usr/bin/install-report

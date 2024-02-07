@@ -1,19 +1,15 @@
 name: Build mitmproxy
 
+permissions:
+  contents: read
+  packages: write
+
 on:
-  push:
-    paths:
-      - 'mitmproxy/**'
-  pull_request:
-    branches:
-      - '!dependabot/**'
-  workflow_run:
-    workflows:
-      - Lint Docker Files
-    branches: [ 'master', 'feature/**' ]
-    types:
-      - completed
+  workflow_call:
   workflow_dispatch:
+
+env:
+  should_push: ${{ github.ref == 'refs/heads/main' }}
 
 jobs:
   mitmproxy-build:
@@ -55,7 +51,6 @@ jobs:
           - 5.1.0
           - 5.0.1
           - 5.0.0
-
     steps:
       - name: "Setup: Setup QEMU"
         uses: docker/setup-qemu-action@v2
@@ -73,17 +68,16 @@ jobs:
             mitm-proxy
 
       - name: "Setup: Login to Docker Hub"
-        if: ${{ !env.ACT }}
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          username: matthewbaggett
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
       - name: "Setup: Login to GHCR"
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ secrets.GHCR_USERNAME }}
+          username: matthewbaggett
           password: ${{ secrets.GHCR_PASSWORD }}
 
       - name: "Build: Build MITM proxy with healthchecks"
@@ -91,18 +85,16 @@ jobs:
         with:
           context: mitm-proxy
           build-contexts: |
-            mitmproxy/mitmproxy=docker-image://mitmproxy/mitmproxy:${{ matrix.mitmproxy }}
+            mitmproxy:version=docker-image://mitmproxy/mitmproxy:${{ matrix.mitmproxy }}
           build-args: |
             MITMPROXY_VERSION=${{ matrix.mitmproxy }}
             GIT_SHA=${{ github.sha }}
             BUILD_DATE=${{ github.event.repository.pushed_at }}
           platforms: ${{ (!env.ACT && !(startsWith('6.',matrix.mitmproxy) || startsWith('5.', matrix.mitmproxy))) && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
           pull: true
-          push: true
+          push: ${{ env.should_push && !env.ACT }}
           tags: |
-            ${{ !env.ACT && format('benzine/mitmproxy:{0}',matrix.mitmproxy) || '' }}
-            ${{ format('ghcr.io/benzine-framework/mitmproxy:{0}', matrix.mitmproxy) }}
+            ${{ format('benzine/mitmproxy:{0}', matrix.mitmproxy) }}
+            ${{ env.should_push && format('ghcr.io/benzine-framework/mitmproxy:{0}', matrix.mitmproxy) }}
           cache-from: ${{ !env.ACT && 'type=gha' || '' }}
           cache-to: ${{ !env.ACT && 'type=gha,mode=max' || '' }}
-
-

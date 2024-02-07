@@ -3,5 +3,5 @@ set -e
 cd "$(dirname "$0")"
 
 for file in *.sh; do
-  /bin/bash $file
+	/bin/bash "${file}"
 done

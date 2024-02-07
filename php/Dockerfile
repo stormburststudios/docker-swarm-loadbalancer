@@ -1,10 +1,68 @@
-ARG PHP_CORE_VERSION
-# hadolint ignore=DL3024
-FROM ${PHP_CORE_VERSION} AS php-cli
+# checkov:skip=CKV_DOCKER_3 user cannot be determined at this stage.
+FROM marshall:build AS php-core
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
       org.opencontainers.image.source="https://github.com/benzine-framework/docker"
+ARG PHP_PACKAGES
+ARG COMPOSER_VERSION
+ENV COMPOSER_ALLOW_SUPERUSER=1
+COPY core/install-report.sh /usr/bin/install-report
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN echo "Acquire::Retries \"5\";" > /etc/apt/apt.conf.d/80-retries && \
+    echo "Acquire::http::No-Cache=true;" > /etc/apt/apt.conf.d/80-no-cache && \
+    echo "Acquire::http::Pipeline-Depth=0;" > /etc/apt/apt.conf.d/80-no-pipeline && \
+    apt-get -qq update && \
+    apt-get -yqq upgrade && \
+    apt-get -yqq install --no-install-recommends \
+        python3-software-properties \
+        software-properties-common \
+        && \
+    echo "PHP packages to install:" && echo $PHP_PACKAGES && \
+    add-apt-repository -y ppa:ondrej/php && \
+    apt-get -qq update && \
+    apt-get -yqq install --no-install-recommends $PHP_PACKAGES  &&\
+    apt-get remove -yqq \
+        software-properties-common \
+        python-apt-common \
+        python3-software-properties \
+        python3.5 python3.5-minimal libpython3.5-minimal \
+        && \
+    apt-get autoremove -yqq && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log && \
+    rm -rf  /usr/bin/mariabackup \
+            /usr/bin/mysql_embedded \
+            /usr/bin/mysql_find_rows \
+            /usr/bin/mysql_fix_extensions \
+            /usr/bin/mysql_waitpid \
+            /usr/bin/mysqlaccess \
+            /usr/bin/mysqlanalyze \
+            /usr/bin/mysqlcheck \
+            /usr/bin/mysqldump \
+            /usr/bin/mysqldumpslow \
+            /usr/bin/mysqlimport \
+            /usr/bin/mysqloptimize \
+            /usr/bin/mysqlrepair \
+            /usr/bin/mysqlreport \
+            /usr/bin/mysqlshow \
+            /usr/bin/mysqlslap \
+            /usr/bin/mytop
 
+RUN chmod +x /usr/bin/install-report && \
+    /usr/bin/install-report
+
+RUN curl https://getcomposer.org/download/$COMPOSER_VERSION/composer.phar --output /usr/local/bin/composer && \
+    chmod +x /usr/local/bin/composer /usr/bin/install-report && \
+    composer self-update
+
+# Healthcheck is nonsensical for this container.
+HEALTHCHECK NONE
+
+# checkov:skip=CKV_DOCKER_3 user cannot be determined at this stage.
+FROM php-core AS php-cli
+LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
+      org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
+      org.opencontainers.image.source="https://github.com/benzine-framework/docker"
 
 # Install a funky cool repl.
 RUN composer global require -q psy/psysh:@stable && \
@@ -14,8 +72,11 @@ RUN composer global require -q psy/psysh:@stable && \
 
 COPY cli/psysh-config.php /root/.config/psysh/config.php
 
-ARG PHP_CORE_VERSION
-FROM ${PHP_CORE_VERSION} AS php-nginx
+RUN composer --version && \
+    repl --version
+
+# checkov:skip=CKV_DOCKER_3 user cannot be determined at this stage.
+FROM php-cli AS php-nginx
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
       org.opencontainers.image.source="https://github.com/benzine-framework/docker"
@@ -26,10 +87,10 @@ ENV PHPFPM_MAX_CHILDREN=25
 COPY nginx /conf
 COPY self-signed-certificates /certs
 
+# ts:skip=AC_DOCKER_0002 Mis-detecting usage of apt instead of apt-get
 RUN apt-get -qq update && \
     # Install pre-dependencies to use apt-key.
     apt-get -yqq install --no-install-recommends \
-        sudo \
         lsb-core \
         gnupg \
         && \
@@ -101,13 +162,15 @@ RUN apt-get -qq update && \
     mv /conf/php-fpm.runit /etc/service/php-fpm/run && \
     mv /conf/letsencrypt.runit /etc/service/letsencrypt/run && \
     #mv /conf/logs-letsencrypt.runit /etc/service/logs-letsencrypt/run && \
+    #mv /conf/logs-letsencrypt.finish /etc/service/logs-letsencrypt/finish && \
     mv /conf/logs-nginx-access.runit /etc/service/logs-nginx-access/run && \
     mv /conf/logs-nginx-error.runit /etc/service/logs-nginx-error/run && \
     mv /conf/logs-phpfpm-error.runit /etc/service/logs-phpfpm-error/run && \
+    mv /conf/logs-phpfpm-error.finish /etc/service/logs-phpfpm-error/finish && \
     # Make sure all our new services are using unix line endings
-    dos2unix -q /etc/service/*/run && \
+    dos2unix -q /etc/service/*/run /etc/service/*/finish && \
     # Make sure all our new services are executable
-    chmod +x /etc/service/*/run && \
+    chmod +x /etc/service/*/run /etc/service/*/finish && \
     # Cleanup the /conf dir
     rm -R /conf && \
     # Write the PHP version into some template locations
@@ -133,12 +196,13 @@ VOLUME /etc/letsencrypt
 HEALTHCHECK --interval=30s --timeout=3s \
     CMD curl -f http://localhost/ || exit 1
 
-ARG PHP_CORE_VERSION
-FROM ${PHP_CORE_VERSION} AS php-apache
+# checkov:skip=CKV_DOCKER_3 user cannot be determined at this stage.
+FROM php-cli AS php-apache
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
       org.opencontainers.image.source="https://github.com/benzine-framework/docker"
 ARG PHP_VERSION
+# ts:skip=AC_DOCKER_0002 Mis-detecting usage of apt instead of apt-get
 RUN apt-get -qq update && \
     apt-get -yqq install --no-install-recommends \
         apache2 \

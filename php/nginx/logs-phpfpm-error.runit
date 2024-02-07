@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-if [[ -f /var/log/php*-fpm.log ]]; then
-    tail -f /var/log/php*-fpm.log
-else
-    sleep 1
-fi
+# for each php-fpm log file, tail it
+# if there are no php-fpm log files, sleep for a second
+for i in /var/log/php*-fpm.log; do
+	if [[ -f ${i} ]]; then
+		tail -f "${i}" &
+	fi
+done

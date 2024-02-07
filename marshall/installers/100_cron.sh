@@ -1,6 +1,7 @@
 #!/bin/bash
+# shellcheck disable=SC1091
 source /installers/config
-$APT_GET cron
+${APT_GET} cron
 
 chmod 600 /etc/crontab
 

@@ -14,13 +14,13 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       #- /proc/meminfo:/proc/meminfo:ro
       - ./:/app
-    command: ["/app/agent"]
+    command: [/app/agent]
     environment:
       - HOSTNAME=exploding-bolts
       - REDIS_HOST=redis
       - MINIMUM_UPDATE_INTERVAL=10
     depends_on:
-     - redis
+      - redis
   stats:
     image: matthewbaggett/swarm-agent:stats
     build:

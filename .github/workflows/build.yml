@@ -2,7 +2,7 @@ name: Build
 
 on:
   schedule:
-    - "30 5 * * 2" # Build on tuesday morning at 5:30am
+    - cron: "30 5 * * 2" # Build on tuesday morning at 5:30am
   workflow_dispatch:
 
 concurrency:

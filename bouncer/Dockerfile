@@ -6,8 +6,7 @@ LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
 USER root
 # ts:skip=AC_DOCKER_0002 Mis-detecting usage of apt instead of apt-get
 # Install nginx, certbot
-RUN adduser bouncer && \
-    apt-get -qq update && \
+RUN apt-get -qq update && \
     # Install pre-dependencies to use apt-key.
     apt-get -yqq install --no-install-recommends \
         lsb-core \
@@ -80,9 +79,6 @@ EXPOSE 443
 
 # Down-privelege to bouncer
 USER bouncer
-
-# Install Composer dependencies even though we don't need to, it should be done in the build process
-RUN composer install
 
 # Set a healthcheck to curl the bouncer and expect a 200
 HEALTHCHECK --start-period=30s \

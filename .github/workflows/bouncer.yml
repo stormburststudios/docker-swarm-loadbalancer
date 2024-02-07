@@ -95,8 +95,8 @@ jobs:
           tags: |
             ${{ !env.ACT && 'benzine/bouncer:latest' || '' }}
             ${{ !env.ACT && 'ghcr.io/benzine-framework/bouncer:latest' || 'ghcr.io/benzine-framework/bouncer:devel' }}
-          cache-from: ${{ !env.ACT && 'type=gha' || 'type=local,src=/tmp' }}
-          cache-to: ${{ !env.ACT && 'type=gha,mode=max' || 'type=local,dest=/tmp' }}
+          cache-from: ${{ !env.ACT && 'type=gha' || '' }}
+          cache-to: ${{ !env.ACT && 'type=gha,mode=max' || '' }}
           build-contexts: |
             php:cli=docker-image://ghcr.io/benzine-framework/php:cli-8.2
 

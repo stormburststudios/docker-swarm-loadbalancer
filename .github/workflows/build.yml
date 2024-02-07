@@ -1,11 +1,8 @@
 name: Build
 
 on:
-  pull_request:
-    types: [opened, reopened, synchronize]
-  push:
-    branches:
-      - main
+  schedule:
+    - "30 5 * * 2" # Build on tuesday morning at 5:30am
   workflow_dispatch:
 
 concurrency:

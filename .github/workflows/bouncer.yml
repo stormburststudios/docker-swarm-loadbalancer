@@ -67,13 +67,16 @@ jobs:
           username: matthewbaggett
           password: ${{ secrets.GHCR_PASSWORD }}
 
-      - name: "Setup: Configure Cache"
+      - name: "Setup: Find Composer Cache Directory"
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: "Setup: Composer Cache"
         uses: actions/cache@v4
         with:
-          path: bouncer
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-bouncer-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-bouncer-composer-
 
       - name: "Dependencies: Composer Install"
         working-directory: bouncer

@@ -19,7 +19,7 @@ env:
 
 jobs:
   bouncer-build:
-    name: Bake Bouncer Container
+    name: Build Bouncer
     runs-on: ubuntu-latest
     steps:
       - name: "Setup: Checkout Source"

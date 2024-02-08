@@ -4,17 +4,21 @@ php-cs-fixer:
 
 fix: php-cs-fixer
 
+image_reference_devel:=ghcr.io/benzine-framework/bouncer:devel
+
 build-n-push: fix
 	docker build \
 		--build-arg BUILD_DATE="$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")" \
 		--build-arg GIT_SHA="$(shell git rev-parse HEAD)" \
+		--build-arg GIT_BUILD_ID="$(shell git rev-parse --abbrev-ref HEAD)-$(shell git describe --tags --dirty --always | sed -e 's/^v//')" \
 		--build-arg GIT_COMMIT_MESSAGE="$(shell git log -1 --pretty=%B | head -n1)" \
+		--build-context php:cli=docker-image://ghcr.io/benzine-framework/php:cli-8.2 \
 		--tag benzine/bouncer \
-		--tag ghcr.io/benzine-framework/bouncer \
+		--tag $(image_reference_devel) \
 		--target bouncer \
+		--progress plain \
 			.
-	#docker push benzine/bouncer
-	docker push ghcr.io/benzine-framework/bouncer
+	docker push $(image_reference_devel)
 
 test-as-service: clean
 	docker build -t bouncer --target bouncer .

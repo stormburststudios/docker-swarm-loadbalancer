@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bouncer\Settings;
 
+use Carbon\Carbon;
 use Monolog\Level;
 
 class Settings implements SettingsInterface
@@ -42,6 +43,13 @@ class Settings implements SettingsInterface
     public function __construct()
     {
         $this->settings = [
+            'build' => [
+                'sha'       => Settings::getEnvironment('GIT_SHA', 'unknown'),
+                'sha_short' => substr(Settings::getEnvironment('GIT_SHA', 'unknown'), 0, 7),
+                'id'        => Settings::getEnvironment('GIT_BUILD_ID', 'unknown'),
+                'date'      => Carbon::parse(Settings::getEnvironment('BUILD_DATE')),
+                'message'   => trim(Settings::getEnvironment('GIT_COMMIT_MESSAGE', '')),
+            ],
             'logger'                  => [
                 'name'                  => Settings::getEnvironment('LOG_NAME', 'bouncer'),
                 'path'                  => Settings::getEnvironment('LOG_FILE', '/var/log/bouncer/bouncer.log'),
@@ -51,8 +59,18 @@ class Settings implements SettingsInterface
                 'coloured_output'       => Settings::isEnabled('LOG_COLOUR', true),
                 'show_state_deltas'     => Settings::isEnabled('LOG_SHOW_STATE_DELTAS'),
             ],
+            'ssl' => [
+                'allow_non_ssl'   => Settings::isEnabled('BOUNCER_ALLOW_NON_SSL', true),
+                'global_cert'     => Settings::getEnvironment('GLOBAL_CERT'),
+                'global_cert_key' => Settings::getEnvironment('GLOBAL_CERT_KEY'),
+            ],
+            'bouncer' => [
+                'http_port'                         => intval(Settings::getEnvironment('BOUNCER_HTTP_PORT', 80)),
+                'https_port'                        => intval(Settings::getEnvironment('BOUNCER_HTTPS_PORT', 443)),
+                'forced_update_interval_seconds'    => intval(Settings::getEnvironment('BOUNCER_FORCED_UPDATE_INTERVAL_SECONDS', 0)),
+                'max_nginx_config_creation_notices' => intval(Settings::getEnvironment('BOUNCER_MAXIMUM_NGINX_CONFIG_CREATION_NOTICES', 15)),
+            ],
         ];
-        \Kint::dump($this->settings);
     }
 
     public function get(string $key = '', mixed $default = null): mixed

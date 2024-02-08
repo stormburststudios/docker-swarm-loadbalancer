@@ -1,21 +1,24 @@
 server {
 {% if allowNonSSL %}
-  listen      80;
-  listen      [::]:80;
+  listen      {{ portHttp }};
+  listen      [::]:{{ portHttp }};
 {% endif %}
-  listen      443 ssl;
-  listen      [::]:443 ssl;
-  server_name {{ domains|join(' ') }};
+  listen      {{ portHttps }} ssl;
+  listen      [::]:{{ portHttps }} ssl;
+  server_name {{ serverName }};
   access_log  /var/log/bouncer/{{ name }}.access.log;
   error_log   /var/log/bouncer/{{ name }}.error.log;
 
-{% if useTemporaryCert %}
+{% if certType == 'TEMPORARY_CERT' %}
   ssl_certificate     /certs/example.crt;
   ssl_certificate_key /certs/example.key;
-{% elseif useGlobalCert %}
+{% elseif certType == 'GLOBAL_CERT' %}
   ssl_certificate     /certs/global.crt;
   ssl_certificate_key /certs/global.key;
-{% else %}
+{% elseif certType == 'CUSTOM_CERT' %}
+  ssl_certificate     /etc/nginx/sites-enabled/{{ customCertFile }};
+  ssl_certificate_key /etc/nginx/sites-enabled/{{ customCertKeyFile }};
+{% elseif certType == 'LETSENCRYPT_CERT' %}
   ssl_certificate     /etc/letsencrypt/live/{{ name }}/fullchain.pem;
   ssl_certificate_key /etc/letsencrypt/live/{{ name }}/privkey.pem;
 {% endif %}
@@ -60,9 +63,9 @@ server {
 
 {% if not allowNonSSL %}
 server {
-  listen      80;
-  listen      [::]:80;
-  server_name {{ domains|join(' ') }};
+  listen      {{ portHttp }};
+  listen      [::]:{{ portHttp }};
+  server_name {{ serverName }};
   return 301 https://$host$request_uri;
 }
 {% endif %}

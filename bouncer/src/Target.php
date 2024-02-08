@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bouncer;
 
 use Bouncer\Logger\Logger;
+use Bouncer\Settings\Settings;
 use Spatie\Emoji\Emoji;
 
 class Target
@@ -16,9 +17,11 @@ class Target
     private ?int $port        = null;
     private bool $letsEncrypt = false;
     private string $targetPath;
-    private bool $allowNonSSL           = true;
-    private bool $useTemporaryCert      = true;
+    private bool $allowNonSSL;
+    private bool $useTemporaryCert      = false;
     private bool $useGlobalCert         = false;
+    private ?string $customCert         = null;
+    private ?string $customCertKey      = null;
     private bool $allowWebsocketSupport = true;
     private bool $allowLargePayloads    = false;
     private ?int $proxyTimeoutSeconds   = null;
@@ -28,29 +31,41 @@ class Target
     private ?string $hostOverride = null;
 
     public function __construct(
-        private Logger $logger
+        private Logger $logger,
+        private Settings $settings,
     ) {
+        $this->allowNonSSL = $this->settings->get('ssl/allow_non_ssl', true);
     }
 
     public function __toArray()
     {
+        if ($this->settings->has('ssl/global_cert') && $this->settings->get('ssl/global_cert') === true) {
+            if ($this->getTypeCertInUse() != EnumCertType::GLOBAL_CERT) {
+                $this->logger->debug('{label} has overridden cert type of {cert_type}', ['emoji' => Emoji::exclamationQuestionMark() . ' ', 'label' => $this->getLabel(), 'cert_type' => $this->getTypeCertInUse()->name]);
+            }
+        }
+
         return [
-            'id'                    => $this->getId(),
-            'name'                  => $this->getName(),
-            'label'                 => $this->getLabel(),
-            'domains'               => $this->getDomains(),
-            'letsEncrypt'           => $this->isLetsEncrypt(),
-            'targetPath'            => $this->getTargetPath(),
-            'useTemporaryCert'      => $this->isUseTemporaryCert(),
-            'useGlobalCert'         => $this->isUseGlobalCert(),
-            'allowNonSSL'           => $this->isAllowNonSSL(),
-            'allowWebsocketSupport' => $this->isAllowWebsocketSupport(),
-            'allowLargePayloads'    => $this->isAllowLargePayloads(),
-            'proxyTimeoutSeconds'   => $this->getProxyTimeoutSeconds(),
-            'hasAuth'               => $this->hasAuth(),
-            'authFile'              => $this->getBasicAuthFileName(),
-            'hasHostOverride'       => $this->hasHostOverride(),
-            'hostOverride'          => $this->getHostOverride(),
+            'portHttp'  => $this->settings->get('bouncer/http_port'),
+            'portHttps' => $this->settings->get('bouncer/https_port'),
+        ] + [
+            'id'                       => $this->getId(),
+            'name'                     => $this->getName(),
+            'label'                    => $this->getLabel(),
+            'serverName'               => $this->getNginxServerName(),
+            'certType'                 => $this->getTypeCertInUse()->name,
+            'targetPath'               => $this->getTargetPath(),
+            'customCertFile'           => $this->getCustomCertPath(),
+            'customCertKeyFile'        => $this->getCustomCertKeyPath(),
+            'useCustomCert'            => $this->isUseCustomCert(),
+            'allowNonSSL'              => $this->isAllowNonSSL(),
+            'allowWebsocketSupport'    => $this->isAllowWebsocketSupport(),
+            'allowLargePayloads'       => $this->isAllowLargePayloads(),
+            'proxyTimeoutSeconds'      => $this->getProxyTimeoutSeconds(),
+            'hasAuth'                  => $this->hasAuth(),
+            'authFile'                 => $this->getBasicAuthFileName(),
+            'hasHostOverride'          => $this->hasHostOverride(),
+            'hostOverride'             => $this->getHostOverride(),
         ];
     }
 
@@ -98,6 +113,35 @@ class Target
         return $this;
     }
 
+    public function getCustomCert(): ?string
+    {
+        return $this->customCert;
+    }
+
+    public function setCustomCert(?string $customCert): Target
+    {
+        $this->customCert = $customCert;
+
+        return $this;
+    }
+
+    public function getCustomCertKey(): ?string
+    {
+        return $this->customCertKey;
+    }
+
+    public function setCustomCertKey(?string $customCertKey): Target
+    {
+        $this->customCertKey = $customCertKey;
+
+        return $this;
+    }
+
+    public function isUseCustomCert(): bool
+    {
+        return $this->customCert !== null && $this->customCertKey !== null;
+    }
+
     public function getAuth(): array
     {
         return [
@@ -136,6 +180,16 @@ class Target
         return "{$this->getBasicAuthFileName()}.hash";
     }
 
+    public function getCustomCertPath(): string
+    {
+        return "{$this->getName()}.public.pem";
+    }
+
+    public function getCustomCertKeyPath(): string
+    {
+        return "{$this->getName()}.private.pem";
+    }
+
     public function getBasicAuthFileData(): string
     {
         $output = shell_exec(sprintf('htpasswd -nibB -C10 %s %s', $this->getUsername(), $this->getPassword()));
@@ -152,6 +206,8 @@ class Target
             $this->getNginxConfigFileName(),
             $this->hasAuth() ? $this->getBasicAuthFileName() : null,
             $this->hasAuth() ? $this->getBasicAuthHashFileName() : null,
+            $this->isUseCustomCert() ? $this->getCustomCertPath() : null,
+            $this->isUseCustomCert() ? $this->getCustomCertKeyPath() : null,
         ]);
     }
 
@@ -186,14 +242,21 @@ class Target
 
     public function setUseGlobalCert(bool $useGlobalCert): self
     {
+        // $this->logger->critical('setUseGlobalCert: {useGlobalCert}', ['useGlobalCert' => $useGlobalCert ? 'yes' : 'no']);
         $this->useGlobalCert = $useGlobalCert;
 
-        // Global cert overrides temporary certs.
-        if ($useGlobalCert) {
-            $this->setUseTemporaryCert(false);
-        }
-
         return $this;
+    }
+
+    public function getTypeCertInUse(): EnumCertType
+    {
+        return match (true) {
+            $this->isUseCustomCert()    => EnumCertType::CUSTOM_CERT,
+            $this->isLetsEncrypt()      => EnumCertType::LETSENCRYPT_CERT,
+            $this->isUseTemporaryCert() => EnumCertType::TEMPORARY_CERT,
+            $this->isUseGlobalCert()    => EnumCertType::GLOBAL_CERT,
+            default                     => EnumCertType::NO_CERT,
+        };
     }
 
     public function isAllowWebsocketSupport(): bool
@@ -238,6 +301,25 @@ class Target
     public function getDomains(): array
     {
         return $this->domains;
+    }
+
+    public function getNginxServerNames(): array
+    {
+        $serverNames = [];
+        foreach ($this->domains as $domain) {
+            if (stripos($domain, '*') !== false) {
+                $serverNames[] = sprintf('~^(.*)%s$', str_replace('*', '', $domain));
+            } else {
+                $serverNames[] = $domain;
+            }
+        }
+
+        return $serverNames;
+    }
+
+    public function getNginxServerName(): string
+    {
+        return implode(' ', $this->getNginxServerNames());
     }
 
     /**
@@ -304,12 +386,12 @@ class Target
         return $this;
     }
 
-    public function getName()
+    public function getName(): string
     {
-        return reset($this->domains);
+        return str_replace('*.', '', reset($this->domains));
     }
 
-    public function getLabel()
+    public function getLabel(): string
     {
         return $this->label ?? $this->getName();
     }

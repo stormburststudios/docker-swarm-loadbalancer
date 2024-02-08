@@ -22,6 +22,12 @@ jobs:
     name: Bake Bouncer Container
     runs-on: ubuntu-latest
     steps:
+      - name: "Setup: Checkout Source"
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            bouncer
+
       - name: "Setup: Get Date"
         id: date
         run: |
@@ -35,7 +41,7 @@ jobs:
       - name: "Setup: PHP"
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.1
+          php-version: 8.2
         env:
           runner: self-hosted
 
@@ -61,12 +67,6 @@ jobs:
           username: matthewbaggett
           password: ${{ secrets.GHCR_PASSWORD }}
 
-      - name: "Setup: Checkout Source"
-        uses: actions/checkout@v4
-        with:
-          sparse-checkout: |
-            bouncer
-
       - name: "Setup: Configure Cache"
         uses: actions/cache@v4
         with:
@@ -90,6 +90,7 @@ jobs:
           push: true
           build-args: |
             GIT_SHA=${{ github.sha }}
+            GIT_BUILD_ID=${{ github.ref_name }}
             BUILD_DATE=${{ steps.date.outputs.container_build_datetime }}
             GIT_COMMIT_MESSAGE=${{ github.event.head_commit.message }}
           tags: |

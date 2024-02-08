@@ -1,9 +1,11 @@
+# checkov:skip=CKV_DOCKER_3 user cannot be determined at this stage.
 FROM php:cli as bouncer
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
       org.opencontainers.image.source="https://github.com/benzine-framework/docker"
 
-USER root
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 # ts:skip=AC_DOCKER_0002 Mis-detecting usage of apt instead of apt-get
 # Install nginx, certbot
 RUN apt-get -qq update && \
@@ -39,12 +41,12 @@ COPY self-signed-certificates /certs
 
 # Install runits for services
 COPY nginx.runit /etc/service/nginx/run
-COPY logs.runit /etc/service/nginx-logs/run
-COPY logs.finish /etc/service/nginx-logs/finish
+#COPY logs.runit /etc/service/nginx-logs/run
+#COPY logs.finish /etc/service/nginx-logs/finish
 COPY bouncer.runit /etc/service/bouncer/run
 COPY bouncer.finish /etc/service/bouncer/finish
-COPY logs-nginx-access.runit /etc/service/logs-nginx-access/run
-COPY logs-nginx-error.runit /etc/service/logs-nginx-error/run
+#COPY logs-nginx-access.runit /etc/service/logs-nginx-access/run
+#COPY logs-nginx-error.runit /etc/service/logs-nginx-error/run
 RUN chmod +x /etc/service/*/run /etc/service/*/finish
 
 # Copy default nginx bits
@@ -69,6 +71,16 @@ COPY src /app/src
 COPY templates /app/templates
 RUN chmod +x /app/bin/bouncer
 
+# stuff some envs from build
+ARG BUILD_DATE
+ARG GIT_SHA
+ARG GIT_BUILD_ID
+ARG GIT_COMMIT_MESSAGE
+ENV BUILD_DATE=${BUILD_DATE} \
+    GIT_SHA=${GIT_SHA} \
+    GIT_BUILD_ID=${GIT_BUILD_ID} \
+    GIT_COMMIT_MESSAGE=${GIT_COMMIT_MESSAGE}
+
 # Create some volumes for logs and certs
 VOLUME /etc/letsencrypt
 VOLUME /var/log/bouncer
@@ -77,32 +89,26 @@ VOLUME /var/log/bouncer
 EXPOSE 80
 EXPOSE 443
 
-# Down-privelege to bouncer
-USER bouncer
-
 # Set a healthcheck to curl the bouncer and expect a 200
 HEALTHCHECK --start-period=30s \
     CMD curl -s -o /dev/null -w "200" http://localhost:80/ || exit 1
 
-# stuff some envs from build
-ARG BUILD_DATE
-ARG GIT_SHA
-ARG GIT_COMMIT_MESSAGE
-ENV BUILD_DATE=${BUILD_DATE} \
-    GIT_SHA=${GIT_SHA} \
-    GIT_COMMIT_MESSAGE=${GIT_COMMIT_MESSAGE}
+RUN printenv | sort
 
-FROM benzine/php:nginx-8.1 as test-app-a
+# checkov:skip=CKV_DOCKER_3 user cannot be determined at this stage.
+FROM php:nginx as test-app-a
 COPY ./test/public-web-a /app/public
 HEALTHCHECK --start-period=30s \
     CMD curl -s -o /dev/null -w "200" http://localhost:80/ || exit 1
 
-FROM benzine/php:nginx-8.1 as test-app-b
+# checkov:skip=CKV_DOCKER_3 user cannot be determined at this stage.
+FROM php:nginx as test-app-b
 COPY ./test/public-web-b /app/public
 HEALTHCHECK --start-period=30s \
     CMD curl -s -o /dev/null -w "200" http://localhost:80/ || exit 1
 
-FROM benzine/php:nginx-8.1 as test-app-c
+# checkov:skip=CKV_DOCKER_3 user cannot be determined at this stage.
+FROM php:nginx as test-app-c
 COPY ./test/public-web-c /app/public
 HEALTHCHECK --start-period=30s \
     CMD curl -s -o /dev/null -w "200" http://localhost:80/ || exit 1

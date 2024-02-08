@@ -103,7 +103,7 @@ jobs:
           build-contexts: |
             php:cli=docker-image://ghcr.io/benzine-framework/php:cli-8.2
 
-      - name: "Validate build"
+      - name: "Post-Build: Validate build"
         shell: bash
         run: |
           docker \

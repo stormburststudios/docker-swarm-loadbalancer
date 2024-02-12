@@ -1,0 +1,13 @@
+FROM mariadb:injected-version
+
+LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
+      org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
+      org.opencontainers.image.source="https://github.com/benzine-framework/docker"
+
+# If healthcheck.sh isn't baked into the underlying image, crash.
+RUN which healthcheck.sh
+
+# Add healthcheck
+HEALTHCHECK --interval=10s --timeout=30s --retries=3 \
+  CMD ["healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
+

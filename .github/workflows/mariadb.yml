@@ -31,7 +31,7 @@ jobs:
           - 11.1
           - 11.0
           - 10.11
-          - 10.10
+          - "10.10"
           - 10.6
           - 10.5
           - 10.4
@@ -62,9 +62,9 @@ jobs:
         name: Build & Push
         with:
           context: mariadb
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ env.ACT && 'linux/amd64' || 'linux/amd64,linux/arm64' }}
           pull: true
-          push: ${{ env.should_push && !env.ACT }}
+          push: ${{ env.should_push }}
           tags: |
             benzine/mariadb:${{ matrix.version }}
             ghcr.io/benzine-framework/mariadb:${{ matrix.version }}

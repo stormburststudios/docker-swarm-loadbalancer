@@ -1,5 +1,9 @@
 FROM eclipse-mosquitto:injected-version
 
+LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
+      org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
+      org.opencontainers.image.source="https://github.com/benzine-framework/docker"
+
 COPY mosquitto.conf /mosquitto/config/mosquitto.conf
 
 RUN adduser -D mqtt

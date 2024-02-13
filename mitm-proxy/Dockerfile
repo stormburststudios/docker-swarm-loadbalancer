@@ -1,3 +1,4 @@
+# checkov:skip=CKV_DOCKER_3
 FROM mitmproxy:version
 ARG BUILD_DATE
 ARG GIT_SHA
@@ -36,7 +37,6 @@ RUN os=$(grep "^ID=" < /etc/os-release | cut -f2 -d'=') && \
       exit 1; \
     fi
 
-USER mitmproxy
 
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=3s \

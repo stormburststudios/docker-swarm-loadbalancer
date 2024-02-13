@@ -1,4 +1,4 @@
-name: Build mitmproxy
+name: MITMproxy w/Healthcheck
 
 permissions:
   contents: read
@@ -94,7 +94,7 @@ jobs:
             BUILD_DATE=${{ github.event.repository.pushed_at }}
           platforms: ${{ (!env.ACT && !(startsWith('6.',matrix.mitmproxy) || startsWith('5.', matrix.mitmproxy))) && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
           pull: true
-          push: ${{ env.should_push && !env.ACT }}
+          push: ${{ env.should_push }}
           tags: |
             ${{ format('benzine/mitmproxy:{0}', matrix.mitmproxy) }}
             ${{ env.should_push && format('ghcr.io/benzine-framework/mitmproxy:{0}', matrix.mitmproxy) }}

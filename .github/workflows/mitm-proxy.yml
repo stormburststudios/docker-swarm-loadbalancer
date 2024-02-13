@@ -7,6 +7,12 @@ permissions:
 on:
   workflow_call:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - mitm-proxy/**
+      - .github/workflows/mitm-proxy.yml
 
 env:
   should_push: ${{ github.ref == 'refs/heads/main' }}

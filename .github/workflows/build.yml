@@ -74,7 +74,7 @@ jobs:
 
   mariadb:
     needs: qc-before
-    name: MariaDB
+    name: MariaDB w/Healthcheck
     uses: ./.github/workflows/mariadb.yml
     secrets: inherit
     permissions:
@@ -101,7 +101,7 @@ jobs:
 
   redis:
     needs: qc-before
-    name: Redis w/Healthchecks
+    name: Redis w/Healthcheck
     uses: ./.github/workflows/redis.yml
     secrets: inherit
     permissions:

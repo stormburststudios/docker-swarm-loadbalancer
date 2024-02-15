@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sleep 600
+/sync/sync --push

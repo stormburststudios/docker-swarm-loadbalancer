@@ -1,0 +1,4 @@
+#!/bin/bash
+
+/sync/sync --prune
+sleep 84600

@@ -1,0 +1,8 @@
+#!/usr/bin/env php
+<?php
+
+use S3DB\Sync\Sync;
+
+require_once 'vendor/autoload.php';
+
+(new Sync())->run();

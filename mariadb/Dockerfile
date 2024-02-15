@@ -1,3 +1,4 @@
+# checkov:skip=CKV_DOCKER_3 We're not adding a user, its coming down from on-high in mariadb.
 FROM mariadb:injected-version
 
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \

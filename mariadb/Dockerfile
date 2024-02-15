@@ -8,6 +8,6 @@ LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
 RUN which healthcheck.sh
 
 # Add healthcheck
-HEALTHCHECK --interval=10s --timeout=30s --retries=3 \
+HEALTHCHECK --start-period=30s --interval=10s --timeout=30s --retries=3 \
   CMD ["healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
 

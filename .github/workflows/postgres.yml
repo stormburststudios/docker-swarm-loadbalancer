@@ -55,8 +55,13 @@ jobs:
           - 13.14
           - 12
           - 12.18
+        alpine:
+          - "-alpine"
+          - ""
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: postgres
 
       - uses: docker/setup-qemu-action@v2
 
@@ -77,15 +82,29 @@ jobs:
           username: matthewbaggett
           password: ${{ secrets.GHCR_PASSWORD }}
 
-      - uses: docker/build-push-action@v4
-        name: Build & Push
+      - name: "Setup: Docker meta"
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            benzine/postgres
+            ghcr.io/benzine-framework/postgres
+          labels: |
+            org.opencontainers.image.title=Postgres ${{ matrix.version }}${{ matrix.alpine }} w/healthcheck
+            org.opencontainers.image.description=Postgres ${{ matrix.version }} with Healthcheck
+            org.opencontainers.image.vendor=Matthew Baggett <matthew@baggett.me>
+          tags: |
+            type=raw,value=${{ matrix.version }}${{ matrix.alpine }},enable=true
+
+      - name: "Docker: Build & Push"
+        uses: docker/build-push-action@v4
         with:
           context: postgres
           platforms: ${{ env.ACT && 'linux/amd64' || 'linux/amd64,linux/arm64' }}
           pull: true
           push: ${{ env.should_push }}
-          tags: |
-            benzine/postgres:${{ matrix.version }}
-            ghcr.io/benzine-framework/postgres:${{ matrix.version }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
           build-contexts: |
-            postgres:injected-version=docker-image://postgres:${{ matrix.version }}
+            postgres:injected-version=docker-image://postgres:${{ matrix.version }}${{ matrix.alpine }}

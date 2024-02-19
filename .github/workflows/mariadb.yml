@@ -58,7 +58,7 @@ jobs:
           username: matthewbaggett
           password: ${{ secrets.GHCR_PASSWORD }}
 
-      - uses: docker/build-push-action@v4
+      - uses: docker/build-push-action@v5
         name: Build & Push
         with:
           context: mariadb

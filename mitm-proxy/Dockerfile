@@ -4,7 +4,8 @@ ARG BUILD_DATE
 ARG GIT_SHA
 ARG MITM_VERSION
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
-      org.opencontainers.image.source="https://github.com/benzine-framework/docker/mitm-proxy" \
+      org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
+      org.opencontainers.image.source="https://github.com/benzine-framework/docker" \
       org.opencontainers.image.title="mitm-proxy with healthcheck" \
       org.opencontainers.image.created="${BUILD_DATE}" \
       org.opencontainers.image.version="${MITM_VERSION}" \

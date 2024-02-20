@@ -141,8 +141,8 @@ jobs:
           - jammy
           - lunar
           - mantic
-          - noble
-          - devel
+          #- noble
+          #- devel
           - rolling
           - latest
     steps:

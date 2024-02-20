@@ -14,9 +14,6 @@ on:
       - mitm-proxy/**
       - .github/workflows/mitm-proxy.yml
 
-env:
-  should_push: ${{ github.ref == 'refs/heads/main' }}
-
 jobs:
   mitmproxy-build:
     name: "MITM proxy with Healthchecks"
@@ -74,14 +71,12 @@ jobs:
             mitm-proxy
 
       - name: "Setup: Login to Docker Hub"
-        if: ${{ env.should_push }}
         uses: docker/login-action@v3
         with:
           username: matthewbaggett
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
       - name: "Setup: Login to GHCR"
-        if: ${{ env.should_push }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -100,9 +95,9 @@ jobs:
             BUILD_DATE=${{ github.event.repository.pushed_at }}
           platforms: ${{ (!env.ACT && !(startsWith('6.',matrix.mitmproxy) || startsWith('5.', matrix.mitmproxy))) && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
           pull: true
-          push: ${{ env.should_push }}
+          push: true
           tags: |
             ${{ format('benzine/mitmproxy:{0}', matrix.mitmproxy) }}
-            ${{ env.should_push && format('ghcr.io/benzine-framework/mitmproxy:{0}', matrix.mitmproxy) }}
+            ${{ format('ghcr.io/benzine-framework/mitmproxy:{0}', matrix.mitmproxy) }}
           cache-from: ${{ !env.ACT && 'type=gha' || '' }}
           cache-to: ${{ !env.ACT && 'type=gha,mode=max' || '' }}

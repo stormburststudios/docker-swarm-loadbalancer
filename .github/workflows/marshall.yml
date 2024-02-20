@@ -7,6 +7,12 @@ permissions:
 on:
   workflow_call:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "marshall/**"
+      - ".github/workflows/marshall.yml"
 
 env:
   latest-stable-version: "focal"

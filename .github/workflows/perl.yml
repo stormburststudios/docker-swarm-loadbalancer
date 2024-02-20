@@ -81,7 +81,8 @@ jobs:
         run: |
           echo "perl_version=$(docker run --rm ghcr.io/benzine-framework/perl:${{ matrix.ubuntu }} perl -v | grep "This is perl" | cut -d'(' -f2 | cut -d')' -f1 | sed 's/[^0-9.]*//g')" >> $GITHUB_OUTPUT
 
-      - name: "Retag build with perl version"
+      - name: "Retag build with perl version (${{ steps.perl_version.outputs.perl_version })"
+        if: matrix.ubuntu == 'focal' || matrix.ubuntu == 'jammy' || matrix.ubuntu == 'lunar'
         run: |
           docker tag ghcr.io/benzine-framework/perl:${{ matrix.ubuntu }} ghcr.io/benzine-framework/perl:${{ steps.perl_version.outputs.perl_version }}
           docker tag ghcr.io/benzine-framework/perl:${{ matrix.ubuntu }} matthewbaggett/perl:${{ steps.perl_version.outputs.perl_version }}

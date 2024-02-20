@@ -9,6 +9,11 @@ on:
     paths:
       - "perl/**"
       - ".github/workflows/perl.yml"
+  workflow_run:
+    workflows:
+      - "Marshall"
+    types:
+      - completed
 
 permissions:
   contents: read

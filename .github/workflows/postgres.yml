@@ -58,6 +58,9 @@ jobs:
         alpine:
           - "-alpine"
           - ""
+        exclude:
+          - version: latest
+            alpine: "-alpine"
     steps:
       - uses: actions/checkout@v4
         with:

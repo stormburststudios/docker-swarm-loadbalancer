@@ -91,7 +91,7 @@ jobs:
           docker push matthewbaggett/perl:${{ steps.perl_version.outputs.perl_version }}
           docker push benzine/perl:${{ steps.perl_version.outputs.perl_version }}
 
-      - name: "Retag build with perl version AND ubuntu version (${{ steps.perl_version.outputs.perl_version })"
+      - name: "Retag build with perl version AND ubuntu version (${{ steps.perl_version.outputs.perl_version }})"
         run: |
           docker tag ghcr.io/benzine-framework/perl:${{ matrix.ubuntu }} ghcr.io/benzine-framework/perl:${{ steps.perl_version.outputs.perl_version }}-${{ matrix.ubuntu }}
           docker tag ghcr.io/benzine-framework/perl:${{ matrix.ubuntu }} matthewbaggett/perl:${{ steps.perl_version.outputs.perl_version }}-${{ matrix.ubuntu }}

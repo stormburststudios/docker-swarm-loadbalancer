@@ -62,8 +62,7 @@ jobs:
         with:
           context: perl
           target: release
-          platforms: ${{ !env.ACT && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
-          pull: true
+          platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/arm/v7
           push: true
           tags: |
             ghcr.io/benzine-framework/perl:${{ matrix.ubuntu }}

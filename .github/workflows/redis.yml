@@ -36,7 +36,7 @@ jobs:
           - latest
     steps:
       - name: "Setup: Setup QEMU"
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
 
       - name: "Setup: Expose GitHub Runtime"
         uses: crazy-max/ghaction-github-runtime@v3

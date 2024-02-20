@@ -3,6 +3,10 @@ name: Build S3DB
 on:
   workflow_call:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Postgres", "MariaDB"]
+    types: [completed]
+
   push:
     branches:
       - main

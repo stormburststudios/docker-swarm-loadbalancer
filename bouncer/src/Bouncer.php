@@ -448,7 +448,7 @@ class Bouncer
 
                 case 'BOUNCER_CUSTOM_NGINX_CONFIG':
                     // If envval is base64 encoded, decode it first
-                    if (base64_encode(base64_decode($envVal, true)) === $envVal) {
+                    if (preg_match('/^[a-zA-Z0-9\/\r\n+]*={0,2}$/', $envVal)) {
                         $envVal = base64_decode($envVal);
                     }
                     $this->logger->info('Custom nginx config for {label} is provided.', ['emoji' => Emoji::artistPalette(), 'label' => $bouncerTarget->getLabel()]);

@@ -212,7 +212,7 @@ class Bouncer
                     $bouncerTarget->setEndpointHostnameOrIp($networks[0]['IPAddress']);
                 }
 
-                $bouncerTarget->setTargetPath(sprintf('http://%s:%d/', $bouncerTarget->getEndpointHostnameOrIp(), $bouncerTarget->getPort() >= 0 ? $bouncerTarget->getPort() : 80));
+                $bouncerTarget->setTargetPath(sprintf('http://%s:%d', $bouncerTarget->getEndpointHostnameOrIp(), $bouncerTarget->getPort() >= 0 ? $bouncerTarget->getPort() : 80));
 
                 $bouncerTarget->setUseGlobalCert($this->isUseGlobalCert());
 
@@ -302,7 +302,7 @@ class Bouncer
 
                         continue;
                     }
-                    $bouncerTarget->setTargetPath(sprintf('http://%s:%d/', $bouncerTarget->getEndpointHostnameOrIp(), $bouncerTarget->getPort()));
+                    $bouncerTarget->setTargetPath(sprintf('http://%s:%d', $bouncerTarget->getEndpointHostnameOrIp(), $bouncerTarget->getPort()));
 
                     $bouncerTarget->setUseGlobalCert($this->isUseGlobalCert());
 

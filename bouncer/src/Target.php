@@ -28,7 +28,8 @@ class Target
     private ?string $username           = null;
     private ?string $password           = null;
 
-    private ?string $hostOverride = null;
+    private ?string $hostOverride      = null;
+    private ?string $customNginxConfig = null;
 
     public function __construct(
         private Logger $logger,
@@ -461,5 +462,22 @@ class Target
                 '',
             $this->getName()
         );
+    }
+
+    public function setCustomNginxConfig(string $config): self
+    {
+        $this->customNginxConfig = $config;
+
+        return $this;
+    }
+
+    public function getCustomNginxConfig(): ?string
+    {
+        return $this->customNginxConfig;
+    }
+
+    public function hasCustomNginxConfig(): bool
+    {
+        return $this->customNginxConfig !== null;
     }
 }

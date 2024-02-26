@@ -62,6 +62,7 @@ These environment variables need to be applied to the CONSUMING SERVICE and not 
 | BOUNCER_ALLOW_WEBSOCKETS       | Defaults to enabled. Values are "yes" or "true", anything else is false | Enable websocket behaviour                                                                                                                                                                                  |
 | BOUNCER_ALLOW_LARGE_PAYLOADS   | Defaults to disabled.                                                   | Allows overriding the default nginx payload size. Related to BOUNCER_MAX_PAYLOADS_MEGABYTES                                                                                                                 |
 | BOUNCER_MAX_PAYLOADS_MEGABYTES | numbers                                                                 | Size of max payload to allow, in megabytes. Requires BOUNCER_ALLOW_LARGE_PAYLOADS to be enabled                                                                                                             |
+| BOUNCER_CUSTOM_NGINX_CONFIG    | Contents of nginx config file, optionally base64 encoded                | Allows you to provide a custom nginx config file for this service. This will entirely replace the default config for this service. This is hella dangerous.                                                 |
 
 ## Security considerations
 

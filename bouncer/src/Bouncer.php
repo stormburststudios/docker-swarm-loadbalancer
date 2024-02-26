@@ -280,6 +280,12 @@ class Bouncer
                     $bouncerTarget->setLabel($service['Spec']['Name']);
                     $bouncerTarget = $this->parseContainerEnvironmentVariables($envs, $bouncerTarget);
 
+                    if ($bouncerTarget->hasCustomNginxConfig()) {
+                        $this->logger->info('Custom nginx config for {label} is provided.', ['emoji' => Emoji::artistPalette(), 'label' => $bouncerTarget->getLabel()]);
+                        $bouncerTargets[] = $bouncerTarget;
+
+                        continue;
+                    }
                     if ($bouncerTarget->isPortSet()) {
                         $bouncerTarget->setEndpointHostnameOrIp($service['Spec']['Name']);
                         // $this->logger->info('{label}: Ports for {target_name} has been explicitly set to {host}:{port}.', ['emoji' => Emoji::warning().' ', 'target_name' => $bouncerTarget->getName(), 'host' => $bouncerTarget->getEndpointHostnameOrIp(), 'port' => $bouncerTarget->getPort()]);
@@ -300,7 +306,7 @@ class Bouncer
 
                     $bouncerTarget->setUseGlobalCert($this->isUseGlobalCert());
 
-                    if ($bouncerTarget->isEndpointValid()) {
+                    if ($bouncerTarget->isEndpointValid() || $bouncerTarget->hasCustomNginxConfig()) {
                         $bouncerTargets[] = $bouncerTarget;
                     } else {
                         $this->logger->debug(
@@ -437,6 +443,16 @@ class Bouncer
 
                 case 'BOUNCER_PROXY_TIMEOUT_SECONDS':
                     $bouncerTarget->setProxyTimeoutSeconds(is_numeric($envVal) ? intval($envVal) : null);
+
+                    break;
+
+                case 'BOUNCER_CUSTOM_NGINX_CONFIG':
+                    // If envval is base64 encoded, decode it first
+                    if (base64_encode(base64_decode($envVal, true)) === $envVal) {
+                        $envVal = base64_decode($envVal);
+                    }
+                    $this->logger->info('Custom nginx config for {label} is provided.', ['emoji' => Emoji::artistPalette(), 'label' => $bouncerTarget->getLabel()]);
+                    $bouncerTarget->setCustomNginxConfig($envVal);
 
                     break;
             }
@@ -804,7 +820,7 @@ class Bouncer
      */
     private function generateNginxConfig(Target $target): bool
     {
-        $configData     = $this->twig->render('NginxTemplate.twig', $target->__toArray());
+        $configData     = $target->hasCustomNginxConfig() ? $target->getCustomNginxConfig() : $this->twig->render('NginxTemplate.twig', $target->__toArray());
         $changed        = false;
         $configFileHash = $this->configFilesystem->fileExists($target->getNginxConfigFileName()) ? sha1($this->configFilesystem->read($target->getNginxConfigFileName())) : null;
 

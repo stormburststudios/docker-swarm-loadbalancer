@@ -2,7 +2,9 @@
 FROM marshall:build AS php-core
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
-      org.opencontainers.image.source="https://github.com/benzine-framework/docker"
+      org.opencontainers.image.source="https://github.com/benzine-framework/docker" \
+      org.opencontainers.image.description="Build of Marshall with PHP"
+
 ARG PHP_PACKAGES
 ARG COMPOSER_VERSION
 ENV COMPOSER_ALLOW_SUPERUSER=1
@@ -79,7 +81,9 @@ RUN composer --version && \
 FROM php-cli AS php-nginx
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
-      org.opencontainers.image.source="https://github.com/benzine-framework/docker"
+      org.opencontainers.image.source="https://github.com/benzine-framework/docker" \
+      org.opencontainers.image.description="Build of Marshall with Nginx + PHP"
+
 ARG PHP_VERSION
 ARG PHP_MEMORY_LIMIT=128M
 ARG PHP_DATA_MAX_SIZE=1024M
@@ -200,7 +204,9 @@ HEALTHCHECK --interval=30s --timeout=3s \
 FROM php-cli AS php-apache
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker" \
-      org.opencontainers.image.source="https://github.com/benzine-framework/docker"
+      org.opencontainers.image.source="https://github.com/benzine-framework/docker" \
+      org.opencontainers.image.description="Build of Marshall with Apache + PHP"
+
 ARG PHP_VERSION
 # ts:skip=AC_DOCKER_0002 Mis-detecting usage of apt instead of apt-get
 RUN apt-get -qq update && \

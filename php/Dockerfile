@@ -177,6 +177,7 @@ RUN apt-get -qq update && \
     sed -i "s/{{PHP}}/$PHP_VERSION/g" /etc/nginx/sites-enabled/default && \
     sed -i "s/{{PHP}}/$PHP_VERSION/g" /etc/nginx/sites-enabled/default-ssl && \
     sed -i "s/{{PHP}}/$PHP_VERSION/g" /etc/service/php-fpm/run && \
+    sed -i "s/{{PHP}}/$PHP_VERSION/g" /etc/service/logs-phpfpm-error/run && \
     # Enable PHP-FPM status & PHP-FPM ping
     sed -i -e "s|;pm.status_path =.*|pm.status_path = /fpm-status|g" /etc/php/*/fpm/pool.d/www.conf && \
     sed -i -e "s|;ping.path =.*|ping.path = /fpm-ping|g" /etc/php/*/fpm/pool.d/www.conf && \

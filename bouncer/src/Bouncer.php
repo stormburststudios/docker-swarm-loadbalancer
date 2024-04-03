@@ -939,6 +939,7 @@ class Bouncer
         $command = new CommandBuilder('/usr/sbin/nginx');
         $command->addFlag('s', 'reload');
         $this->logger->info('Restarting nginx', ['emoji' => Emoji::timerClock() . ' ']);
-        $shell->run($command);
+        $nginxRestartOutput = $shell->run($command);
+        $this->logger->debug('Nginx restarted {restart_output}', ['restart_output' => $nginxRestartOutput, 'emoji' => Emoji::partyPopper()]);
     }
 }

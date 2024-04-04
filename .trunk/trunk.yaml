@@ -2,14 +2,14 @@
 # To learn more about the format of this file, see https://docs.trunk.io/reference/trunk-yaml
 version: 0.1
 cli:
-  version: 1.19.0
+  version: 1.21.0
   shell_hooks:
     enforce: true
 # Trunk provides extensibility via plugins. (https://docs.trunk.io/plugins)
 plugins:
   sources:
     - id: trunk
-      ref: v1.4.2
+      ref: v1.4.5
       uri: https://github.com/trunk-io/plugins
 # Many linters and tools depend on runtimes - configure them here. (https://docs.trunk.io/runtimes)
 runtimes:
@@ -22,25 +22,55 @@ lint:
   disabled:
     - terrascan
   enabled:
-    - gitleaks@8.18.1
-    - actionlint@1.6.26
-    - checkov@3.2.2
+    - gitleaks@8.18.2
+    - actionlint@1.6.27
+    - checkov@3.2.52
     - git-diff-check
     - hadolint@2.12.0
     - markdownlint@0.39.0
-    - osv-scanner@1.6.2
-    - prettier@3.2.4
-    - shellcheck@0.9.0
+    - osv-scanner@1.7.0
+    - prettier@3.2.5
+    - shellcheck@0.10.0
     - shfmt@3.6.0
-    - trivy@0.48.3
-    - trufflehog@3.66.2
-    - yamllint@1.33.0
+    - trivy@0.50.1
+    - trufflehog@3.71.0
+    - yamllint@1.35.1
+    - php-cs-fixer@0.0.1
   ignore:
     - linters: [markdownlint]
       paths:
         - "**/LICENCE.md"
         - "**/LICENSE.md"
         - "**/CODE_OF_CONDUCT.md"
+  definitions:
+    - name: php-cs-fixer
+      files: [php]
+      commands:
+        - name: lint
+          output: sarif
+          #parse_regex: "((?P<path>.*):(?P<line>\\d+):(?P<col>\\d+): \\[(?P<severity>.*)\\] (?P<message>.*) \\((?P<code>.*)\\))" # matches the parser run output
+          success_codes: [0, 1, 4, 8]
+          cache_results: false
+          run: php-cs-fixer fix --dry-run --format=checkstyle ${target}
+          read_output_from: stdout
+          parser:
+            run: "cs2pr"
+
+      #        - name: format
+      #          output: rewrite
+      #          success_codes: [0]
+      #          run: php-cs-fixer fix -q ${target}
+      #          formatter: true
+      #          batch: true
+
+      direct_configs: [.php-cs-fixer.php, .php-cs-fixer.dist.php]
+      #working_directory: ${root_or_parent_with_direct_config}
+      suggest_if: files_present
+      tools: [php-cs-fixer, cs2pr]
+      version_command:
+        parse_regex: ${semver}
+        run: php-cs-fixer --version
+
 actions:
   enabled:
     - trunk-announce
@@ -48,10 +78,15 @@ actions:
     - trunk-fmt-pre-commit
     - trunk-upgrade-available
 tools:
+  disabled:
+    - composer
   enabled:
+    - action-validator@0.6.0
+    - php-cs-fixer@0.0.1
+    - cs2pr@0.0.1
     - jq@jq-1.7.1
-    - gh@2.43.1
-    - act@0.2.59
+    - gh@2.47.0
+    - act@0.2.61
     - terraform@1.7.2
   definitions:
     - name: gh
@@ -61,6 +96,35 @@ tools:
         - name: PATH
           list: ["${tool}/bin"]
       shims: [gh]
+    - name: composer
+      download: composer
+      known_good_version: 0.0.1
+      environment:
+        - name: PATH
+          list: ["${tool}/bin"]
+      shims: [composer]
+    - name: php-cs-fixer
+      download: php-cs-fixer
+      known_good_version: 0.0.1
+      environment:
+        - name: PATH
+          list: ["${tool}/bin"]
+      shims: [php-cs-fixer]
+    - name: cs2pr
+      download: cs2pr
+      known_good_version: 0.0.1
+      environment:
+        - name: PATH
+          list: ["${tool}/bin"]
+      shims: [cs2pr]
+
+    - name: php-static-cli
+      download: php-static-cli
+      known_good_version: 2.0.1
+      environment:
+        - name: PATH
+          list: ["${tool}/bin"]
+      shims: [spc]
 downloads:
   - name: gh
     downloads:
@@ -94,3 +158,40 @@ downloads:
           arm_64: arm64
         url: https://github.com/cli/cli/releases/download/v${version}/gh_${version}_${os}_${cpu}.tar.gz
         strip_components: 1
+  - name: composer
+    downloads:
+      - os:
+          linux: linux
+          macos: macos
+        cpu:
+          x86_64: x86_64
+          arm_64: arm64
+        url: https://github.com/matthewbaggett/packaged-tooling/releases/download/${version}/composer-8.2-${os}-${cpu}
+  - name: php-cs-fixer
+    downloads:
+      - os:
+          linux: linux
+          macos: macos
+        cpu:
+          x86_64: x86_64
+          arm_64: arm64
+        url: https://github.com/matthewbaggett/packaged-tooling/releases/download/${version}/php-cs-fixer-8.2-${os}-${cpu}
+  - name: cs2pr
+    downloads:
+      - os:
+          linux: linux
+          macos: macos
+        cpu:
+          x86_64: x86_64
+          arm_64: arm64
+        url: https://github.com/matthewbaggett/packaged-tooling/releases/download/${version}/cs2pr-8.2-${os}-${cpu}
+
+  - name: php-static-cli
+    downloads:
+      - os:
+          linux: linux
+          macos: macos
+        cpu:
+          x86_64: x86_64
+          arm_64: aarch64
+        url: https://github.com/crazywhalecc/static-php-cli/releases/download/${version}/spc-${os}-${cpu}.tar.gz

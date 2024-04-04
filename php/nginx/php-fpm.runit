@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1083,SC2312
 
+# Create the log file to be able to run tail without errors
 touch /var/log/php{{PHP}}-fpm.log
 
 # Load envs into PHP-fpm's env.conf.
-# shellcheck disable=SC1083,SC2312
 env | sed "s/\(.*\)=\(.*\)/env[\1]='\2'/" >/etc/php/{{PHP}}/fpm/conf.d/env.conf
 
 if [[ ${DEBUG_MODE,,} == "on" ]]; then

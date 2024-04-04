@@ -12,7 +12,7 @@ $targets = explode(",", $_ENV['TARGETS']);
 $targets = array_map('trim', $targets);
 
 # For each $target, resolve the target to IP addresses
-foreach($targets as $target){
+foreach($targets as $target) {
     $targetIps[$target] = gethostbynamel($target) ?: [];
     $targetIps[$target] = array_values($targetIps[$target]);
 }
@@ -27,21 +27,21 @@ foreach ($targets as $target) {
 $responses = Utils::settle($promises)->wait();
 $rollup = true;
 $json = [];
-foreach($responses as $target => $response){
+foreach($responses as $target => $response) {
     if(!isset($response['value']) || $response['value']->getStatusCode() != 200) {
         $rollup = false;
         if ($response['reason'] instanceof \Exception) {
             $json[$target] = ['Status' => 'ERROR', 'Reason' => $response['reason']->getMessage()];
-        }else {
+        } else {
             $json[$target] = ['Status' => "ERROR", 'Reason' => 'Unknown'];
         }
-    }else{
+    } else {
         $json[$target] = json_decode($response['value']->getBody()->getContents(), true);
     }
     $json[$target]['IP'] = $targetIps[$target];
 
 }
-if(!$rollup){
+if(!$rollup) {
     header("HTTP/1.0 500 Internal Server Error");
 }
 header('Content-Type: application/json; charset=utf-8');

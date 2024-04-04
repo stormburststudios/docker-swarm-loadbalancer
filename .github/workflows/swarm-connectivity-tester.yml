@@ -82,11 +82,6 @@ jobs:
           platforms: ${{ !env.ACT && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
           pull: true
           push: true
-          build-args: |
-            GIT_SHA=${{ github.sha }}
-            GIT_BUILD_ID=${{ github.ref_name }}
-            BUILD_DATE=${{ steps.date.outputs.container_build_datetime }}
-            GIT_COMMIT_MESSAGE=${{ github.event.head_commit.message }}
           tags: |
             ${{ !env.ACT && 'benzine/swarm-connectivity-tester:target' || '' }}
             ${{ !env.ACT && 'ghcr.io/benzine-framework/swarm-connectivity-tester:target' || 'ghcr.io/benzine-framework/swarm-connectivity-tester:target-devel' }}
@@ -104,11 +99,6 @@ jobs:
           platforms: ${{ !env.ACT && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
           pull: true
           push: true
-          build-args: |
-            GIT_SHA=${{ github.sha }}
-            GIT_BUILD_ID=${{ github.ref_name }}
-            BUILD_DATE=${{ steps.date.outputs.container_build_datetime }}
-            GIT_COMMIT_MESSAGE=${{ github.event.head_commit.message }}
           tags: |
             ${{ !env.ACT && 'benzine/swarm-connectivity-tester:reporter' || '' }}
             ${{ !env.ACT && 'ghcr.io/benzine-framework/swarm-connectivity-tester:reporter' || 'ghcr.io/benzine-framework/swarm-connectivity-tester:reporter-devel' }}

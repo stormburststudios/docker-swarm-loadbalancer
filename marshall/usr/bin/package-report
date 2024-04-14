@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-printf "Packages installed:\n KiloBytes\tPackage\n"
-
-# shellcheck disable=SC2312
-dpkg-query -W --showformat='${Installed-Size;10}\t${Package}\n' | sort -k1,1n | tac | head -n 5

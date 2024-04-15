@@ -41,4 +41,5 @@ RUN os=$(grep "^ID=" < /etc/os-release | cut -f2 -d'=') && \
 
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=3s \
-  CMD curl -I -x http://localhost:8080 -k https://www.google.com || exit 1
+  #CMD curl -I -x http://localhost:8080 -k https://www.google.com || exit 1
+  CMD curl -i http://localhost:8081 || exit 1

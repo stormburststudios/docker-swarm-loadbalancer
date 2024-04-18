@@ -134,3 +134,30 @@ jobs:
     permissions:
       contents: read
       packages: write
+
+  dynamodb:
+    needs: qc-before
+    name: DynamoDB Dev Container
+    uses: ./.github/workflows/dynamodb.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      packages: write
+
+  minio:
+    needs: qc-before
+    name: Minio Dev Container
+    uses: ./.github/workflows/minio.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      packages: write
+
+  mongodb:
+    needs: qc-before
+    name: MongoDB Dev Container
+    uses: ./.github/workflows/mongodb.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      packages: write

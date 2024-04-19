@@ -2,3 +2,4 @@ version: "3.7"
 services:
   dynamodb:
     build: .
+    image: ghcr.io/benzine-framework/dynamodb:local

@@ -1,4 +1,4 @@
-name: Minio
+name: MongoDB
 
 permissions:
   contents: read

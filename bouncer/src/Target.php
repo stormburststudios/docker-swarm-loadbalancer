@@ -442,12 +442,12 @@ class Target
         // Is it a Hostname that resolves?
         $resolved = gethostbyname($this->getEndpointHostnameOrIp());
         if (filter_var($resolved, FILTER_VALIDATE_IP)) {
-            // $this->logger->debug(sprintf('%s isEndpointValid: %s is a hostname that resolves to a normal IP %s', Emoji::magnifyingGlassTiltedRight(), $this->getEndpointHostnameOrIp(), $resolved));
+            // $this->logger->critical(sprintf('%s isEndpointValid: %s is a hostname that resolves to a normal IP %s', Emoji::magnifyingGlassTiltedRight(), $this->getEndpointHostnameOrIp(), $resolved));
 
             return true;
         }
 
-        $this->logger->warning('isEndpointValid: {endpoint} is a hostname that does not resolve', ['emoji' => Emoji::magnifyingGlassTiltedRight(), 'endpoint' => $this->getEndpointHostnameOrIp()]);
+        $this->logger->critical('isEndpointValid: {endpoint} is a hostname that does not resolve', ['emoji' => Emoji::magnifyingGlassTiltedRight(), 'endpoint' => $this->getEndpointHostnameOrIp()]);
 
         return false;
     }

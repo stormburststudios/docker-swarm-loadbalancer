@@ -14,6 +14,7 @@ RUN adduser mysql && \
     apt-get -y install --no-install-recommends \
       wget \
       mysql-client \
+      socat \
     && \
     wget -q https://downloads.mysql.com/archives/get/p/21/file/$MYSQL_PROXY_TAR_NAME.tar.gz && \
     tar -xzvf $MYSQL_PROXY_TAR_NAME.tar.gz && \

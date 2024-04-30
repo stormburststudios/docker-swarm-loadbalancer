@@ -400,7 +400,7 @@ class Bouncer
 
                 case 'BOUNCER_HOST_OVERRIDE':
                     $bouncerTarget->setHostOverride($envVal);
-                    $this->logger->warning('{label}: Host reported to container overridden and set to {host_override}.', ['emoji' => Emoji::hikingBoot() . ' ', 'label' => $bouncerTarget->getLabel(), 'host_override' => $bouncerTarget->getHostOverride()]);
+                    $this->logger->warning('{label}: Host reported to container overridden and set to {host_override}.', ['emoji' => Emoji::hikingBoot(), 'label' => $bouncerTarget->getLabel(), 'host_override' => $bouncerTarget->getHostOverride()]);
 
                     break;
 
@@ -781,7 +781,7 @@ class Bouncer
                 $this->logger->info('Created {label}', $context + ['emoji' => Emoji::pencil() . ' ']);
                 $this->logger->debug('  -> {config_dir}/{file}', $context + ['emoji' => Emoji::pencil() . ' ']);
                 $this->logger->debug('  -> {domain}', $context + ['emoji' => Emoji::pencil() . ' ']);
-                $this->logger->critical('{label} cert type is {cert_type}', $context + ['emoji' => Emoji::catFace() . ' ', 'cert_type' => $target->getTypeCertInUse()->name]);
+                $this->logger->critical('{label} cert type is {cert_type}', $context + ['emoji' => Emoji::catFace(), 'cert_type' => $target->getTypeCertInUse()->name]);
             }
         } else {
             $this->logger->info('More than {num_max} Nginx configs generated.. Too many to show them all!', ['emoji' => Emoji::pencil() . ' ', 'num_max' => $this->getMaximumNginxConfigCreationNotices()]);

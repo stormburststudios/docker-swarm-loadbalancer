@@ -669,6 +669,15 @@ class Bouncer
         if ($this->s3Enabled()) {
             $this->writeCertificatesToS3();
         }
+
+        // if any of the targets has requiresForcedScanning set to true, we need to force an update
+        if (array_reduce($targets, fn ($carry, $target) => $carry || $target->requiresForcedScanning(), false)) {
+            $this->logger->warning('Forcing an update in 5 seconds because one or more targets require it.', ['emoji' => Emoji::warning()]);
+            sleep(5);
+            return;
+        }
+
+        // Wait for next change
         $this->waitUntilContainerChange();
     }
 

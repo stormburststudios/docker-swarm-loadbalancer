@@ -31,6 +31,8 @@ class Target
     private ?string $hostOverride      = null;
     private ?string $customNginxConfig = null;
 
+    private bool $requiresForcedScanning = false;
+
     public function __construct(
         private Logger $logger,
         private Settings $settings,
@@ -448,6 +450,7 @@ class Target
         }
 
         $this->logger->critical('isEndpointValid: {endpoint} is a hostname that does not resolve', ['emoji' => Emoji::magnifyingGlassTiltedRight(), 'endpoint' => $this->getEndpointHostnameOrIp()]);
+        $this->setRequiresForcedScanning(true);
 
         return false;
     }
@@ -479,5 +482,15 @@ class Target
     public function hasCustomNginxConfig(): bool
     {
         return $this->customNginxConfig !== null;
+    }
+
+    public function requiresForcedScanning(): bool
+    {
+        return $this->requiresForcedScanning;
+    }
+
+    public function setRequiresForcedScanning(bool $requiresForcedScanning): void
+    {
+        $this->requiresForcedScanning = $requiresForcedScanning;
     }
 }

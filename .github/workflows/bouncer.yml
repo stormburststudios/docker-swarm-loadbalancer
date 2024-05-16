@@ -8,26 +8,20 @@ on:
   push:
     branches:
       - main
-    paths:
-      - bouncer/**
-      - .github/workflows/bouncer.yml
   workflow_call:
   workflow_dispatch:
 
 concurrency:
-  group: bouncer-${{ github.head_ref || github.run_id }}
+  group: ${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
-  bouncer-build:
+  build:
     name: Build Bouncer
     runs-on: ubuntu-latest
     steps:
       - name: "Setup: Checkout Source"
         uses: actions/checkout@v4
-        with:
-          sparse-checkout: |
-            bouncer
 
       - name: "Setup: Get Date"
         id: date
@@ -70,24 +64,22 @@ jobs:
 
       - name: "Setup: Find Composer Cache Directory"
         id: composer-cache
-        working-directory: bouncer
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: "Setup: Composer Cache"
         uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-bouncer-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-bouncer-composer-
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
 
       - name: "Dependencies: Composer Install"
-        working-directory: bouncer
         run: composer install --ignore-platform-reqs
 
       - name: "Build: Build & Push Image"
         uses: docker/build-push-action@v5
         with:
-          context: bouncer
+          context: .
           target: bouncer
           platforms: ${{ !env.ACT && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
           pull: true

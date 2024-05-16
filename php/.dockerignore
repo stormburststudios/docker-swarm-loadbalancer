@@ -1,7 +1,0 @@
-doc/
-test-app/
-tester/
-build.yml
-Dockerfile
-Makefile*
-test.yml

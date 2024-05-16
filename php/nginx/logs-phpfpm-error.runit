@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-# shellcheck disable=SC1083
-tail -f /var/log/php{{PHP}}-fpm.log

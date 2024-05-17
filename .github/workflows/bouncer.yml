@@ -11,7 +11,7 @@ on:
     branches:
       - main
   schedule:
-    - cron '0 8 * * 2' # 8am Patch Tuesday
+    - cron: "0 14 * * 2" # 2pm Patch Tuesday
 
 concurrency:
   group: ${{ github.head_ref || github.run_id }}
@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build Bouncer
+    name: Build Docker Swarm Loadbalancer
     runs-on: ubuntu-latest
     steps:
       - name: "Setup: Checkout Source"
@@ -39,8 +39,6 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.2
-        env:
-          runner: self-hosted
 
       - name: "Setup: Setup QEMU"
         uses: docker/setup-qemu-action@v3
@@ -55,14 +53,14 @@ jobs:
         uses: docker/login-action@v3
         with:
           username: matthewbaggett
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: "Setup: Login to GHCR"
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: matthewbaggett
-          password: ${{ secrets.GHCR_PASSWORD }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Setup: Find Composer Cache Directory"
         id: composer-cache
@@ -72,8 +70,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
+          key: ${{ runner.os }}-bouncer-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-bouncer-composer-
 
       - name: "Dependencies: Composer Install"
         run: composer install --ignore-platform-reqs

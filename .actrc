@@ -1,3 +1,4 @@
+--pull=false
 --use-new-action-cache
 --action-cache-path=.github/cache/act/actions
 --cache-server-path=.github/cache/act/cache

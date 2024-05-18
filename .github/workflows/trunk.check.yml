@@ -1,15 +1,11 @@
 name: "Quality Control: Trunk Check"
 
-permissions: read-all
+permissions:
+  contents: read
 
 on:
   workflow_call:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-  schedule:
-    - cron: "0 11 * * 2" # 11am Patch Tuesday
 
 concurrency:
   group: ${{ github.head_ref || github.run_id }}

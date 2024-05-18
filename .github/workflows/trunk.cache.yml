@@ -1,6 +1,8 @@
 name: "Quality Control: Trunk Cache"
 
-permissions: read-all
+permissions:
+  contents: read
+  actions: write
 
 on:
   workflow_call:
@@ -10,6 +12,7 @@ on:
       - main
     paths:
       - .trunk/trunk.yaml
+      - .github/workflows/trunk.cache.yml
   schedule:
     - cron: "0 9 * * 1" # 9am Tooling Monday
 

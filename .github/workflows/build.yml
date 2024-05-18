@@ -58,7 +58,9 @@ jobs:
     name: Clean
     needs:
       - release-container
+    if: always()
     uses: ./.github/workflows/docker.clean.yml
     secrets: inherit
     permissions:
       contents: read
+      packages: write

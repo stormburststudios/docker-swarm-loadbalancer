@@ -18,16 +18,16 @@ env:
 
 jobs:
   docker-build:
-    name: Build Swarm Loadbalancer
+    name: Build Swarm Load Balancer
     runs-on: ubuntu-latest
     steps:
-      - uses: benzine-framework/action-get-datetime@v1.0.2
       - uses: benzine-framework/action-setup-php@main
+      - uses: benzine-framework/action-get-datetime@main
       - uses: benzine-framework/action-setup-docker@main
         with:
-          ghcr_user: ${{ github.repository_owner }}
-          ghcr_token: ${{ secrets.GHCR_TOKEN }}
-          docker_hub_user: ${{ secrets.DOCKER_HUB_USER }}
+          ghcr_user: matthewbaggett
+          ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+          docker_hub_user: matthewbaggett
           docker_hub_token: ${{ secrets.DOCKER_HUB_TOKEN }}
       - name: "Build & Push Candidate Image as ${{ env.CANDIDATE_IMAGE }}"
         uses: docker/build-push-action@v5
@@ -35,15 +35,15 @@ jobs:
           context: .
           target: bouncer
           build-contexts: |
-            php:cli=docker-image://ghcr.io/benzine-framework/php:cli-${{ steps.read-php-version.outputs.php_version }}
+            php:cli=docker-image://ghcr.io/benzine-framework/php:cli-${{ env.PHP_VERSION }}
           build-args: |
             GIT_SHA=${{ github.sha }}
             GIT_BUILD_ID=${{ github.ref_name }}
             GIT_COMMIT_MESSAGE=${{ github.event.head_commit.message }}
             BUILD_DATE=${{ env.ATOM }}
-          platforms: ${{ !env.ACT && env.PLATFORMS || 'linux/amd64' }}
+          platforms: ${{ github.actor != 'nektos/act' && env.PLATFORMS || 'linux/amd64' }}
           pull: true
-          push: true
+          push: ${{ github.ref == 'refs/heads/main' }}
           tags: ${{ env.CANDIDATE_IMAGE }}
-          cache-from: ${{ !env.ACT && 'type=gha' || '' }}
-          cache-to: ${{ !env.ACT && 'type=gha,mode=max' || '' }}
+          cache-from: ${{ env.DOCKER_CACHE_FROM }}
+          cache-to: ${{ env.DOCKER_CACHE_TO }}

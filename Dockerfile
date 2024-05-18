@@ -94,8 +94,6 @@ EXPOSE 443
 HEALTHCHECK --start-period=30s \
     CMD curl -s -o /dev/null -w "200" http://localhost:80/ || exit 1
 
-RUN ls -lah /app /app/bin
-
 # checkov:skip=CKV_DOCKER_3 This is a test container.
 FROM php:nginx as test-app
 COPY tests/testsites /app/public

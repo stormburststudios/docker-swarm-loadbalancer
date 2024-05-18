@@ -2,8 +2,8 @@ name: Build Swarm Loadbalancer
 
 permissions:
   contents: read
-  packages: write
-  checks: write
+  packages: read
+  checks: read
 
 on:
   workflow_call:
@@ -22,12 +22,18 @@ jobs:
   build-container:
     uses: ./.github/workflows/docker.build.yml
     secrets: inherit
+    permissions:
+      packages: write
   check-php:
     uses: ./.github/workflows/php.check.yml
     secrets: inherit
+    permissions:
+      pull-requests: write
   check-trunk:
     uses: ./.github/workflows/trunk.check.yml
     secrets: inherit
+    permissions:
+      checks: write
   release-container:
     needs:
       - build-container
@@ -35,3 +41,5 @@ jobs:
       - check-trunk
     uses: ./.github/workflows/docker.release.yml
     secrets: inherit
+    permissions:
+      packages: write

@@ -3,7 +3,6 @@ name: "Quality Control: Trunk Upgrade"
 permissions: read-all
 
 on:
-  workflow_call:
   workflow_dispatch:
   push:
     branches:

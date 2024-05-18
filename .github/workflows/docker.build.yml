@@ -8,10 +8,6 @@ on:
   workflow_call:
   workflow_dispatch:
 
-concurrency:
-  group: "${{ github.workflow }}-${{ github.head_ref || github.run_id }}"
-  cancel-in-progress: true
-
 env:
   PLATFORMS: linux/amd64,linux/arm64
   CANDIDATE_IMAGE: ghcr.io/benzine-framework/bouncer:build-${{ github.sha }}

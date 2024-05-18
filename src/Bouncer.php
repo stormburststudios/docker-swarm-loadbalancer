@@ -49,6 +49,7 @@ class Bouncer
     private ?int $lastUpdateEpoch                  = null;
     private int $maximumNginxConfigCreationNotices = 15;
     private Settings $settings;
+    private bool $testMode;
 
     private const DEFAULT_DOCKER_SOCKET          = '/var/run/docker.sock';
     private const FILESYSTEM_CONFIG_DIR          = '/etc/nginx/sites-enabled';
@@ -110,6 +111,8 @@ class Bouncer
                 )
             );
         }
+
+        $this->setTestMode(isset($this->environment['TEST_MODE']));
     }
 
     public function getMaximumNginxConfigCreationNotices(): int
@@ -160,6 +163,21 @@ class Bouncer
         return $this;
     }
 
+    public function isTestMode(): bool
+    {
+        return $this->testMode;
+    }
+
+    public function setTestMode(bool $testMode): Bouncer
+    {
+        $this->testMode = $testMode;
+        if ($this->testMode) {
+            $this->logger->critical('Test mode is enabled. It will immediately crash out upon completion of 1 cycle.', ['emoji' => Emoji::warning()]);
+        }
+
+        return $this;
+    }
+
     /**
      * @return Target[]
      *
@@ -206,32 +224,45 @@ class Bouncer
 
                 if (!empty($container['NetworkSettings']['IPAddress'])) {
                     // As per docker service
-                    $bouncerTarget->setEndpointHostnameOrIp($container['NetworkSettings']['IPAddress']);
+                    $bouncerTarget->setEndpoints([$container['NetworkSettings']['IPAddress']]);
                 } else {
                     // As per docker compose
                     $networks = array_values($container['NetworkSettings']['Networks']);
-                    $bouncerTarget->setEndpointHostnameOrIp($networks[0]['IPAddress']);
+                    $bouncerTarget->setEndpoints([$networks[0]['IPAddress']]);
                 }
-
-                $bouncerTarget->setTargetPath(sprintf('http://%s:%d', $bouncerTarget->getEndpointHostnameOrIp(), $bouncerTarget->getPort() >= 0 ? $bouncerTarget->getPort() : 80));
 
                 $bouncerTarget->setUseGlobalCert($this->isUseGlobalCert());
 
-                $valid = $bouncerTarget->isEndpointValid();
-                // $this->logger->debug(sprintf(
-                //    '%s Decided that %s has the endpoint %s and it %s.',
-                //    Emoji::magnifyingGlassTiltedLeft(),
-                //    $bouncerTarget->getName(),
-                //    $bouncerTarget->getEndpointHostnameOrIp(),
-                //    $valid ? 'is valid' : 'is not valid'
-                // ));
-                if ($valid) {
+                // if this bouncerTarget already exists, merge it in instead of adding it.
+                foreach ($bouncerTargets as $existing) {
+                    if (isset($bouncerTarget) && $existing->getDomains() == $bouncerTarget->getDomains()) {
+                        $this->logger->debug('Found another instance of the same service, merging them together.', ['emoji' => Emoji::cupcake()]);
+                        $existing->setEndpoints(array_merge($existing->getEndpoints(), $bouncerTarget->getEndpoints()));
+                        unset($bouncerTarget);
+                    }
+                }
+                if (isset($bouncerTarget)) {
                     $bouncerTargets[] = $bouncerTarget;
                 }
             }
         }
 
-        return $bouncerTargets;
+        $validBouncerTargets = [];
+        foreach ($bouncerTargets as $bouncerTarget) {
+            $valid = $bouncerTarget->isEndpointValid();
+            // $this->logger->debug(sprintf(
+            //    '%s Decided that %s has the endpoint %s and it %s.',
+            //    Emoji::magnifyingGlassTiltedLeft(),
+            //    $bouncerTarget->getName(),
+            //    $bouncerTarget->getEndpointHostnameOrIp(),
+            //    $valid ? 'is valid' : 'is not valid'
+            // ));
+            if ($valid) {
+                $validBouncerTargets[] = $bouncerTarget;
+            }
+        }
+
+        return $validBouncerTargets;
     }
 
     public function findContainersSwarmMode(): array
@@ -288,10 +319,10 @@ class Bouncer
                         continue;
                     }
                     if ($bouncerTarget->isPortSet()) {
-                        $bouncerTarget->setEndpointHostnameOrIp($service['Spec']['Name']);
+                        $bouncerTarget->setEndpoints([$service['Spec']['Name']]);
                         // $this->logger->info('{label}: Ports for {target_name} has been explicitly set to {host}:{port}.', ['emoji' => Emoji::warning().' ', 'target_name' => $bouncerTarget->getName(), 'host' => $bouncerTarget->getEndpointHostnameOrIp(), 'port' => $bouncerTarget->getPort()]);
                     } elseif (isset($service['Endpoint']['Ports'])) {
-                        $bouncerTarget->setEndpointHostnameOrIp('172.17.0.1');
+                        $bouncerTarget->setEndpoints(['172.17.0.1']);
                         $bouncerTarget->setPort(intval($service['Endpoint']['Ports'][0]['PublishedPort']));
                     } else {
                         $this->logger->warning('{label}: ports block missing for {target_name}. Try setting BOUNCER_TARGET_PORT.', ['emoji' => Emoji::warning() . ' Bouncer.php', 'label' => $bouncerTarget->getLabel(), 'target_name' => $bouncerTarget->getName()]);
@@ -303,28 +334,39 @@ class Bouncer
 
                         continue;
                     }
-                    $bouncerTarget->setTargetPath(sprintf('http://%s:%d', $bouncerTarget->getEndpointHostnameOrIp(), $bouncerTarget->getPort()));
-
                     $bouncerTarget->setUseGlobalCert($this->isUseGlobalCert());
 
-                    // @phpstan-ignore-next-line MB: I'm not sure you're right about ->hasCustomNginxConfig only returning false, Stan..
-                    if ($bouncerTarget->isEndpointValid() || $bouncerTarget->hasCustomNginxConfig()) {
-                        $bouncerTargets[] = $bouncerTarget;
-                    } else {
-                        $this->logger->debug(
-                            'Decided that {target_name} has the endpoint {endpoint} and it is not valid.',
-                            [
-                                'emoji'       => Emoji::magnifyingGlassTiltedLeft(),
-                                'target_name' => $bouncerTarget->getName(),
-                                'endpoint'    => $bouncerTarget->getEndpointHostnameOrIp(),
-                            ]
-                        );
+                    // if this bouncerTarget already exists, merge it in instead of adding it.
+                    foreach ($bouncerTargets as $existing) {
+                        if ($existing->getDomains() == $bouncerTarget->getDomains()) {
+                            $this->logger->debug('Found another instance of the same service, merging them together.', ['emoji' => Emoji::cupcake()]);
+                            $existing->setEndpoints(array_merge($existing->getEndpoints(), $bouncerTarget->getEndpoints()));
+                            unset($bouncerTarget);
+                        }
                     }
                 }
             }
         }
 
-        return $bouncerTargets;
+        // Iterate over bouncers and check validity
+        $validBouncerTargets = [];
+        foreach ($bouncerTargets as $bouncerTarget) {
+            // @phpstan-ignore-next-line MB: I'm not sure you're right about ->hasCustomNginxConfig only returning false, Stan..
+            if ($bouncerTarget->isEndpointValid() || $bouncerTarget->hasCustomNginxConfig()) {
+                $validBouncerTargets[] = $bouncerTarget;
+            } else {
+                $this->logger->debug(
+                    'Decided that {target_name} has the endpoint {endpoint} and it is not valid.',
+                    [
+                        'emoji'       => Emoji::magnifyingGlassTiltedLeft(),
+                        'target_name' => $bouncerTarget->getName(),
+                        'endpoint'    => $bouncerTarget->getEndpoints()[0],
+                    ]
+                );
+            }
+        }
+
+        return $validBouncerTargets;
     }
 
     public function run(): void
@@ -512,10 +554,7 @@ class Bouncer
         } elseif ($this->forcedUpdateIntervalSeconds > 0 && $this->lastUpdateEpoch <= time() - $this->forcedUpdateIntervalSeconds) {
             $this->logger->warning('Forced update interval of {interval_seconds} seconds has been reached, forcing update.', ['emoji' => Emoji::watch(), 'interval_seconds' => $this->forcedUpdateIntervalSeconds]);
             $isTainted = true;
-        } elseif ($this->previousContainerState === []) {
-            $this->logger->warning('Initial state has not been set, forcing update.', ['emoji' => Emoji::watch()]);
-            $isTainted = true;
-        } elseif ($this->previousSwarmState === []) {
+        } elseif ($this->previousContainerState === [] && $this->previousSwarmState === []) {
             $this->logger->warning('Initial swarm state has not been set, forcing update.', ['emoji' => Emoji::watch()]);
             $isTainted = true;
         }
@@ -661,6 +700,13 @@ class Bouncer
             sleep(5);
 
             return;
+        }
+
+        if ($this->isTestMode()) {
+            $this->logger->info('Test mode enabled, not restarting nginx. Infact, I\'ll die now..', ['emoji' => Emoji::warning() . ' Bouncer.php']);
+            $this->dumpConfigs();
+
+            exit(0);
         }
 
         // Wait for next change
@@ -924,7 +970,6 @@ class Bouncer
             $target->setUseTemporaryCert(false);
             $this->generateNginxConfig($target);
         }
-
         $this->restartNginx();
     }
 
@@ -936,5 +981,19 @@ class Bouncer
         $this->logger->info('Restarting nginx', ['emoji' => Emoji::timerClock() . ' Bouncer.php']);
         $nginxRestartOutput = $shell->run($command);
         $this->logger->debug('Nginx restarted {restart_output}', ['restart_output' => $nginxRestartOutput, 'emoji' => Emoji::partyPopper()]);
+    }
+
+    private function dumpConfigs(): void
+    {
+        // Dump the contents of every .conf file in /etc/nginx/sites-enabled
+        foreach ($this->configFilesystem->listContents('') as $file) {
+            if ($file['type'] == 'file' && pathinfo($file['path'], PATHINFO_EXTENSION) == 'conf') {
+                if ($file['path'] == 'default.conf') {
+                    continue;
+                }
+                $this->logger->info('Dumping {file}', ['emoji' => Emoji::pencil() . ' Bouncer.php', 'file' => $file['path']]);
+                echo $this->configFilesystem->read($file['path']);
+            }
+        }
     }
 }

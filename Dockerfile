@@ -91,11 +91,18 @@ EXPOSE 80
 EXPOSE 443
 
 # Set a healthcheck to curl the bouncer and expect a 200
+# A moderately long start period is important because while it IS serving a HTTP 200 immediately, it might not have
+# completed probing the docker socket and generating the config yet.
 HEALTHCHECK --start-period=30s \
     CMD curl -s -o /dev/null -w "200" http://localhost:80/ || exit 1
 
 # checkov:skip=CKV_DOCKER_3 This is a test container.
 FROM php:nginx as test-app
 COPY tests/testsites /app/public
-HEALTHCHECK --start-period=30s \
+HEALTHCHECK --start-period=3s --interval=3s \
     CMD curl -s -o /dev/null -w "200" http://localhost:80/ || exit 1
+
+# checkov:skip=CKV_DOCKER_7 This is a test container.
+# checkov:skip=CKV_DOCKER_3 This is a test container.
+FROM alpine as test-box
+RUN apk add --no-cache curl bash

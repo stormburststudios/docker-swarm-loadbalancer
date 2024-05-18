@@ -14,10 +14,9 @@ class Target
     private string $id;
     private ?string $label = null;
     private array $domains;
-    private string $endpointHostnameOrIp;
+    private array $endpoints  = [];
     private ?int $port        = null;
     private bool $letsEncrypt = false;
-    private string $targetPath;
     private bool $allowNonSSL;
     private bool $useTemporaryCert       = false;
     private bool $useGlobalCert          = false;
@@ -55,8 +54,9 @@ class Target
             'name'                     => $this->getName(),
             'label'                    => $this->getLabel(),
             'serverName'               => $this->getNginxServerName(),
+            'backends'                 => $this->getBackends(),
+            'backendName'              => $this->getBackendName(),
             'certType'                 => $this->getTypeCertInUse()->name,
-            'targetPath'               => $this->getTargetPath(),
             'customCertFile'           => $this->getCustomCertPath(),
             'customCertKeyFile'        => $this->getCustomCertKeyPath(),
             'useCustomCert'            => $this->isUseCustomCert(),
@@ -318,6 +318,11 @@ class Target
         return implode(' ', $this->getNginxServerNames());
     }
 
+    public function getBackendName()
+    {
+        return sprintf('backend_%s', substr(md5($this->getName()), 0, 8));
+    }
+
     /**
      * @param string[] $domains
      */
@@ -341,26 +346,24 @@ class Target
         return $this;
     }
 
-    public function getTargetPath(): string
+    public function getBackends(): array
     {
-        return $this->targetPath;
+        $backends = [];
+        foreach ($this->getEndpoints() as $endpoint) {
+            $backends[] = sprintf('%s:%d', $endpoint, $this->getPort());
+        }
+
+        return $backends;
     }
 
-    public function setTargetPath(string $targetPath): self
+    public function getEndpoints(): array
     {
-        $this->targetPath = $targetPath;
-
-        return $this;
+        return $this->endpoints;
     }
 
-    public function getEndpointHostnameOrIp(): string
+    public function setEndpoints(array $endpoints): self
     {
-        return $this->endpointHostnameOrIp;
-    }
-
-    public function setEndpointHostnameOrIp(string $endpointHostnameOrIp): self
-    {
-        $this->endpointHostnameOrIp = $endpointHostnameOrIp;
+        $this->endpoints = $endpoints;
 
         return $this;
     }
@@ -422,23 +425,24 @@ class Target
 
     public function isEndpointValid(): bool
     {
-        // Is it just an IP?
-        if (filter_var($this->getEndpointHostnameOrIp(), FILTER_VALIDATE_IP)) {
-            // $this->logger->debug(sprintf('%s isEndpointValid: %s is a normal IP', Emoji::magnifyingGlassTiltedRight(), $this->getEndpointHostnameOrIp()));
+        foreach ($this->getEndpoints() as $endpoint) {
+            // Is it just an IP?
+            if (filter_var($endpoint, FILTER_VALIDATE_IP)) {
+                // $this->logger->debug(sprintf('%s isEndpointValid: %s is a normal IP', Emoji::magnifyingGlassTiltedRight(), $this->getEndpointHostnameOrIp()));
 
-            return true;
+                return true;
+            }
+
+            // Is it a Hostname that resolves?
+            $resolved = gethostbyname($endpoint);
+            if (filter_var($resolved, FILTER_VALIDATE_IP)) {
+                // $this->logger->critical(sprintf('%s isEndpointValid: %s is a hostname that resolves to a normal IP %s', Emoji::magnifyingGlassTiltedRight(), $this->getEndpointHostnameOrIp(), $resolved));
+
+                return true;
+            }
+            $this->logger->critical('isEndpointValid: {endpoint} is a hostname that does not resolve', ['emoji' => Emoji::magnifyingGlassTiltedRight(), 'endpoint' => $endpoint]);
+            $this->setRequiresForcedScanning(true);
         }
-
-        // Is it a Hostname that resolves?
-        $resolved = gethostbyname($this->getEndpointHostnameOrIp());
-        if (filter_var($resolved, FILTER_VALIDATE_IP)) {
-            // $this->logger->critical(sprintf('%s isEndpointValid: %s is a hostname that resolves to a normal IP %s', Emoji::magnifyingGlassTiltedRight(), $this->getEndpointHostnameOrIp(), $resolved));
-
-            return true;
-        }
-
-        $this->logger->critical('isEndpointValid: {endpoint} is a hostname that does not resolve', ['emoji' => Emoji::magnifyingGlassTiltedRight(), 'endpoint' => $this->getEndpointHostnameOrIp()]);
-        $this->setRequiresForcedScanning(true);
 
         return false;
     }

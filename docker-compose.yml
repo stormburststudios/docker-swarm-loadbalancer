@@ -1,46 +1,74 @@
+networks:
+  default:
+
 services:
   bouncer:
-    image: ghcr.io/benzine-framework/bouncer:latest
     build:
+      context: .
       target: bouncer
       additional_contexts:
         - php:cli=docker-image://ghcr.io/benzine-framework/php:cli-8.2
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./:/app
-    #    environment:
-    #      - BOUNCER_LETSENCRYPT_MODE=staging
-    #      - BOUNCER_LETSENCRYPT_EMAIL=matthew@baggett.me
-    #      - BOUNCER_S3_ENDPOINT=http://grey.ooo:9000
-    #      - BOUNCER_S3_KEY_ID=geusebio
-    #      - BOUNCER_S3_KEY_SECRET=changeme
-    #      - BOUNCER_S3_BUCKET=bouncer-certificates
-    #      - BOUNCER_S3_USE_PATH_STYLE_ENDPOINT="yes"
-    ports:
-      - 127.0.99.100:80:80
-      - 127.0.99.100:443:443
-
-  web-a:
-    image: test-app-a
+      - ./src:/app/src
+      - ./templates:/app/templates
+      - ./vendor:/app/vendor
+    networks:
+      default:
+        aliases:
+          - a.example.org
+          - b.example.org
+          - plural.example.org
+          - redirect-to-ssl.example.org
+          - nope.example.org
+    depends_on:
+      web-a:
+        condition: service_healthy
+      web-b:
+        condition: service_healthy
+      web-redirect-ssl:
+        condition: service_healthy
+      web-plural:
+        condition: service_healthy
+  web-a: &web
     build:
-      target: test-app-a
+      context: .
+      target: test-app
       additional_contexts:
         - php:nginx=docker-image://ghcr.io/benzine-framework/php:nginx-8.2
     volumes:
       - ./tests/testsites:/app/public
     environment:
-      - BOUNCER_DOMAIN=a.web.grey.ooo
+      - BOUNCER_DOMAIN=a.example.org
       - BOUNCER_TARGET_PORT=80
       - SITE_NAME=A
+    networks:
+      - default
   web-b:
-    image: test-app-b
-    build:
-      target: test-app-b
-      additional_contexts:
-        - php:nginx=docker-image://ghcr.io/benzine-framework/php:nginx-8.2
-    volumes:
-      - ./tests/testsites:/app/public
+    <<: *web
     environment:
-      - BOUNCER_DOMAIN=b.web.grey.ooo
+      - BOUNCER_DOMAIN=b.example.org
       - BOUNCER_TARGET_PORT=80
       - SITE_NAME=B
+  web-plural:
+    <<: *web
+    environment:
+      - BOUNCER_DOMAIN=plural.example.org
+      - BOUNCER_TARGET_PORT=80
+      - SITE_NAME=plural
+    deploy:
+      replicas: 3
+  web-redirect-ssl:
+    <<: *web
+    environment:
+      - BOUNCER_DOMAIN=redirect-to-ssl.example.org
+      - BOUNCER_TARGET_PORT=80
+      - SITE_NAME=redirect-to-ssl
+      - BOUNCER_ALLOW_NON_SSL=false
+  test-box:
+    build:
+      context: .
+      target: test-box
+    command: ["tail", "-f", "/dev/null"]
+    networks:
+      - default

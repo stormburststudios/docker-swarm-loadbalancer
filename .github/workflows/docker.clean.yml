@@ -12,31 +12,27 @@ on:
     types:
       - completed
 
-env:
-  CANDIDATE_IMAGE: ghcr.io/benzine-framework/bouncer
-  CANDIDATE_TAG: build-${{ github.sha }}
-
 jobs:
   cleanup-delete-candidate-image:
     name: Delete candidate image
     runs-on: ubuntu-latest
     steps:
       - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
-      - uses: dataaxiom/ghcr-cleanup-action@main
+      - uses: dataaxiom/ghcr-cleanup-action@v1.0.3
         with:
-          owner: ${{ github.repository_owner }}
-          repository: ${{ github.repository }}
-          name: ${{ env.CANDIDATE_IMAGE }}
-          tags: ${{ env.CANDIDATE_TAG }}
+          owner: benzine-framework
+          repository: docker-swarm-loadbalancer
+          name: bouncer
+          tags: build-${{ github.sha }}
           token: ${{ secrets.GITHUB_TOKEN }}
   cleanup-untagged-images:
     name: Delete untagged images
     runs-on: ubuntu-latest
     steps:
       - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
-      - uses: dataaxiom/ghcr-cleanup-action@main
+      - uses: dataaxiom/ghcr-cleanup-action@v1.0.3
         with:
-          owner: ${{ github.repository_owner }}
-          repository: ${{ github.repository }}
-          name: ${{ env.CANDIDATE_IMAGE }}
+          owner: benzine-framework
+          repository: docker-swarm-loadbalancer
+          name: bouncer
           token: ${{ secrets.GITHUB_TOKEN }}

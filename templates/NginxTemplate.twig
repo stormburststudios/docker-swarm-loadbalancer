@@ -1,3 +1,9 @@
+upstream {{ backendName }} {
+  least_conn;
+{% for backend in backends %}
+  server {{ backend }};
+{% endfor %}
+}
 server {
 {% if allowNonSSL %}
   # Non-SSL Traffic is allowed
@@ -39,7 +45,7 @@ server {
 {% endif %}
 
     # Server to send the request on to
-    proxy_pass                  "{{ targetPath }}";
+    proxy_pass                  "http://{{ backendName }}";
 
     # Standard headers setting origin data
     proxy_set_header            X-Real-IP $remote_addr;

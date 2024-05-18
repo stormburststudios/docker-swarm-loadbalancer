@@ -1,8 +1,16 @@
 <?php
-$finder = PhpCsFixer\Finder::create();
+
+declare(strict_types=1);
+
+use PhpCsFixer\Config;
+use PhpCsFixer\Finder;
+use PhpCsFixer\Runner\Parallel\ParallelConfig;
+
+$finder = Finder::create();
 $finder->in(__DIR__);
 
-return (new PhpCsFixer\Config())
+return (new Config())
+    ->setParallelConfig(new ParallelConfig(10, 20, 120))
     ->setRiskyAllowed(true)
     ->setHideProgress(false)
     ->setRules([
@@ -37,4 +45,4 @@ return (new PhpCsFixer\Config())
         'native_function_invocation' => false, // Disabled as adding count($i) -> \count($i) is annoying, but supposedly more performant
     ])
     ->setFinder($finder)
-    ;
+;

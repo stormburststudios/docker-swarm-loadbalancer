@@ -15,6 +15,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  tests:
+    name: "Tests"
+    uses: ./.github/workflows/tests.yml
+    permissions:
+      contents: read
   build-container:
     name: Build
     uses: ./.github/workflows/docker.build.yml
@@ -52,6 +57,7 @@ jobs:
       - validate-container
       - check-php
       - check-trunk
+      - tests
     uses: ./.github/workflows/docker.release.yml
     secrets: inherit
     permissions:

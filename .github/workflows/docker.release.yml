@@ -14,28 +14,21 @@ env:
   RELEASE_IMAGE_DOCKER: benzine/bouncer:latest
 
 jobs:
-  release:
-    name: Release
+  release-ghcr:
+    name: Release GHCR
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        registry:
-          - ghcr
-          - docker
-      fail-fast: false
     steps:
-      - uses: benzine-framework/action-setup-docker@main
-        with:
-          ghcr_user: ${{ github.repository_owner }}
-          ghcr_token: ${{ secrets.GHCR_TOKEN }}
-          docker_hub_user: ${{ secrets.DOCKER_HUB_USER }}
-          docker_hub_token: ${{ secrets.DOCKER_HUB_TOKEN }}
-      - name: "Pull Candidate Image"
-        run: docker pull ${{ env.CANDIDATE_IMAGE }}
-      - name: "Login to GHCR"
-        if: matrix.registry == 'ghcr'
-        run: docker login ghcr.io -u matthewbaggett -p ${{ secrets.GITHUB_TOKEN }}
-      - name: "Tag Candidate Image"
-        run: docker tag ${{ env.CANDIDATE_IMAGE }} ${{ matrix.registry == 'ghcr' && env.RELEASE_IMAGE_GHCR || env.RELEASE_IMAGE_DOCKER }}
-      - name: "Push Release Image"
-        run: docker push ${{ matrix.registry == 'ghcr' && env.RELEASE_IMAGE_GHCR || env.RELEASE_IMAGE_DOCKER }}
+      - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
+      - run: docker pull ${{ env.CANDIDATE_IMAGE }}
+      - run: docker tag ${{ env.CANDIDATE_IMAGE }} ${{ env.RELEASE_IMAGE_GHCR }}
+      - run: docker push ${{ env.RELEASE_IMAGE_GHCR }}
+
+  release-docker-hub:
+    name: Release Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
+      - run: docker login docker.io -u ${{ secrets.DOCKER_HUB_USER }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
+      - run: docker pull ${{ env.CANDIDATE_IMAGE }}
+      - run: docker tag ${{ env.CANDIDATE_IMAGE }} ${{ env.RELEASE_IMAGE_DOCKER }}
+      - run: docker push ${{ env.RELEASE_IMAGE_DOCKER }}

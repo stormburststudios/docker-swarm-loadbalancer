@@ -17,7 +17,7 @@ env:
 
 jobs:
   cleanup-delete-candidate-image:
-    name: Run Trivy
+    name: Delete candidate image
     runs-on: ubuntu-latest
     steps:
       - uses: benzine-framework/action-setup-docker@main
@@ -27,6 +27,7 @@ jobs:
       - uses: bots-house/ghcr-delete-image-action@v1.1.0
         with:
           owner: ${{ github.repository_owner }}
-          name: ${{ github.event.repository.name }}
+          #name: ${{ github.event.repository.name }}
+          name: bouncer
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: build-${{ github.sha }}

@@ -26,6 +26,7 @@ jobs:
           ghcr_token: ${{ secrets.GHCR_TOKEN }}
       - uses: dataaxiom/ghcr-cleanup-action@v1
         with:
+          owner: ${{ github.repository_owner }}
           tags: build-${{ github.sha }}
           token: ${{ secrets.GITHUB_TOKEN }}
   cleanup-untagged-images:
@@ -38,4 +39,5 @@ jobs:
           ghcr_token: ${{ secrets.GHCR_TOKEN }}
       - uses: dataaxiom/ghcr-cleanup-action@v1
         with:
+          owner: ${{ github.repository_owner }}
           token: ${{ secrets.GITHUB_TOKEN }}

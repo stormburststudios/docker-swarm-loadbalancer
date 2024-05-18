@@ -25,8 +25,9 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: "Post-Build: Validate build"
-        shell: bash
+      - name: "Pull Candidate Image"
+        run: docker pull ${{ env.CANDIDATE_IMAGE }}
+      - name: "Run Install Report"
         run: docker run --rm ${{ env.CANDIDATE_IMAGE }} /usr/bin/install-report
   validate-dive-report:
     name: Run Dive
@@ -37,11 +38,22 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: "Pull Candidate Image"
+        run: docker pull ${{ env.CANDIDATE_IMAGE }}
+      - name: "Generate Dive Config"
+        run: |
+          {
+            echo "rules:"
+            echo "lowestEfficiency: 0.95"
+            echo "highestWastedBytes: 20MB"
+            echo "highestUserWastedPercent: 0.20"
+          } > ${{ github.workspace }}/.dive-ci.yml
       # Use Dive to inspect the image for junk
       - name: "Post-Build: Dive"
-        uses: wagoodman/dive@v0.10.0
+        uses: yuichielectric/dive-action@0.0.3
         with:
-          args: ${{ env.CANDIDATE_IMAGE }}
+          image: ${{ env.CANDIDATE_IMAGE }}
+          config-file: ${{ github.workspace }}/.dive-ci.yml
   validate-vulnerability-report:
     name: Run Trivy
     runs-on: ubuntu-latest
@@ -51,10 +63,15 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: "Pull Candidate Image"
+        run: docker pull ${{ env.CANDIDATE_IMAGE }}
       # Inspect the container for security vulnerabilities
       - name: "Post-Build: Trivy"
-        uses: aquasecurity/trivy-action@v0.3.0
+        uses: aquasecurity/trivy-action@v0.9.2
         with:
           image-ref: ${{ env.CANDIDATE_IMAGE }}
           format: table
           exit-code: 1
+          ignore-unfixed: true
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"

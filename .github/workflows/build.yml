@@ -38,6 +38,8 @@ jobs:
       checks: write
   validate-container:
     name: Validate
+    needs:
+      - build-container
     uses: ./.github/workflows/docker.validate.yml
     secrets: inherit
     permissions:

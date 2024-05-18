@@ -22,11 +22,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
-      - uses: dataaxiom/ghcr-cleanup-action@v1
+      - uses: dataaxiom/ghcr-cleanup-action@main
         with:
           owner: ${{ github.repository_owner }}
           repository: ${{ github.repository }}
-          package: ${{ env.CANDIDATE_IMAGE }}
+          name: ${{ env.CANDIDATE_IMAGE }}
           tags: ${{ env.CANDIDATE_TAG }}
           token: ${{ secrets.GITHUB_TOKEN }}
   cleanup-untagged-images:
@@ -34,9 +34,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
-      - uses: dataaxiom/ghcr-cleanup-action@v1
+      - uses: dataaxiom/ghcr-cleanup-action@main
         with:
           owner: ${{ github.repository_owner }}
           repository: ${{ github.repository }}
-          package: ${{ env.CANDIDATE_IMAGE }}
+          name: ${{ env.CANDIDATE_IMAGE }}
           token: ${{ secrets.GITHUB_TOKEN }}

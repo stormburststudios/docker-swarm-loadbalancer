@@ -25,6 +25,7 @@ jobs:
       - uses: dataaxiom/ghcr-cleanup-action@v1
         with:
           owner: ${{ github.repository_owner }}
+          repository: ${{ github.repository }}
           package: ${{ env.CANDIDATE_IMAGE }}
           tags: ${{ env.CANDIDATE_TAG }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -36,5 +37,6 @@ jobs:
       - uses: dataaxiom/ghcr-cleanup-action@v1
         with:
           owner: ${{ github.repository_owner }}
+          repository: ${{ github.repository }}
           package: ${{ env.CANDIDATE_IMAGE }}
           token: ${{ secrets.GITHUB_TOKEN }}

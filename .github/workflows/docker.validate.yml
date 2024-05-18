@@ -26,12 +26,7 @@ jobs:
     steps:
       - name: "Post-Build: Validate build"
         shell: bash
-        run: |
-          docker \
-            run \
-              --rm \
-              ${{ env.CANDIDATE_IMAGE }} \
-                /usr/bin/install-report
+        run: docker run --rm ${{ env.CANDIDATE_IMAGE }} /usr/bin/install-report
   validate-dive-report:
     name: Run Dive
     runs-on: ubuntu-latest

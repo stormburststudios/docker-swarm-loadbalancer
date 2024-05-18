@@ -1,6 +1,7 @@
 name: "QC: PHP"
 
-permissions: read-all
+permissions:
+  contents: read
 
 on:
   workflow_call:
@@ -20,7 +21,7 @@ jobs:
     name: PHPStan
     runs-on: ubuntu-latest
     permissions:
-      checks: write # For trunk to post annotations
+      checks: write # To post annotations
       contents: read # For repo checkout
     steps:
       - uses: actions/checkout@v4
@@ -47,6 +48,7 @@ jobs:
     permissions:
       checks: write # For trunk to post annotations
       contents: read # For repo checkout
+      pull-requests: write # To create PRs
     steps:
       - uses: actions/checkout@v4
       - id: read-php-version

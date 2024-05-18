@@ -24,10 +24,18 @@ jobs:
         with:
           ghcr_user: ${{ github.repository_owner }}
           ghcr_token: ${{ secrets.GHCR_TOKEN }}
-      - uses: bots-house/ghcr-delete-image-action@v1.1.0
+      - uses: dataaxiom/ghcr-cleanup-action@v1
         with:
-          owner: ${{ github.repository_owner }}
-          #name: ${{ github.event.repository.name }}
-          name: bouncer
+          tags: build-${{ github.sha }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: build-${{ github.sha }}
+  cleanup-untagged-images:
+    name: Delete untagged images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: benzine-framework/action-setup-docker@main
+        with:
+          ghcr_user: ${{ github.repository_owner }}
+          ghcr_token: ${{ secrets.GHCR_TOKEN }}
+      - uses: dataaxiom/ghcr-cleanup-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}

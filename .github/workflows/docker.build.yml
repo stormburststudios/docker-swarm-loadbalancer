@@ -17,10 +17,11 @@ env:
   CANDIDATE_IMAGE: ghcr.io/benzine-framework/bouncer:build-${{ github.sha }}
 
 jobs:
-  build:
+  docker-build:
     name: Build Swarm Loadbalancer
     runs-on: ubuntu-latest
     steps:
+      - uses: benzine-framework/action-get-datetime@v1.0.2
       - uses: benzine-framework/action-setup-php@main
       - uses: benzine-framework/action-setup-docker@main
         with:
@@ -39,7 +40,7 @@ jobs:
             GIT_SHA=${{ github.sha }}
             GIT_BUILD_ID=${{ github.ref_name }}
             GIT_COMMIT_MESSAGE=${{ github.event.head_commit.message }}
-            BUILD_DATE=${{ steps.date.outputs.container_build_datetime }}
+            BUILD_DATE=${{ env.ATOM }}
           platforms: ${{ !env.ACT && env.PLATFORMS || 'linux/amd64' }}
           pull: true
           push: true

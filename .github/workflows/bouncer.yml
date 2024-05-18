@@ -90,8 +90,8 @@ jobs:
             BUILD_DATE=${{ steps.date.outputs.container_build_datetime }}
             GIT_COMMIT_MESSAGE=${{ github.event.head_commit.message }}
           tags: |
-            ${{ !env.ACT && 'benzine/bouncer:latest' || '' }}
-            ${{ !env.ACT && 'ghcr.io/benzine-framework/bouncer:latest' || 'ghcr.io/benzine-framework/bouncer:devel' }}
+            benzine/bouncer:latest
+            ghcr.io/benzine-framework/bouncer:latest
           cache-from: ${{ !env.ACT && 'type=gha' || '' }}
           cache-to: ${{ !env.ACT && 'type=gha,mode=max' || '' }}
           build-contexts: |

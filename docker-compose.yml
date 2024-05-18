@@ -1,10 +1,7 @@
-version: "3.5"
-
 services:
   bouncer:
-    image: ghcr.io/benzine-framework/bouncer:devel
+    image: ghcr.io/benzine-framework/bouncer:latest
     build:
-      context: bouncer
       target: bouncer
       additional_contexts:
         - php:cli=docker-image://ghcr.io/benzine-framework/php:cli-8.2
@@ -26,7 +23,6 @@ services:
   web-a:
     image: test-app-a
     build:
-      context: bouncer
       target: test-app-a
       additional_contexts:
         - php:nginx=docker-image://ghcr.io/benzine-framework/php:nginx-8.2
@@ -40,7 +36,6 @@ services:
   web-b:
     image: test-app-b
     build:
-      context: bouncer
       target: test-app-b
       additional_contexts:
         - php:nginx=docker-image://ghcr.io/benzine-framework/php:nginx-8.2

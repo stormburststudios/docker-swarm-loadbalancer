@@ -27,7 +27,7 @@ jobs:
     secrets: inherit
     permissions:
       contents: read
-      pull-requests: write
+      checks: write
   check-trunk:
     uses: ./.github/workflows/trunk.check.yml
     secrets: inherit

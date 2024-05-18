@@ -20,6 +20,11 @@ jobs:
     name: Run Install Report
     runs-on: ubuntu-latest
     steps:
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: "Post-Build: Validate build"
         shell: bash
         run: docker run --rm ${{ env.CANDIDATE_IMAGE }} /usr/bin/install-report
@@ -27,6 +32,11 @@ jobs:
     name: Run Dive
     runs-on: ubuntu-latest
     steps:
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       # Use Dive to inspect the image for junk
       - name: "Post-Build: Dive"
         uses: wagoodman/dive@v0.10.0
@@ -36,6 +46,11 @@ jobs:
     name: Run Trivy
     runs-on: ubuntu-latest
     steps:
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       # Inspect the container for security vulnerabilities
       - name: "Post-Build: Trivy"
         uses: aquasecurity/trivy-action@v0.3.0

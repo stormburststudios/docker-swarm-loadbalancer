@@ -23,18 +23,23 @@ jobs:
       checks: write # For trunk to post annotations
       contents: read # For repo checkout
     steps:
-      - name: "Checkout"
-        uses: actions/checkout@v4
-      - name: "Read PHP version from composer.json"
-        id: read-php-version
+      - uses: actions/checkout@v4
+      - id: read-php-version
         run: echo "php_version=$(jq -r '.require["php"]' composer.json | sed -E 's/[^0-9.]//g')" >> $GITHUB_OUTPUT
-      - name: "Setup PHP"
-        uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ steps.read-php-version.outputs.php_version }}
           tools: phpstan
-      - name: Run PHPStan
-        run: phpstan analyse src
+      - id: composer-cache-find
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - id: composer-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: "${{ runner.os }}-bouncer-composer-${{ hashFiles('**/composer.lock') }}"
+          restore-keys: ${{ runner.os }}-bouncer-composer-
+      - run: composer install --ignore-platform-reqs --prefer-dist
+      - run: phpstan analyse src
 
   php-cs-fixer:
     name: PHP-CS-Fixer
@@ -43,21 +48,15 @@ jobs:
       checks: write # For trunk to post annotations
       contents: read # For repo checkout
     steps:
-      - name: "Checkout"
-        uses: actions/checkout@v4
-      - name: "Read PHP version from composer.json"
-        id: read-php-version
+      - uses: actions/checkout@v4
+      - id: read-php-version
         run: echo "php_version=$(jq -r '.require["php"]' composer.json | sed -E 's/[^0-9.]//g')" >> $GITHUB_OUTPUT
-      - name: "Setup PHP"
-        uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ steps.read-php-version.outputs.php_version }}
           tools: php-cs-fixer
-      - name: "Run PHP CS Fixer"
-        run: php-cs-fixer fix --config=.php-cs-fixer.php --diff --verbose
-      # If there are changed files, create a PR, assign it to whom created the push and fail the build
-      - name: "Create PR"
-        uses: peter-evans/create-pull-request@v6
+      - run: php-cs-fixer fix --config=.php-cs-fixer.php --diff --verbose
+      - uses: peter-evans/create-pull-request@v6
         with:
           title: "Apply php-cs-fixer changes"
           commit-message: "Apply php-cs-fixer changes"

@@ -51,7 +51,7 @@ jobs:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: "${{ runner.os }}-bouncer-composer-${{ hashFiles('**/composer.lock') }}"
           restore-keys: ${{ runner.os }}-bouncer-composer-
-      - run: composer install --ignore-platform-reqs
+      - run: composer install --ignore-platform-reqs --prefer-dist
       - name: "Build & Push Candidate Image as ${{ env.CANDIDATE_IMAGE }}"
         uses: docker/build-push-action@v5
         with:

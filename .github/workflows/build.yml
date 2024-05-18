@@ -3,6 +3,7 @@ name: Build Swarm Loadbalancer
 permissions:
   contents: read
   packages: write
+  checks: write
 
 on:
   workflow_call:

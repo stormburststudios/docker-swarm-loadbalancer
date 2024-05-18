@@ -1,4 +1,4 @@
-name: Build Swarm Loadbalancer
+name: "Build"
 
 permissions:
   contents: read

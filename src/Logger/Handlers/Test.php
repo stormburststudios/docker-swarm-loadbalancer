@@ -11,6 +11,4 @@ use Monolog\Handler\TestHandler;
  *
  * @coversNothing
  */
-class Test extends TestHandler
-{
-}
+class Test extends TestHandler {}

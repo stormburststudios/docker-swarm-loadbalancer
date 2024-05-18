@@ -6,6 +6,4 @@ namespace Bouncer\Logger\Handlers;
 
 use Monolog\Handler\StreamHandler;
 
-class Cli extends StreamHandler
-{
-}
+class Cli extends StreamHandler {}

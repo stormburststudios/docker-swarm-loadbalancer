@@ -1,4 +1,4 @@
-name: Trunk Check
+name: "Quality Control: Trunk Check"
 
 permissions: read-all
 
@@ -23,11 +23,6 @@ jobs:
       checks: write # For trunk to post annotations
       contents: read # For repo checkout
     steps:
-      - name: "Setup PHP"
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.3
-      - name: "Checkout"
-        uses: actions/checkout@v4
+      - uses: benzine-framework/action-setup-php@main
       - name: "Trunk Check"
         uses: trunk-io/trunk-action@v1

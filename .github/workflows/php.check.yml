@@ -1,4 +1,4 @@
-name: "QC: PHP"
+name: "Quality Control: PHP"
 
 permissions:
   contents: read
@@ -24,23 +24,8 @@ jobs:
       checks: write # To post annotations
       contents: read # For repo checkout
     steps:
-      - uses: actions/checkout@v4
-      - id: read-php-version
-        run: echo "php_version=$(jq -r '.require["php"]' composer.json | sed -E 's/[^0-9.]//g')" >> $GITHUB_OUTPUT
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ steps.read-php-version.outputs.php_version }}
-          tools: phpstan
-      - id: composer-cache-find
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-      - id: composer-cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache-find.outputs.dir }}
-          key: "${{ runner.os }}-bouncer-composer-${{ hashFiles('**/composer.lock') }}"
-          restore-keys: ${{ runner.os }}-bouncer-composer-
-      - run: composer install --ignore-platform-reqs --prefer-dist
-      - run: phpstan analyse src
+      - uses: benzine-framework/action-setup-php@main
+      - run: vendor/bin/phpstan analyse src
 
   php-cs-fixer:
     name: PHP-CS-Fixer
@@ -48,13 +33,6 @@ jobs:
     permissions:
       checks: write # For trunk to post annotations
       contents: read # For repo checkout
-      pull-requests: write # To create PRs
     steps:
-      - uses: actions/checkout@v4
-      - id: read-php-version
-        run: echo "php_version=$(jq -r '.require["php"]' composer.json | sed -E 's/[^0-9.]//g')" >> $GITHUB_OUTPUT
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ steps.read-php-version.outputs.php_version }}
-          tools: php-cs-fixer
-      - run: php-cs-fixer fix --config=.php-cs-fixer.php --diff --verbose --dry-run
+      - uses: benzine-framework/action-setup-php@main
+      - run: vendor/bin/php-cs-fixer fix --diff --verbose --dry-run

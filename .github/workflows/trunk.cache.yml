@@ -1,4 +1,4 @@
-name: Trunk Cache
+name: "Quality Control: Trunk Cache"
 
 permissions: read-all
 
@@ -24,12 +24,7 @@ jobs:
     permissions:
       actions: write
     steps:
-      - name: "Setup PHP"
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.3
-      - name: "Checkout"
-        uses: actions/checkout@v4
+      - uses: benzine-framework/action-setup-php@main
       - name: "Trunk Cache"
         uses: trunk-io/trunk-action@v1
         with:

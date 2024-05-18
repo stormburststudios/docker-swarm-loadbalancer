@@ -7,7 +7,6 @@ namespace Bouncer;
 use Bouncer\Logger\AbstractLogger;
 use Bouncer\Logger\Logger;
 use Bouncer\Settings\Settings;
-use Psr\Log\LoggerInterface;
 use Spatie\Emoji\Emoji;
 
 class Target
@@ -20,17 +19,17 @@ class Target
     private bool $letsEncrypt = false;
     private string $targetPath;
     private bool $allowNonSSL;
-    private bool $useTemporaryCert      = false;
-    private bool $useGlobalCert         = false;
-    private ?string $customCert         = null;
-    private ?string $customCertKey      = null;
-    private bool $allowWebsocketSupport = true;
-    private bool $allowLargePayloads    = false;
-    private ?int $proxyTimeoutSeconds   = null;
-    private ?string $username           = null;
-    private ?string $password           = null;
-    private ?string $hostOverride      = null;
-    private ?string $customNginxConfig = null;
+    private bool $useTemporaryCert       = false;
+    private bool $useGlobalCert          = false;
+    private ?string $customCert          = null;
+    private ?string $customCertKey       = null;
+    private bool $allowWebsocketSupport  = true;
+    private bool $allowLargePayloads     = false;
+    private ?int $proxyTimeoutSeconds    = null;
+    private ?string $username            = null;
+    private ?string $password            = null;
+    private ?string $hostOverride        = null;
+    private ?string $customNginxConfig   = null;
     private bool $requiresForcedScanning = false;
 
     public function __construct(
@@ -413,7 +412,6 @@ class Target
 
         return $this;
     }
-
 
     public function updateLogger(): self
     {

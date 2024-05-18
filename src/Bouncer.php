@@ -659,6 +659,7 @@ class Bouncer
         if (array_reduce($targets, fn ($carry, $target) => $carry || $target->requiresForcedScanning(), false)) {
             $this->logger->warning('Forcing an update in 5 seconds because one or more targets require it.', ['emoji' => Emoji::warning()]);
             sleep(5);
+
             return;
         }
 

@@ -1,4 +1,4 @@
-name: Trunk Upgrade
+name: "Quality Control: Trunk Upgrade"
 
 permissions: read-all
 
@@ -26,12 +26,7 @@ jobs:
       contents: write # For trunk to create PRs
       pull-requests: write # For trunk to create PRs
     steps:
-      - name: "Setup PHP"
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.3
-      - name: "Checkout"
-        uses: actions/checkout@v4
+      - uses: benzine-framework/action-setup-php@main
       - name: "Trunk Upgrade"
         uses: trunk-io/trunk-action/upgrade@v1
       - name: "PR: Find Pull Request"

@@ -1,4 +1,4 @@
-name: Validate Swarm Loadbalancer
+name: "Build: Validate"
 
 permissions:
   contents: read

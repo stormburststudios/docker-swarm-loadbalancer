@@ -1,0 +1,32 @@
+name: "Build: Cleanup Residue"
+
+permissions:
+  contents: read
+  packages: write
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Build Swarm Loadbalancer"]
+    types:
+      - completed
+
+env:
+  CANDIDATE_IMAGE: ghcr.io/benzine-framework/bouncer:build-${{ github.sha }}
+
+jobs:
+  cleanup-delete-candidate-image:
+    name: Run Trivy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: benzine-framework/action-setup-docker@main
+        with:
+          ghcr_user: ${{ github.repository_owner }}
+          ghcr_token: ${{ secrets.GHCR_TOKEN }}
+      - uses: bots-house/ghcr-delete-image-action@v1.1.0
+        with:
+          owner: ${{ github.repository_owner }}
+          name: ${{ github.event.repository.name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: build-${{ github.sha }}

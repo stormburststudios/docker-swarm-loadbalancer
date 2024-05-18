@@ -16,26 +16,37 @@ concurrency:
 
 jobs:
   build-container:
+    name: Build
     uses: ./.github/workflows/docker.build.yml
     secrets: inherit
     permissions:
       contents: read
       packages: write
   check-php:
+    name: PHP QC
     uses: ./.github/workflows/php.check.yml
     secrets: inherit
     permissions:
       contents: read
       checks: write
   check-trunk:
+    name: Trunk QC
     uses: ./.github/workflows/trunk.check.yml
     secrets: inherit
     permissions:
       contents: read
       checks: write
+  validate-container:
+    name: Validate
+    uses: ./.github/workflows/docker.validate.yml
+    secrets: inherit
+    permissions:
+      contents: read
   release-container:
+    name: Release
     needs:
       - build-container
+      - validate-container
       - check-php
       - check-trunk
     uses: ./.github/workflows/docker.release.yml
@@ -43,3 +54,11 @@ jobs:
     permissions:
       contents: read
       packages: write
+  clean-container:
+    name: Clean
+    needs:
+      - release-container
+    uses: ./.github/workflows/docker.clean.yml
+    secrets: inherit
+    permissions:
+      contents: read

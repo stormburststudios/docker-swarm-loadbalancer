@@ -15,7 +15,7 @@ env:
 
 jobs:
   release:
-    name: Release Swarm Loadbalancer
+    name: Release
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -24,14 +24,14 @@ jobs:
           - docker
       fail-fast: false
     steps:
-      - name: "Pull Candidate Image"
-        run: docker pull ${{ env.CANDIDATE_IMAGE }}
       - uses: benzine-framework/action-setup-docker@main
         with:
           ghcr_user: ${{ github.repository_owner }}
           ghcr_token: ${{ secrets.GHCR_TOKEN }}
           docker_hub_user: ${{ secrets.DOCKER_HUB_USER }}
           docker_hub_token: ${{ secrets.DOCKER_HUB_TOKEN }}
+      - name: "Pull Candidate Image"
+        run: docker pull ${{ env.CANDIDATE_IMAGE }}
       - name: "Login to GHCR"
         if: matrix.registry == 'ghcr'
         run: docker login ghcr.io -u matthewbaggett -p ${{ secrets.GITHUB_TOKEN }}

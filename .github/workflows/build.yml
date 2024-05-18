@@ -1,0 +1,36 @@
+name: Build Swarm Loadbalancer
+
+permissions:
+  contents: read
+  packages: write
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 14 * * 2" # 2pm Patch Tuesday
+
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  build-container:
+    uses: ./.github/workflows/docker.build.yml
+    secrets: inherit
+  check-php:
+    uses: ./.github/workflows/php.check.yml
+    secrets: inherit
+  check-trunk:
+    uses: ./.github/workflows/trunk.check.yml
+    secrets: inherit
+  release-container:
+    needs:
+      - build-container
+      - check-php
+      - check-trunk
+    uses: ./.github/workflows/docker.release.yml
+    secrets: inherit

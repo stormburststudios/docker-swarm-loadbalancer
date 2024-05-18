@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Bouncer;
 
+use Bouncer\Logger\AbstractLogger;
 use Bouncer\Logger\Logger;
 use Bouncer\Settings\Settings;
+use Psr\Log\LoggerInterface;
 use Spatie\Emoji\Emoji;
 
 class Target
@@ -27,14 +29,12 @@ class Target
     private ?int $proxyTimeoutSeconds   = null;
     private ?string $username           = null;
     private ?string $password           = null;
-
     private ?string $hostOverride      = null;
     private ?string $customNginxConfig = null;
-
     private bool $requiresForcedScanning = false;
 
     public function __construct(
-        private Logger $logger,
+        private AbstractLogger $logger,
         private Settings $settings,
     ) {
         $this->allowNonSSL = $this->settings->get('ssl/allow_non_ssl', true);
@@ -94,9 +94,6 @@ class Target
         return $this->username;
     }
 
-    /**
-     * @param string
-     */
     public function setUsername(string $username): self
     {
         $this->username = $username;
@@ -298,9 +295,6 @@ class Target
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getDomains(): array
     {
         return $this->domains;
@@ -420,10 +414,6 @@ class Target
         return $this;
     }
 
-    public function getLogger(): Logger
-    {
-        return $this->logger;
-    }
 
     public function updateLogger(): self
     {

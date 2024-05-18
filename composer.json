@@ -1,18 +1,21 @@
 {
   "name": "benzine/bouncer",
   "description": "Automated Docker-swarm aware Nginx configuration management",
-  "type": "project",
-  "config": {
-    "sort-packages": true
-  },
   "license": "GPL-3.0-or-later",
+  "type": "project",
+  "authors": [
+    {
+      "name": "Matthew Baggett",
+      "email": "matthew@baggett.me"
+    }
+  ],
   "require": {
-    "php": "^8.1",
+    "php": "^8.2",
     "ext-curl": "*",
     "ext-json": "*",
     "ext-openssl": "*",
-    "adambrett/shell-wrapper": "~1.0",
-    "bramus/monolog-colored-line-formatter": "~3.1",
+    "adambrett/shell-wrapper": "^1.0",
+    "bramus/monolog-colored-line-formatter": "^3.1",
     "guzzlehttp/guzzle": "^7.8",
     "kint-php/kint": "^3.3",
     "league/flysystem": "^2.5",
@@ -21,27 +24,40 @@
     "nesbot/carbon": "^2.72",
     "phpspec/php-diff": "^1.1",
     "spatie/emoji": "^2.3",
+    "symfony/polyfill-php83": "^1.28",
     "symfony/yaml": "^6.4",
     "twig/twig": "^3.8"
   },
-  "authors": [
-    {
-      "name": "Matthew Baggett",
-      "email": "matthew@baggett.me"
-    }
-  ],
   "require-dev": {
-    "friendsofphp/php-cs-fixer": "^3.46"
+    "ergebnis/composer-normalize": "^2.42",
+    "friendsofphp/php-cs-fixer": "^3.46",
+    "php-static-analysis/rector-rule": "^0.2.2",
+    "phpstan/extension-installer": "^1.2.0",
+    "phpstan/phpstan": "^1.11",
+    "phpunit/phpunit": "^11",
+    "rawr/phpunit-data-provider": "^3.3",
+    "rector/rector": "^1.0",
+    "rregeer/phpunit-coverage-check": "^0.3.1",
+    "squizlabs/php_codesniffer": "^3.7"
   },
   "autoload": {
     "psr-4": {
       "Bouncer\\": "src/"
     }
   },
-  "scripts": {
-    "fix": "php-cs-fixer fix"
-  },
   "bin": [
     "bin/bouncer"
-  ]
+  ],
+  "config": {
+    "allow-plugins": {
+      "ergebnis/composer-normalize": true,
+      "phpstan/extension-installer": true
+    },
+    "sort-packages": true
+  },
+  "scripts": {
+    "fix": "php-cs-fixer fix",
+    "stan": "phpstan analyse",
+    "test": "phpunit"
+  }
 }

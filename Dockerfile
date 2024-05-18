@@ -1,4 +1,4 @@
-# checkov:skip=CKV_DOCKER_3 user cannot be determined at this stage.
+# checkov:skip=CKV_DOCKER_3 I don't have time for rootless
 FROM php:cli as bouncer
 
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
@@ -96,21 +96,8 @@ HEALTHCHECK --start-period=30s \
 
 RUN ls -lah /app /app/bin
 
-# checkov:skip=CKV_DOCKER_3 user cannot be determined at this stage.
-FROM php:nginx as test-app-a
-COPY test/public-web-a /app/public
+# checkov:skip=CKV_DOCKER_3 This is a test container.
+FROM php:nginx as test-app
+COPY tests/testsites /app/public
 HEALTHCHECK --start-period=30s \
     CMD curl -s -o /dev/null -w "200" http://localhost:80/ || exit 1
-
-# checkov:skip=CKV_DOCKER_3 user cannot be determined at this stage.
-FROM php:nginx as test-app-b
-COPY test/public-web-b /app/public
-HEALTHCHECK --start-period=30s \
-    CMD curl -s -o /dev/null -w "200" http://localhost:80/ || exit 1
-
-# checkov:skip=CKV_DOCKER_3 user cannot be determined at this stage.
-FROM php:nginx as test-app-c
-COPY test/public-web-c /app/public
-HEALTHCHECK --start-period=30s \
-    CMD curl -s -o /dev/null -w "200" http://localhost:80/ || exit 1
-

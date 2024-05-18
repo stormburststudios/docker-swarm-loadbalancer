@@ -1,0 +1,69 @@
+name: "QC: PHP"
+
+permissions: read-all
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 11 * * 2" # 11am Patch Tuesday
+
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  php-stan:
+    name: PHPStan
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write # For trunk to post annotations
+      contents: read # For repo checkout
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+      - name: "Read PHP version from composer.json"
+        id: read-php-version
+        run: echo "php_version=$(jq -r '.require["php"]' composer.json | sed -E 's/[^0-9.]//g')" >> $GITHUB_OUTPUT
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ steps.read-php-version.outputs.php_version }}
+          tools: phpstan
+      - name: Run PHPStan
+        run: phpstan analyse src
+  php-cs-fixer:
+    name: PHP-CS-Fixer
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write # For trunk to post annotations
+      contents: read # For repo checkout
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+      - name: "Read PHP version from composer.json"
+        id: read-php-version
+        run: echo "php_version=$(jq -r '.require["php"]' composer.json | sed -E 's/[^0-9.]//g')" >> $GITHUB_OUTPUT
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ steps.read-php-version.outputs.php_version }}
+          tools: php-cs-fixer
+      - name: "Run PHP CS Fixer"
+        run: php-cs-fixer fix --config=.php-cs-fixer.php --diff --verbose
+      # If there are changed files, create a PR, assign it to whom created the push and fail the build
+      - name: "Create PR"
+        uses: peter-evans/create-pull-request@v3
+        with:
+          title: "Apply php-cs-fixer changes"
+          commit-message: "Apply php-cs-fixer changes"
+          branch: "php-cs-fixer-${{ github.sha }}"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          assignees: ${{ github.actor }}
+          labels: "auto-apply"
+          body: |
+            This PR was automatically created to apply php-cs-fixer changes.
+            Please review the changes and merge if they are correct.

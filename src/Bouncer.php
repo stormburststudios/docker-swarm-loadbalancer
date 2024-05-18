@@ -7,6 +7,7 @@ namespace Bouncer;
 use AdamBrett\ShellWrapper\Command\Builder as CommandBuilder;
 use AdamBrett\ShellWrapper\Runners\Exec;
 use Aws\S3\S3Client;
+use Bouncer\Logger\AbstractLogger;
 use GuzzleHttp\Client as Guzzle;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\ServerException;
@@ -15,7 +16,7 @@ use League\Flysystem\FileAttributes;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemException;
 use League\Flysystem\Local\LocalFilesystemAdapter;
-use Monolog\Logger;
+use Bouncer\Logger\Logger;
 use Bouncer\Logger\Formatter;
 use Spatie\Emoji\Emoji;
 use Symfony\Component\Yaml\Yaml;
@@ -38,7 +39,7 @@ class Bouncer
     private Filesystem $certificateStoreLocal;
     private ?Filesystem $certificateStoreRemote = null;
     private Filesystem $providedCertificateStore;
-    private Logger $logger;
+    private AbstractLogger $logger;
     private array $previousContainerState = [];
     private array $previousSwarmState     = [];
     private array $fileHashes;
@@ -61,7 +62,7 @@ class Bouncer
 
         $this->settings = new Settings();
 
-        $this->logger = new \Bouncer\Logger\Logger(
+        $this->logger = new Logger(
             settings: $this->settings,
             processIdProcessor: new Processor\ProcessIdProcessor(),
             memoryPeakUsageProcessor: new Processor\MemoryPeakUsageProcessor(),
@@ -306,6 +307,7 @@ class Bouncer
 
                     $bouncerTarget->setUseGlobalCert($this->isUseGlobalCert());
 
+                    // @phpstan-ignore-next-line MB: I'm not sure you're right about ->hasCustomNginxConfig only returning false, Stan..
                     if ($bouncerTarget->isEndpointValid() || $bouncerTarget->hasCustomNginxConfig()) {
                         $bouncerTargets[] = $bouncerTarget;
                     } else {
@@ -364,6 +366,7 @@ class Bouncer
 
             exit(1);
         }
+        // @phpstan-ignore-next-line Yes, I know this is a loop, that is desired.
         while (true) {
             $this->runLoop();
         }
@@ -469,24 +472,6 @@ class Bouncer
     private function dockerGetContainer(string $id): array
     {
         return json_decode($this->docker->request('GET', "containers/{$id}/json")->getBody()->getContents(), true);
-    }
-
-    private function dockerEnvHas(string $key, ?array $envs): bool
-    {
-        if ($envs === null) {
-            return false;
-        }
-
-        foreach ($envs as $env) {
-            if (stripos($env, '=') !== false) {
-                [$envKey, $envVal] = explode('=', $env, 2);
-                if ($envKey === $key) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
     private function dockerEnvFilter(?array $envs): array

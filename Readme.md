@@ -1,5 +1,16 @@
 # Automatic Swarm Nginx Load Balancer
 
+This is a non-production-ready automatic loadbalancer that works by sniffing the docker socket for changes to the running systems in a docker swarm.
+It probably works in k8s too, but I don't use k8s personally.
+
+![GitHub Action: Build Status](https://img.shields.io/github/actions/workflow/status/benzine-framework/docker-swarm-loadbalancer/docker.build.yml?logo=github&label=Build)
+![GitHub Action: QC Status](https://img.shields.io/github/actions/workflow/status/benzine-framework/docker-swarm-loadbalancer/trunk.check.yml?logo=github&label=QC)
+
+![Docker Pulls](https://img.shields.io/docker/pulls/benzine/bouncer?logo=docker&label=Docker%20Hub%20Pulls)
+![Docker Image Size](https://img.shields.io/docker/image-size/benzine/bouncer?logo=docker&label=Container%20Size)
+
+_\* this doesn't include the number of times it's been pulled from the github container registry, and theres no nice way to pull that from a REST API so there isn't a pretty badge for that._
+
 ## Environment variables
 
 This container has its own environment variables, AS WELL AS scanning for some environment variables associated with your services.

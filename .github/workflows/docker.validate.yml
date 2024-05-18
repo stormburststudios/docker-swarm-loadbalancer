@@ -1,0 +1,54 @@
+name: Validate Swarm Loadbalancer
+
+permissions:
+  contents: read
+  packages: write
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Build Swarm Loadbalancer"]
+    types:
+      - completed
+
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  CANDIDATE_IMAGE: ghcr.io/benzine-framework/bouncer:build-${{ github.sha }}
+
+jobs:
+  validate-install-report:
+    name: Run Install Report
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Post-Build: Validate build"
+        shell: bash
+        run: |
+          docker \
+            run \
+              --rm \
+              ${{ env.CANDIDATE_IMAGE }} \
+                /usr/bin/install-report
+  validate-dive-report:
+    name: Run Dive
+    runs-on: ubuntu-latest
+    steps:
+      # Use Dive to inspect the image for junk
+      - name: "Post-Build: Dive"
+        uses: wagoodman/dive@v0.10.0
+        with:
+          args: ${{ env.CANDIDATE_IMAGE }}
+  validate-vulnerability-report:
+    name: Run Trivy
+    runs-on: ubuntu-latest
+    steps:
+      # Inspect the container for security vulnerabilities
+      - name: "Post-Build: Trivy"
+        uses: aquasecurity/trivy-action@v0.3.0
+        with:
+          image-ref: ${{ env.CANDIDATE_IMAGE }}
+          format: table
+          exit-code: 1

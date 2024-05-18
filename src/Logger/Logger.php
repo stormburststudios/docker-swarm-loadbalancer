@@ -7,7 +7,7 @@ namespace Bouncer\Logger;
 use Bouncer\Settings\Settings;
 use Monolog\Processor;
 
-class Logger extends \Monolog\Logger
+class Logger extends AbstractLogger
 {
     public function __construct(
         private readonly Settings $settings,

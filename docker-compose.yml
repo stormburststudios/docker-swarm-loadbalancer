@@ -27,12 +27,11 @@ services:
       additional_contexts:
         - php:nginx=docker-image://ghcr.io/benzine-framework/php:nginx-8.2
     volumes:
-      - ./test/public-web-a:/app/public
+      - ./tests/testsites:/app/public
     environment:
       - BOUNCER_DOMAIN=a.web.grey.ooo
       - BOUNCER_TARGET_PORT=80
-  #      - BOUNCER_LETSENCRYPT=true
-
+      - SITE_NAME=A
   web-b:
     image: test-app-b
     build:
@@ -40,8 +39,8 @@ services:
       additional_contexts:
         - php:nginx=docker-image://ghcr.io/benzine-framework/php:nginx-8.2
     volumes:
-      - ./test/public-web-b:/app/public
+      - ./tests/testsites:/app/public
     environment:
       - BOUNCER_DOMAIN=b.web.grey.ooo
       - BOUNCER_TARGET_PORT=80
-#      - BOUNCER_LETSENCRYPT=true
+      - SITE_NAME=B

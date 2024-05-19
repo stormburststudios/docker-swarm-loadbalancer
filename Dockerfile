@@ -1,5 +1,5 @@
 # checkov:skip=CKV_DOCKER_3 I don't have time for rootless
-FROM php:cli as bouncer
+FROM ghcr.io/benzine-framework/php:cli-8.2 AS bouncer
 
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker-swarm-loadbalancer" \
@@ -97,7 +97,7 @@ HEALTHCHECK --start-period=30s \
     CMD curl -s -o /dev/null -w "200" http://localhost:80/ || exit 1
 
 # checkov:skip=CKV_DOCKER_3 This is a test container.
-FROM php:nginx as test-app
+FROM ghcr.io/benzine-framework/php:nginx-8.2 AS test-app
 COPY tests/testsites /app/public
 HEALTHCHECK --start-period=3s --interval=3s \
     CMD curl -s -o /dev/null -w "200" http://localhost:80/ || exit 1

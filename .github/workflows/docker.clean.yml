@@ -26,9 +26,7 @@ jobs:
           dry-run: true
           prune-tags-regexes: |
             ^build-${{ github.sha }}$
-          keep-tags-regexes: |
-            ^v
-            ^latest$
+
   cleanup-untagged-images:
     name: Delete untagged images
     runs-on: ubuntu-latest
@@ -40,6 +38,10 @@ jobs:
           organization: ${{ github.repository_owner }}
           container: bouncer
           dry-run: true
-          keep-younger-than: 7 # days
+          keep-younger-than: 30 # days
           keep-last: 2
           prune-untagged: true
+          keep-tags-regexes: |
+            ^v
+            ^latest$
+            ^old$

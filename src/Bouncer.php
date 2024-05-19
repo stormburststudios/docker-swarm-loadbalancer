@@ -338,7 +338,7 @@ class Bouncer
 
                     // if this bouncerTarget already exists, merge it in instead of adding it.
                     foreach ($bouncerTargets as $existing) {
-                        if ($existing->getDomains() == $bouncerTarget->getDomains()) {
+                        if (isset($bouncerTarget) && $existing->getDomains() == $bouncerTarget->getDomains()) {
                             $this->logger->debug('Found another instance of the same service, merging them together.', ['emoji' => Emoji::cupcake()]);
                             $existing->setEndpoints(array_merge($existing->getEndpoints(), $bouncerTarget->getEndpoints()));
                             unset($bouncerTarget);
@@ -351,7 +351,6 @@ class Bouncer
         // Iterate over bouncers and check validity
         $validBouncerTargets = [];
         foreach ($bouncerTargets as $bouncerTarget) {
-            // @phpstan-ignore-next-line MB: I'm not sure you're right about ->hasCustomNginxConfig only returning false, Stan..
             if ($bouncerTarget->isEndpointValid() || $bouncerTarget->hasCustomNginxConfig()) {
                 $validBouncerTargets[] = $bouncerTarget;
             } else {

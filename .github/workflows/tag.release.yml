@@ -43,7 +43,7 @@ jobs:
             BUILD_DATE=${{ env.ATOM }}
           platforms: ${{ github.actor != 'nektos/act' && env.PLATFORMS || 'linux/amd64' }}
           pull: true
-          push: false
+          push: true
           tags: |
             ${{ env.TAG_IMAGE_GHCR }}
             ${{ env.TAG_IMAGE_DOCKER }}

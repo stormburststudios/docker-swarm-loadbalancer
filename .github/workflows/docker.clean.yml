@@ -26,6 +26,9 @@ jobs:
           dry-run: true
           prune-tags-regexes: |
             ^build-${{ github.sha }}$
+          keep-tags-regexes: |
+            ^v
+            ^latest$
   cleanup-untagged-images:
     name: Delete untagged images
     runs-on: ubuntu-latest

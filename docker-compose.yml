@@ -10,9 +10,6 @@ services:
         - php:cli=docker-image://ghcr.io/benzine-framework/php:cli-8.2
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./src:/app/src
-      - ./templates:/app/templates
-      - ./vendor:/app/vendor
     networks:
       default:
         aliases:
@@ -36,8 +33,6 @@ services:
       target: test-app
       additional_contexts:
         - php:nginx=docker-image://ghcr.io/benzine-framework/php:nginx-8.2
-    volumes:
-      - ./tests/testsites:/app/public
     environment:
       - BOUNCER_DOMAIN=a.example.org
       - BOUNCER_TARGET_PORT=80

@@ -1,5 +1,4 @@
 .idea
-/docker-compose.override.yml
 /.php-cs-fixer.cache
 /.github/cache
 /.secrets

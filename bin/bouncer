@@ -3,6 +3,11 @@
 
 use Bouncer\Bouncer;
 define("APP_ROOT", realpath(__DIR__ . "/../"));
+# If vendor/autoload.php does not exist, we should bomb out and scream
+if (!file_exists(APP_ROOT . '/vendor/autoload.php')) {
+    echo "You must run composer install before running this script\n";
+    exit(1);
+}
 require_once APP_ROOT . '/vendor/autoload.php';
 
 (new Bouncer())->run();

@@ -1,0 +1,19 @@
+services:
+  bouncer:
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./src:/app/src
+      - ./templates:/app/templates
+      - ./vendor:/app/vendor
+  web-a:
+    volumes:
+      - ./tests/testsites:/app/public
+  web-b:
+    volumes:
+      - ./tests/testsites:/app/public
+  web-plural:
+    volumes:
+      - ./tests/testsites:/app/public
+  web-redirect-ssl:
+    volumes:
+      - ./tests/testsites:/app/public

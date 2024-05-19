@@ -14,11 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Start Bouncer
-        run: docker compose up --build -d bouncer test-box
-
+        run: |
+          rm -f docker-compose.override.yml
+          docker compose up --build -d bouncer test-box
       - name: Give it a moment...
         run: sleep 5
-
       - name: No-SSL Connect to Web A
         run: |
           docker compose exec test-box curl -s -D - http://a.example.org > a.nossl.http
@@ -29,7 +29,6 @@ jobs:
           docker compose exec test-box curl -s -k -D - https://a.example.org 2>&1 > a.ssl.http;
           grep "HTTP/1.1 200 OK" a.ssl.http;
           grep "<h1>Website A</h1>" a.ssl.http;
-
       - name: No-SSL Connect to Web B
         run: |
           docker compose exec test-box curl -s -D - http://b.example.org 2>&1 > b.nossl.http 
@@ -40,7 +39,6 @@ jobs:
           docker compose exec test-box curl -s -k -D - https://b.example.org 2>&1 > b.ssl.http
           grep "HTTP/1.1 200 OK" b.ssl.http
           grep "<h1>Website B</h1>" b.ssl.http
-
       - name: No-SSL Connect to SSL-redirect
         run: |
           docker compose exec test-box curl -s -D - http://redirect-to-ssl.example.org 2>&1 > redirect.nossl.http
@@ -53,20 +51,16 @@ jobs:
           docker compose exec test-box curl -s -k -D - https://redirect-to-ssl.example.org 2>&1 > redirect.ssl.http
           grep "HTTP/1.1 200 OK" redirect.ssl.http
           grep "<h1>Website redirect-to-ssl</h1>" redirect.ssl.http
-
       - name: Connect to Plural multiple times and verify it loadbalances
         run: |
           rm -f plural_requests
           for i in {1..20}; do
               docker compose exec test-box curl -s -k https://plural.example.org 2>&1 >> plural_requests
           done
-
           requests=$(cat plural_requests | grep "Running on" | sort | uniq | wc -l)
           echo "Unique Servers: $requests"
-                    
           # We should have exactly 3
           test $requests -eq 3
-
       - name: Cleanup
         if: always()
         run: docker compose down -v --remove-orphans

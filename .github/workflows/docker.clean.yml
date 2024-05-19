@@ -18,21 +18,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
-      - uses: dataaxiom/ghcr-cleanup-action@v1.0.3
+      - uses: vlaurin/action-ghcr-prune@v0.6.0
         with:
-          owner: benzine-framework
-          repository: docker-swarm-loadbalancer
-          name: bouncer
-          tags: build-${{ github.sha }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          organization: ${{ github.repository_owner }}
+          container: bouncer
+          dry-run: false
+          prune-tags-regexp: ^build-${{ github.sha }}$
   cleanup-untagged-images:
     name: Delete untagged images
     runs-on: ubuntu-latest
     steps:
       - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
-      - uses: dataaxiom/ghcr-cleanup-action@v1.0.3
+      - uses: vlaurin/action-ghcr-prune@v0.6.0
         with:
-          owner: benzine-framework
-          repository: docker-swarm-loadbalancer
-          name: bouncer
           token: ${{ secrets.GITHUB_TOKEN }}
+          organization: ${{ github.repository_owner }}
+          container: bouncer
+          dry-run: false
+          keep-younger-than: 7 # days
+          keep-last: 2
+          prune-untagged: true

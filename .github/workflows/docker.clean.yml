@@ -23,8 +23,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           organization: ${{ github.repository_owner }}
           container: bouncer
-          dry-run: false
-          prune-tags-regexp: ^build-${{ github.sha }}$
+          dry-run: true
+          prune-tags-regexes: |
+            ^build-${{ github.sha }}$
   cleanup-untagged-images:
     name: Delete untagged images
     runs-on: ubuntu-latest
@@ -35,7 +36,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           organization: ${{ github.repository_owner }}
           container: bouncer
-          dry-run: false
+          dry-run: true
           keep-younger-than: 7 # days
           keep-last: 2
           prune-untagged: true

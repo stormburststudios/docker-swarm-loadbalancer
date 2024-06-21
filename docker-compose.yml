@@ -2,10 +2,10 @@ networks:
   default:
 
 services:
-  bouncer:
+  loadbalancer:
     build:
       context: .
-      target: bouncer
+      target: loadbalancer
       additional_contexts:
         - php:cli=docker-image://ghcr.io/benzine-framework/php:cli-8.2
     volumes:

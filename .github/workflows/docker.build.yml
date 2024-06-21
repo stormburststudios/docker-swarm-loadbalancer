@@ -37,6 +37,7 @@ jobs:
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: |
             ${{ vars.LOADBALANCER_DOCKER_IMAGE }}:latest
+            ${{ vars.LOADBALANCER_DOCKER_IMAGE }}:built-at-${{ env.ATOM }}
             ${{ vars.LOADBALANCER_DOCKER_IMAGE }}:sha-${{ github.sha }}
           cache-from: ${{ env.DOCKER_CACHE_FROM }}
           cache-to: ${{ env.DOCKER_CACHE_TO }}

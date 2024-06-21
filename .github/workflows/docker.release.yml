@@ -14,7 +14,7 @@ env:
 
 jobs:
   release-ghcr:
-    name: GHCR
+    name: GitHub Container Registry
     runs-on: ${{ vars.RUNS_ON }}
     steps:
       - run: docker login ghcr.io -u ${{ vars.SERVICE_ACCOUNT_USERNAME }} -p ${{ secrets.SERVICE_ACCOUNT_TOKEN }}

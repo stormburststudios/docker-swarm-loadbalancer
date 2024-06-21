@@ -4,6 +4,8 @@ FROM ghcr.io/benzine-framework/php:cli-8.2 AS loadbalancer
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker-swarm-loadbalancer" \
       org.opencontainers.image.source="https://github.com/benzine-framework/docker-swarm-loadbalancer"
+# Allow overriding the default SSL cert subject
+ARG DEFAULT_SSL_CERT_SUBJECT="/C=XX/ST=StateName/L=CityName/O=CompanyName/OU=CompanySectionName/CN=CommonNameOrHostname"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -37,8 +39,17 @@ RUN apt-get -qq update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/dpkg/status.old /var/cache/debconf/templates.dat /var/log/dpkg.log /var/log/lastlog /var/log/apt/*.log
 
-# copy some default self-signed certs
-COPY self-signed-certificates /certs
+# Generate some default self-signed certs
+RUN mkdir /certs && \
+    openssl req \
+      -x509 \
+    -newkey rsa:4096 \
+    -keyout /certs/example.key \
+    -out /certs/example.crt \
+    -sha256 \
+    -days 3650 \
+    -nodes \
+    -subj "${DEFAULT_SSL_CERT_SUBJECT}"
 
 # Install runits for services
 COPY nginx.runit /etc/service/nginx/run

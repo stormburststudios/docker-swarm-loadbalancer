@@ -8,9 +8,6 @@ on:
   workflow_call:
   workflow_dispatch:
 
-env:
-  PLATFORMS: ${{ var.PLATFORMS }}
-
 jobs:
   docker-build:
     name: Build Swarm Load Balancer
@@ -32,7 +29,7 @@ jobs:
             GIT_BUILD_ID=${{ github.ref_name }}
             GIT_COMMIT_MESSAGE=${{ github.event.head_commit.message }}
             BUILD_DATE=${{ env.ATOM }}
-          platforms: ${{ github.actor != 'nektos/act' && env.PLATFORMS || 'linux/amd64' }}
+          platforms: ${{ github.actor != 'nektos/act' && vars.PLATFORMS || 'linux/amd64' }}
           pull: true
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: |

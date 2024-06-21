@@ -8,6 +8,10 @@ on:
   workflow_call:
   workflow_dispatch:
 
+env:
+  PLATFORMS: ${{ vars.PLATFORMS }}
+  DOCKER_IMAGE: ghcr.io/${{ github.repository_owner }}/${{ github.repository_name }}
+
 jobs:
   docker-build:
     name: Build Swarm Load Balancer
@@ -23,7 +27,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          target: bouncer
+          target: loadbalancer
           build-args: |
             GIT_SHA=${{ github.sha }}
             GIT_BUILD_ID=${{ github.ref_name }}
@@ -33,8 +37,8 @@ jobs:
           pull: true
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: |
-            ${{ vars.LOADBALANCER_DOCKER_IMAGE }}:latest
-            ${{ vars.LOADBALANCER_DOCKER_IMAGE }}:built-at-${{ env.ATOM }}
-            ${{ vars.LOADBALANCER_DOCKER_IMAGE }}:sha-${{ github.sha }}
+            ${{ env.DOCKER_IMAGE }}:latest
+            ${{ env.DOCKER_IMAGE }}:date-${{ env.DATE }}
+            ${{ env.DOCKER_IMAGE }}:sha-${{ github.sha }}
           cache-from: ${{ env.DOCKER_CACHE_FROM }}
           cache-to: ${{ env.DOCKER_CACHE_TO }}

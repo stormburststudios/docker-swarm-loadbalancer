@@ -1,5 +1,5 @@
 # checkov:skip=CKV_DOCKER_3 I don't have time for rootless
-FROM ghcr.io/benzine-framework/php:cli-8.2 AS bouncer
+FROM ghcr.io/benzine-framework/php:cli-8.2 AS loadbalancer
 
 LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
       org.label-schema.vcs-url="https://github.com/benzine-framework/docker-swarm-loadbalancer" \

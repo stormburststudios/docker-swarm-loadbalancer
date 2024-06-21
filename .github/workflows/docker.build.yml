@@ -9,8 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  PLATFORMS: linux/amd64,linux/arm64
-  CANDIDATE_IMAGE: ghcr.io/benzine-framework/bouncer:build-${{ github.sha }}
+  PLATFORMS: ${{ var.PLATFORMS }}
 
 jobs:
   docker-build:
@@ -21,10 +20,8 @@ jobs:
       - uses: benzine-framework/action-get-datetime@main
       - uses: benzine-framework/action-setup-docker@main
         with:
-          ghcr_user: matthewbaggett
-          ghcr_token: ${{ secrets.GITHUB_TOKEN }}
-          docker_hub_user: matthewbaggett
-          docker_hub_token: ${{ secrets.DOCKER_HUB_TOKEN }}
+          ghcr_user: ${{ vars.SERVICE_ACCOUNT_USERNAME }}
+          ghcr_token: ${{ secrets.SERVICE_ACCOUNT_TOKEN }}
       - name: "Build & Push Candidate Image as ${{ env.CANDIDATE_IMAGE }}"
         uses: docker/build-push-action@v5
         with:
@@ -38,6 +35,8 @@ jobs:
           platforms: ${{ github.actor != 'nektos/act' && env.PLATFORMS || 'linux/amd64' }}
           pull: true
           push: ${{ github.ref == 'refs/heads/main' }}
-          tags: ${{ env.CANDIDATE_IMAGE }}
+          tags: |
+            ${{ vars.LOADBALANCER_DOCKER_IMAGE }}:latest
+            ${{ vars.LOADBALANCER_DOCKER_IMAGE }}:sha-${{ github.sha }}
           cache-from: ${{ env.DOCKER_CACHE_FROM }}
           cache-to: ${{ env.DOCKER_CACHE_TO }}

@@ -2,3 +2,5 @@
 /.php-cs-fixer.cache
 /.github/cache
 /.secrets
+/.act.secrets
+/.act.vars

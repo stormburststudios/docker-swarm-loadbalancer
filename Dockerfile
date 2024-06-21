@@ -104,5 +104,5 @@ HEALTHCHECK --start-period=3s --interval=3s \
 
 # checkov:skip=CKV_DOCKER_7 This is a test container.
 # checkov:skip=CKV_DOCKER_3 This is a test container.
-FROM alpine as test-box
+FROM alpine AS test-box
 RUN apk add --no-cache curl bash

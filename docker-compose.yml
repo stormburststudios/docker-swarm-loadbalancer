@@ -8,8 +8,12 @@ services:
       target: loadbalancer
       additional_contexts:
         - php:cli=docker-image://ghcr.io/benzine-framework/php:cli-8.2
+      args:
+        PUBLIC_MAINTAINER: "Matthew Baggett <test@baggett.me>"
+        SOURCE_URL: "https://git.grey.ooo/Benzine/docker-swarm-loadbalancer"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    image: loadbalancer-test
     networks:
       default:
         aliases:

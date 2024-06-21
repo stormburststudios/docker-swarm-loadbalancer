@@ -10,7 +10,7 @@ on:
 
 env:
   CANDIDATE_IMAGE: ghcr.io/${{ github.repository }}:sha-${{ github.sha }}
-  RELEASE_IMAGE:   ghcr.io/${{ github.repository }}:latest
+  RELEASE_IMAGE: ghcr.io/${{ github.repository }}:latest
 
 jobs:
   release-ghcr:
@@ -21,4 +21,3 @@ jobs:
       - run: docker pull ${{ env.CANDIDATE_IMAGE }}
       - run: docker tag ${{ env.CANDIDATE_IMAGE }} ${{ env.RELEASE_IMAGE }}
       - run: docker push ${{ env.RELEASE_IMAGE }}
-

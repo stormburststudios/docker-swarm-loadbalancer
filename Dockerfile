@@ -1,11 +1,22 @@
 # checkov:skip=CKV_DOCKER_3 I don't have time for rootless
 FROM ghcr.io/benzine-framework/php:cli-8.2 AS loadbalancer
 
-LABEL maintainer="Matthew Baggett <matthew@baggett.me>" \
-      org.label-schema.vcs-url="https://github.com/benzine-framework/docker-swarm-loadbalancer" \
-      org.opencontainers.image.source="https://github.com/benzine-framework/docker-swarm-loadbalancer"
 # Allow overriding the default SSL cert subject
 ARG DEFAULT_SSL_CERT_SUBJECT="/C=XX/ST=StateName/L=CityName/O=CompanyName/OU=CompanySectionName/CN=CommonNameOrHostname"
+ARG PUBLIC_MAINTAINER="Matthew Baggett <matthew@baggett.me>"
+ARG SOURCE_URL="https://github.com/benzine-framework/docker-swarm-loadbalancer"
+ARG BUILD_DATE
+ARG GIT_SHA
+ARG GIT_BUILD_ID
+ARG GIT_COMMIT_MESSAGE
+ENV BUILD_DATE=${BUILD_DATE} \
+    GIT_SHA=${GIT_SHA} \
+    GIT_BUILD_ID=${GIT_BUILD_ID} \
+    GIT_COMMIT_MESSAGE=${GIT_COMMIT_MESSAGE}
+
+LABEL maintainer="${PUBLIC_MAINTAINER}" \
+      org.label-schema.vcs-url="${SOURCE_URL}" \
+      org.opencontainers.image.source="${SOURCE_URL}"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -82,16 +93,6 @@ COPY bin /app/bin
 COPY src /app/src
 COPY templates /app/templates
 RUN chmod +x /app/bin/bouncer
-
-# stuff some envs from build
-ARG BUILD_DATE
-ARG GIT_SHA
-ARG GIT_BUILD_ID
-ARG GIT_COMMIT_MESSAGE
-ENV BUILD_DATE=${BUILD_DATE} \
-    GIT_SHA=${GIT_SHA} \
-    GIT_BUILD_ID=${GIT_BUILD_ID} \
-    GIT_COMMIT_MESSAGE=${GIT_COMMIT_MESSAGE}
 
 # Create some volumes for logs and certs
 VOLUME /etc/letsencrypt

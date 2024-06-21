@@ -29,6 +29,8 @@ jobs:
           context: .
           target: loadbalancer
           build-args: |
+            MAINTAINER=${{ vars.PUBLIC_MAINTAINER || 'Matthew Baggett <matthew@baggett.me>' }}
+            SOURCE_URL="https://github.com/${{ github.repository }}"
             GIT_SHA=${{ github.sha }}
             GIT_BUILD_ID=${{ github.ref_name }}
             GIT_COMMIT_MESSAGE=${{ github.event.head_commit.message }}

@@ -23,7 +23,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           organization: ${{ github.repository_owner }}
-          container: ${{ github.repository_name }}
+          container: docker-swarm-loadbalancer
           dry-run: true
           prune-tags-regexes: |
             ^build-${{ github.sha }}$

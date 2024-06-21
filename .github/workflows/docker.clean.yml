@@ -19,6 +19,7 @@ jobs:
     steps:
       - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
       - uses: vlaurin/action-ghcr-prune@v0.6.0
+        continue-on-error: true
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           organization: ${{ github.repository_owner }}
@@ -33,6 +34,7 @@ jobs:
     steps:
       - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
       - uses: vlaurin/action-ghcr-prune@v0.6.0
+        continue-on-error: true
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           organization: ${{ github.repository_owner }}

@@ -20,7 +20,7 @@ concurrency:
 jobs:
   trunk-upgrade:
     name: Upgrade Trunk
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNS_ON }}
     permissions:
       contents: write # For trunk to create PRs
       pull-requests: write # For trunk to create PRs

@@ -9,26 +9,16 @@ on:
   workflow_dispatch:
 
 env:
-  CANDIDATE_IMAGE: ghcr.io/benzine-framework/bouncer:build-${{ github.sha }}
-  RELEASE_IMAGE_GHCR: ghcr.io/benzine-framework/bouncer:latest
-  RELEASE_IMAGE_DOCKER: benzine/bouncer:latest
+  CANDIDATE_IMAGE: ghcr.io/${{ github.repository_owner }}/${{ github.repository_name }}:sha-${{ github.sha }}
+  RELEASE_IMAGE: ghcr.io/${{ github.repository_owner }}/${{ github.repository_name }}:latest
 
 jobs:
   release-ghcr:
     name: GHCR
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNS_ON }}
     steps:
-      - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
+      - run: docker login ghcr.io -u ${{ vars.SERVICE_ACCOUNT_USERNAME }} -p ${{ secrets.SERVICE_ACCOUNT_TOKEN }}
       - run: docker pull ${{ env.CANDIDATE_IMAGE }}
-      - run: docker tag ${{ env.CANDIDATE_IMAGE }} ${{ env.RELEASE_IMAGE_GHCR }}
-      - run: docker push ${{ env.RELEASE_IMAGE_GHCR }}
+      - run: docker tag ${{ env.CANDIDATE_IMAGE }} ${{ env.RELEASE_IMAGE }}
+      - run: docker push ${{ env.RELEASE_IMAGE }}
 
-  release-docker-hub:
-    name: Docker Hub
-    runs-on: ubuntu-latest
-    steps:
-      - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
-      - run: docker login docker.io -u matthewbaggett -p ${{ secrets.DOCKER_HUB_TOKEN }}
-      - run: docker pull ${{ env.CANDIDATE_IMAGE }}
-      - run: docker tag ${{ env.CANDIDATE_IMAGE }} ${{ env.RELEASE_IMAGE_DOCKER }}
-      - run: docker push ${{ env.RELEASE_IMAGE_DOCKER }}

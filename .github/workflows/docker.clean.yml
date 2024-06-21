@@ -15,7 +15,7 @@ on:
 jobs:
   cleanup-delete-candidate-image:
     name: Delete candidate image
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNS_ON }}
     steps:
       - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
       - uses: vlaurin/action-ghcr-prune@v0.6.0
@@ -23,14 +23,14 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           organization: ${{ github.repository_owner }}
-          container: bouncer
+          container: ${{ github.repository_name }}
           dry-run: true
           prune-tags-regexes: |
             ^build-${{ github.sha }}$
 
   cleanup-untagged-images:
     name: Delete untagged images
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNS_ON }}
     steps:
       - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
       - uses: vlaurin/action-ghcr-prune@v0.6.0

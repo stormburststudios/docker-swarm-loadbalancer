@@ -10,7 +10,7 @@ on:
 
 env:
   PLATFORMS: ${{ vars.PLATFORMS }}
-  DOCKER_IMAGE: ghcr.io/${{ github.repository_owner }}/${{ github.repository_name }}
+  DOCKER_IMAGE: ghcr.io/${{ github.repository }}
 
 jobs:
   docker-build:

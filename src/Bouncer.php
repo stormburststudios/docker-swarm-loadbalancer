@@ -211,6 +211,7 @@ class Bouncer
             }
             // If BOUNCER_IGNORE is set, skip this service.
             if (isset($envs['BOUNCER_IGNORE'])) {
+                $this->logger->warning('Container {container_name} has BOUNCER_IGNORE set, skipping.', ['emoji' => Emoji::warning() . ' Bouncer.php', 'container_name' => $container['Name']]);
                 continue;
             }
 
@@ -294,13 +295,16 @@ class Bouncer
                         $envs[$envKey] = $envVal;
                     }
                 }
+                \Kint::dump($service['Spec']['TaskTemplate']['ContainerSpec']['Env']);
                 ksort($envs);
                 // If there are no BOUNCER_* environment variables, skip this service.
                 if (count($envs) == 0) {
+                    $this->logger->debug('Service {service_name} has no BOUNCER_* environment variables, skipping.', ['emoji' => Emoji::warning() . ' Bouncer.php', 'service_name' => $service['Spec']['Name']]);
                     continue;
                 }
                 // if BOUNCER_IGNORE is set, skip this service.
                 if (isset($envs['BOUNCER_IGNORE'])) {
+                    $this->logger->warning('Service {service_name} has BOUNCER_IGNORE set, skipping.', ['emoji' => Emoji::warning() . ' Bouncer.php', 'service_name' => $service['Spec']['Name']]);
                     continue;
                 }
 

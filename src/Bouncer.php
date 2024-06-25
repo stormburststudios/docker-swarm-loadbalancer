@@ -8,16 +8,19 @@ use AdamBrett\ShellWrapper\Command\Builder as CommandBuilder;
 use AdamBrett\ShellWrapper\Runners\Exec;
 use Aws\S3\S3Client;
 use Bouncer\Logger\AbstractLogger;
+use Bouncer\Logger\Formatter;
+use Bouncer\Logger\Logger;
+use Bouncer\Settings\Settings;
 use GuzzleHttp\Client as Guzzle;
 use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\ServerException;
 use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use League\Flysystem\FileAttributes;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemException;
 use League\Flysystem\Local\LocalFilesystemAdapter;
-use Bouncer\Logger\Logger;
-use Bouncer\Logger\Formatter;
+use Monolog\Processor;
 use Spatie\Emoji\Emoji;
 use Symfony\Component\Yaml\Yaml;
 use Twig\Environment as Twig;
@@ -25,9 +28,6 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 use Twig\Loader\FilesystemLoader as TwigLoader;
-use GuzzleHttp\Exception\GuzzleException;
-use Monolog\Processor;
-use Bouncer\Settings\Settings;
 
 class Bouncer
 {
@@ -186,6 +186,7 @@ class Bouncer
     public function findContainersContainerMode(): array
     {
         $bouncerTargets = [];
+        $this->logger->warning('Interrogating CONTAINERS for BOUNCER_* environment variables.', ['emoji' => Emoji::magnifyingGlassTiltedLeft()]);
 
         $containers = json_decode($this->docker->request('GET', 'containers/json')->getBody()->getContents(), true);
         foreach ($containers as $container) {
@@ -262,11 +263,14 @@ class Bouncer
             }
         }
 
+        $this->logger->warning('Interrogating CONTAINERS for BOUNCER_* environment variables found {count} containers.', ['emoji' => Emoji::magnifyingGlassTiltedLeft(), 'count' => count($validBouncerTargets)]);
+
         return $validBouncerTargets;
     }
 
     public function findContainersSwarmMode(): array
     {
+        $this->logger->warning('Interrogating SERVICES for BOUNCER_* environment variables.', ['emoji' => Emoji::magnifyingGlassTiltedLeft()]);
         $bouncerTargets = [];
         $services       = json_decode($this->docker->request('GET', 'services')->getBody()->getContents(), true);
 
@@ -364,6 +368,8 @@ class Bouncer
                 );
             }
         }
+
+        $this->logger->warning('Interrogating SERVICES for BOUNCER_* environment variables found {count} containers.', ['emoji' => Emoji::magnifyingGlassTiltedLeft(), 'count' => count($validBouncerTargets)]);
 
         return $validBouncerTargets;
     }
@@ -670,12 +676,20 @@ class Bouncer
 
         $this->logger->debug(' > Swarm mode is {enabled}.', ['emoji' => Emoji::honeybee(), 'enabled' => $this->isSwarmMode() ? 'enabled' : 'disabled']);
 
+        /** @var Target[] $targets */
         $targets = array_values(
             array_merge(
                 $this->findContainersContainerMode(),
                 $this->isSwarmMode() ? $this->findContainersSwarmMode() : []
             )
         );
+
+        foreach($targets as $target){
+            $this->logger->info('Found target {target}', ['emoji' => Emoji::magnifyingGlassTiltedLeft(), 'target' => $target->getName()]);
+            \Kint::dump(
+                $target->getDomains(),
+            );
+        }
 
         // Use some bs to sort the targets by domain from right to left.
         $sortedTargets = [];

@@ -212,6 +212,7 @@ class Bouncer
             // If BOUNCER_IGNORE is set, skip this service.
             if (isset($envs['BOUNCER_IGNORE'])) {
                 $this->logger->warning('Container {container_name} has BOUNCER_IGNORE set, skipping.', ['emoji' => Emoji::warning() . ' ', 'container_name' => $container['Name']]);
+
                 continue;
             }
 
@@ -301,12 +302,14 @@ class Bouncer
                 // If there are no BOUNCER_* environment variables, skip this service.
                 if (count($envs) == 0) {
                     $this->logger->debug('Service {service_name} has no BOUNCER_* envs set, skipping.', ['emoji' => Emoji::ghost() . ' ', 'service_name' => $service['Spec']['Name']]);
+
                     continue;
                 }
 
                 // if BOUNCER_IGNORE is set, skip this service.
                 if (isset($envs['BOUNCER_IGNORE'])) {
                     $this->logger->debug('Service {service_name} has BOUNCER_IGNORE set, skipping.', ['emoji' => Emoji::warning() . ' ', 'service_name' => $service['Spec']['Name']]);
+
                     continue;
                 }
 
@@ -355,7 +358,7 @@ class Bouncer
                         }
                     }
 
-                    if(isset($bouncerTarget)) {
+                    if (isset($bouncerTarget)) {
                         $bouncerTargets[] = $bouncerTarget;
                     }
                 }
@@ -378,7 +381,7 @@ class Bouncer
                 );
             }
         }
-        $this->logger->debug("There are {count} bouncer targets, of which {validCount} are valid", ['count' => count($bouncerTargets), 'validCount' => count($validBouncerTargets)]);
+        $this->logger->debug('There are {count} bouncer targets, of which {validCount} are valid', ['count' => count($bouncerTargets), 'validCount' => count($validBouncerTargets)]);
 
         $this->logger->warning('Interrogating SERVICES for BOUNCER_* environment variables found {count} services.', ['emoji' => Emoji::magnifyingGlassTiltedLeft(), 'count' => count($validBouncerTargets)]);
 
@@ -695,7 +698,7 @@ class Bouncer
             )
         );
 
-        foreach($targets as $target){
+        foreach ($targets as $target) {
             $this->logger->info('Found target {target}', ['emoji' => Emoji::magnifyingGlassTiltedLeft(), 'target' => $target->getName()]);
         }
 

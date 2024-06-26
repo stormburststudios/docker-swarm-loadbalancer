@@ -9,35 +9,37 @@ on:
   workflow_dispatch:
 
 env:
-  PLATFORMS: linux/amd64,linux/arm64
-  CANDIDATE_IMAGE: ghcr.io/benzine-framework/bouncer:build-${{ github.sha }}
+  PLATFORMS: ${{ vars.PLATFORMS }}
+  DOCKER_IMAGE: ghcr.io/${{ github.repository }}
 
 jobs:
   docker-build:
     name: Build Swarm Load Balancer
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNS_ON }}
     steps:
       - uses: benzine-framework/action-setup-php@main
       - uses: benzine-framework/action-get-datetime@main
       - uses: benzine-framework/action-setup-docker@main
         with:
-          ghcr_user: matthewbaggett
-          ghcr_token: ${{ secrets.GITHUB_TOKEN }}
-          docker_hub_user: matthewbaggett
-          docker_hub_token: ${{ secrets.DOCKER_HUB_TOKEN }}
+          ghcr_user: ${{ vars.SERVICE_ACCOUNT_USERNAME }}
+          ghcr_token: ${{ secrets.SERVICE_ACCOUNT_TOKEN }}
       - name: "Build & Push Candidate Image as ${{ env.CANDIDATE_IMAGE }}"
         uses: docker/build-push-action@v5
         with:
           context: .
-          target: bouncer
+          target: loadbalancer
           build-args: |
+            MAINTAINER=${{ vars.PUBLIC_MAINTAINER || 'Matthew Baggett <matthew@baggett.me>' }}
+            SOURCE_URL="https://github.com/${{ github.repository }}"
             GIT_SHA=${{ github.sha }}
             GIT_BUILD_ID=${{ github.ref_name }}
             GIT_COMMIT_MESSAGE=${{ github.event.head_commit.message }}
             BUILD_DATE=${{ env.ATOM }}
-          platforms: ${{ github.actor != 'nektos/act' && env.PLATFORMS || 'linux/amd64' }}
+          platforms: ${{ github.actor != 'nektos/act' && vars.PLATFORMS || 'linux/amd64' }}
           pull: true
           push: ${{ github.ref == 'refs/heads/main' }}
-          tags: ${{ env.CANDIDATE_IMAGE }}
+          tags: |
+            ${{ env.DOCKER_IMAGE }}:date-${{ env.DATE }}
+            ${{ env.DOCKER_IMAGE }}:sha-${{ github.sha }}
           cache-from: ${{ env.DOCKER_CACHE_FROM }}
           cache-to: ${{ env.DOCKER_CACHE_TO }}

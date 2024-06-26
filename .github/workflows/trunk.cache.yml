@@ -22,7 +22,7 @@ concurrency:
 jobs:
   trunk-cache:
     name: Trunk Cache
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNS_ON }}
     permissions:
       actions: write
     steps:

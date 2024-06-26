@@ -13,12 +13,12 @@ on:
       - completed
 
 env:
-  CANDIDATE_IMAGE: ghcr.io/benzine-framework/bouncer:build-${{ github.sha }}
+  CANDIDATE_IMAGE: ghcr.io/${{ github.repository }}:sha-${{ github.sha }}
 
 jobs:
   validate-install-report:
     name: Run Install Report
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNS_ON }}
     steps:
       - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
       - name: "Pull Candidate Image"
@@ -27,7 +27,7 @@ jobs:
         run: docker run --rm ${{ env.CANDIDATE_IMAGE }} /usr/bin/install-report
   validate-dive-report:
     name: Run Dive
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNS_ON }}
     steps:
       - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
       - name: "Pull Candidate Image"
@@ -48,7 +48,7 @@ jobs:
           config-file: ${{ github.workspace }}/.dive-ci.yml
   validate-vulnerability-report:
     name: Run Trivy
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNS_ON }}
     steps:
       - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
       - name: "Pull Candidate Image"

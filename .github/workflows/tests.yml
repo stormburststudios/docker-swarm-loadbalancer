@@ -10,49 +10,63 @@ on:
 jobs:
   test-integration:
     name: Integration Tests
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNS_ON }}
     steps:
       - uses: actions/checkout@v4
-      - name: Start Bouncer
+      - name: Start Loadbalancer
         run: |
           rm -f docker-compose.override.yml
-          docker compose up --build -d bouncer test-box
+          docker compose up --build -d loadbalancer test-box
       - name: Give it a moment...
         run: sleep 5
       - name: No-SSL Connect to Web A
+        shell: bash
         run: |
+          set -xeu
           docker compose exec test-box curl -s -D - http://a.example.org > a.nossl.http
           grep "HTTP/1.1 200 OK" a.nossl.http;
           grep "<h1>Website A</h1>" a.nossl.http;
       - name: SSL Connect to Web A
+        shell: bash
         run: |
+          set -xeu
           docker compose exec test-box curl -s -k -D - https://a.example.org 2>&1 > a.ssl.http;
           grep "HTTP/1.1 200 OK" a.ssl.http;
           grep "<h1>Website A</h1>" a.ssl.http;
       - name: No-SSL Connect to Web B
+        shell: bash
         run: |
+          set -xeu
           docker compose exec test-box curl -s -D - http://b.example.org 2>&1 > b.nossl.http 
           grep "HTTP/1.1 200 OK" b.nossl.http
           grep "<h1>Website B</h1>" b.nossl.http
       - name: SSL Connect to Web B
+        shell: bash
         run: |
+          set -xeu
           docker compose exec test-box curl -s -k -D - https://b.example.org 2>&1 > b.ssl.http
           grep "HTTP/1.1 200 OK" b.ssl.http
           grep "<h1>Website B</h1>" b.ssl.http
       - name: No-SSL Connect to SSL-redirect
+        shell: bash
         run: |
+          set -xeu
           docker compose exec test-box curl -s -D - http://redirect-to-ssl.example.org 2>&1 > redirect.nossl.http
           # Validate its redirected
           grep "HTTP/1.1 301 Moved Permanently" redirect.nossl.http
           # And going to the right place
           grep "Location: https://redirect-to-ssl.example.org" redirect.nossl.http
       - name: SSL Connect to SSL-redirect
+        shell: bash
         run: |
+          set -xeu
           docker compose exec test-box curl -s -k -D - https://redirect-to-ssl.example.org 2>&1 > redirect.ssl.http
           grep "HTTP/1.1 200 OK" redirect.ssl.http
           grep "<h1>Website redirect-to-ssl</h1>" redirect.ssl.http
       - name: Connect to Plural multiple times and verify it loadbalances
+        shell: bash
         run: |
+          set -xeu
           rm -f plural_requests
           for i in {1..20}; do
               docker compose exec test-box curl -s -k https://plural.example.org 2>&1 >> plural_requests

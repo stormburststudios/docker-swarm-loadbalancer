@@ -8,16 +8,19 @@ use AdamBrett\ShellWrapper\Command\Builder as CommandBuilder;
 use AdamBrett\ShellWrapper\Runners\Exec;
 use Aws\S3\S3Client;
 use Bouncer\Logger\AbstractLogger;
+use Bouncer\Logger\Formatter;
+use Bouncer\Logger\Logger;
+use Bouncer\Settings\Settings;
 use GuzzleHttp\Client as Guzzle;
 use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\ServerException;
 use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use League\Flysystem\FileAttributes;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemException;
 use League\Flysystem\Local\LocalFilesystemAdapter;
-use Bouncer\Logger\Logger;
-use Bouncer\Logger\Formatter;
+use Monolog\Processor;
 use Spatie\Emoji\Emoji;
 use Symfony\Component\Yaml\Yaml;
 use Twig\Environment as Twig;
@@ -25,9 +28,6 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 use Twig\Loader\FilesystemLoader as TwigLoader;
-use GuzzleHttp\Exception\GuzzleException;
-use Monolog\Processor;
-use Bouncer\Settings\Settings;
 
 class Bouncer
 {
@@ -186,6 +186,7 @@ class Bouncer
     public function findContainersContainerMode(): array
     {
         $bouncerTargets = [];
+        $this->logger->warning('Interrogating CONTAINERS for BOUNCER_* environment variables.', ['emoji' => Emoji::magnifyingGlassTiltedLeft()]);
 
         $containers = json_decode($this->docker->request('GET', 'containers/json')->getBody()->getContents(), true);
         foreach ($containers as $container) {
@@ -210,6 +211,8 @@ class Bouncer
             }
             // If BOUNCER_IGNORE is set, skip this service.
             if (isset($envs['BOUNCER_IGNORE'])) {
+                $this->logger->warning('Container {container_name} has BOUNCER_IGNORE set, skipping.', ['emoji' => Emoji::warning() . ' ', 'container_name' => $container['Name']]);
+
                 continue;
             }
 
@@ -262,16 +265,19 @@ class Bouncer
             }
         }
 
+        $this->logger->warning('Interrogating CONTAINERS for BOUNCER_* environment variables found {count} containers.', ['emoji' => Emoji::magnifyingGlassTiltedLeft(), 'count' => count($validBouncerTargets)]);
+
         return $validBouncerTargets;
     }
 
     public function findContainersSwarmMode(): array
     {
+        $this->logger->warning('Interrogating SERVICES for BOUNCER_* environment variables.', ['emoji' => Emoji::magnifyingGlassTiltedLeft()]);
         $bouncerTargets = [];
         $services       = json_decode($this->docker->request('GET', 'services')->getBody()->getContents(), true);
 
         if (isset($services['message'])) {
-            $this->logger->debug('Something happened while interrogating services.. This node is not a swarm node, cannot have services: {message}', ['emoji' => Emoji::warning() . ' Bouncer.php', 'message' => $services['message']]);
+            $this->logger->debug('Something happened while interrogating services.. This node is not a swarm node, cannot have services: {message}', ['emoji' => Emoji::warning() . ' ', 'message' => $services['message']]);
         } else {
             foreach ($services as $service) {
                 $envs = [];
@@ -283,6 +289,7 @@ class Bouncer
                 ) {
                     continue;
                 }
+
                 // Parse all the environment variables and store them in an array.
                 foreach ($service['Spec']['TaskTemplate']['ContainerSpec']['Env'] as $env) {
                     [$envKey, $envVal] = explode('=', $env, 2);
@@ -291,12 +298,18 @@ class Bouncer
                     }
                 }
                 ksort($envs);
+
                 // If there are no BOUNCER_* environment variables, skip this service.
                 if (count($envs) == 0) {
+                    $this->logger->debug('Service {service_name} has no BOUNCER_* envs set, skipping.', ['emoji' => Emoji::ghost() . ' ', 'service_name' => $service['Spec']['Name']]);
+
                     continue;
                 }
+
                 // if BOUNCER_IGNORE is set, skip this service.
                 if (isset($envs['BOUNCER_IGNORE'])) {
+                    $this->logger->debug('Service {service_name} has BOUNCER_IGNORE set, skipping.', ['emoji' => Emoji::warning() . ' ', 'service_name' => $service['Spec']['Name']]);
+
                     continue;
                 }
 
@@ -325,7 +338,7 @@ class Bouncer
                         $bouncerTarget->setEndpoints(['172.17.0.1']);
                         $bouncerTarget->setPort(intval($service['Endpoint']['Ports'][0]['PublishedPort']));
                     } else {
-                        $this->logger->warning('{label}: ports block missing for {target_name}. Try setting BOUNCER_TARGET_PORT.', ['emoji' => Emoji::warning() . ' Bouncer.php', 'label' => $bouncerTarget->getLabel(), 'target_name' => $bouncerTarget->getName()]);
+                        $this->logger->warning('{label}: ports block missing for {target_name}. Try setting BOUNCER_TARGET_PORT.', ['emoji' => Emoji::warning() . ' ', 'label' => $bouncerTarget->getLabel(), 'target_name' => $bouncerTarget->getName()]);
                         \Kint::dump(
                             $bouncerTarget->getId(),
                             $bouncerTarget->getLabel(),
@@ -343,6 +356,10 @@ class Bouncer
                             $existing->setEndpoints(array_merge($existing->getEndpoints(), $bouncerTarget->getEndpoints()));
                             unset($bouncerTarget);
                         }
+                    }
+
+                    if (isset($bouncerTarget)) {
+                        $bouncerTargets[] = $bouncerTarget;
                     }
                 }
             }
@@ -364,13 +381,16 @@ class Bouncer
                 );
             }
         }
+        $this->logger->debug('There are {count} bouncer targets, of which {validCount} are valid', ['count' => count($bouncerTargets), 'validCount' => count($validBouncerTargets)]);
+
+        $this->logger->warning('Interrogating SERVICES for BOUNCER_* environment variables found {count} services.', ['emoji' => Emoji::magnifyingGlassTiltedLeft(), 'count' => count($validBouncerTargets)]);
 
         return $validBouncerTargets;
     }
 
     public function run(): void
     {
-        $this->logger->info('Starting Bouncer. Built {build_id} on {build_date}, {build_ago}', ['emoji' => Emoji::redHeart() . ' Bouncer.php', 'build_id' => $this->settings->get('build/id'), 'build_date' => $this->settings->get('build/date')->toDateTimeString(), 'build_ago' => $this->settings->get('build/date')->ago()]);
+        $this->logger->info('Starting Bouncer. Built {build_id} on {build_date}, {build_ago}', ['emoji' => Emoji::redHeart() . ' ', 'build_id' => $this->settings->get('build/id'), 'build_date' => $this->settings->get('build/date')->toDateTimeString(), 'build_ago' => $this->settings->get('build/date')->ago()]);
         $this->logger->info('Build #{git_sha}: "{build_message}"', ['emoji' => Emoji::memo(), 'git_sha' => $this->settings->get('build/sha_short'), 'build_message' => $this->settings->get('build/message')]);
         $this->logger->debug(' > HTTPS Listener is on {https_port}', ['emoji' => Emoji::ship(), 'https_port' => $this->settings->get('bouncer/https_port')]);
         $this->logger->debug(' > HTTP Listener is on {http_port}', ['emoji' => Emoji::ship(), 'http_port' => $this->settings->get('bouncer/http_port')]);
@@ -586,7 +606,7 @@ class Bouncer
         $containerStateDiff = $this->diff($this->previousContainerState, $newContainerState);
         if (!$isTainted && !empty($containerStateDiff)) {
             if ($this->settings->if('logger/show_state_deltas')) {
-                $this->logger->warning('Container state has changed', ['emoji' => Emoji::warning() . ' Bouncer.php']);
+                $this->logger->warning('Container state has changed', ['emoji' => Emoji::warning() . ' ']);
                 echo $containerStateDiff;
             }
             $isTainted = true;
@@ -598,7 +618,7 @@ class Bouncer
         if ($this->isSwarmMode()) {
             $services = json_decode($this->docker->request('GET', 'services')->getBody()->getContents(), true);
             if (isset($services['message'])) {
-                $this->logger->warning('Something happened while interrogating services.. This node is not a swarm node, cannot have services: {message}', ['emoji' => Emoji::warning() . ' Bouncer.php', 'message' => $services['message']]);
+                $this->logger->warning('Something happened while interrogating services.. This node is not a swarm node, cannot have services: {message}', ['emoji' => Emoji::warning() . ' ', 'message' => $services['message']]);
             } else {
                 foreach ($services as $service) {
                     $name                 = $service['Spec']['Name'];
@@ -626,7 +646,7 @@ class Bouncer
         $swarmStateDiff = $this->diff($this->previousSwarmState, $newSwarmState);
         if ($this->isSwarmMode() && !$isTainted && !empty($swarmStateDiff)) {
             if ($this->settings->if('logger/show_state_deltas')) {
-                $this->logger->warning('Swarm state has changed', ['emoji' => Emoji::warning() . ' Bouncer.php']);
+                $this->logger->warning('Swarm state has changed', ['emoji' => Emoji::warning() . ' ']);
                 echo $swarmStateDiff;
             }
             $isTainted = true;
@@ -662,7 +682,7 @@ class Bouncer
         } catch (ServerException $exception) {
             $this->setSwarmMode(false);
         } catch (ConnectException $exception) {
-            $this->logger->critical('Unable to connect to docker socket!', ['emoji' => Emoji::warning() . ' Bouncer.php']);
+            $this->logger->critical('Unable to connect to docker socket!', ['emoji' => Emoji::warning() . ' ']);
             $this->logger->critical($exception->getMessage());
 
             exit(1);
@@ -670,12 +690,17 @@ class Bouncer
 
         $this->logger->debug(' > Swarm mode is {enabled}.', ['emoji' => Emoji::honeybee(), 'enabled' => $this->isSwarmMode() ? 'enabled' : 'disabled']);
 
+        /** @var Target[] $targets */
         $targets = array_values(
             array_merge(
                 $this->findContainersContainerMode(),
                 $this->isSwarmMode() ? $this->findContainersSwarmMode() : []
             )
         );
+
+        foreach ($targets as $target) {
+            $this->logger->info('Found target {target}', ['emoji' => Emoji::magnifyingGlassTiltedLeft(), 'target' => $target->getName()]);
+        }
 
         // Use some bs to sort the targets by domain from right to left.
         $sortedTargets = [];
@@ -702,7 +727,7 @@ class Bouncer
         }
 
         if ($this->isTestMode()) {
-            $this->logger->info('Test mode enabled, not restarting nginx. Infact, I\'ll die now..', ['emoji' => Emoji::warning() . ' Bouncer.php']);
+            $this->logger->info('Test mode enabled, not restarting nginx. Infact, I\'ll die now..', ['emoji' => Emoji::warning() . ' ']);
             $this->dumpConfigs();
 
             exit(0);
@@ -818,15 +843,15 @@ class Bouncer
                     'file'       => $target->getNginxConfigFileName(),
                     'config_dir' => Bouncer::FILESYSTEM_CONFIG_DIR,
                 ];
-                $this->logger->info('Created {label}', $context + ['emoji' => Emoji::pencil() . ' Bouncer.php']);
-                $this->logger->debug('  -> {config_dir}/{file}', $context + ['emoji' => Emoji::pencil() . ' Bouncer.php']);
-                $this->logger->debug('  -> {domain}', $context + ['emoji' => Emoji::pencil() . ' Bouncer.php']);
+                $this->logger->info('Created {label}', $context + ['emoji' => Emoji::pencil() . ' ']);
+                $this->logger->debug('  -> {config_dir}/{file}', $context + ['emoji' => Emoji::pencil() . ' ']);
+                $this->logger->debug('  -> {domain}', $context + ['emoji' => Emoji::pencil() . ' ']);
                 $this->logger->critical('{label} cert type is {cert_type}', $context + ['emoji' => Emoji::catFace(), 'cert_type' => $target->getTypeCertInUse()->name]);
             }
         } else {
-            $this->logger->info('More than {num_max} Nginx configs generated.. Too many to show them all!', ['emoji' => Emoji::pencil() . ' Bouncer.php', 'num_max' => $this->getMaximumNginxConfigCreationNotices()]);
+            $this->logger->info('More than {num_max} Nginx configs generated.. Too many to show them all!', ['emoji' => Emoji::pencil() . ' ', 'num_max' => $this->getMaximumNginxConfigCreationNotices()]);
         }
-        $this->logger->info('Updated {num_created} Nginx configs, {num_changed} changed..', ['emoji' => Emoji::pencil() . ' Bouncer.php', 'num_created' => count($targets), 'num_changed' => count($changedTargets)]);
+        $this->logger->info('Updated {num_created} Nginx configs, {num_changed} changed..', ['emoji' => Emoji::pencil() . ' ', 'num_created' => count($targets), 'num_changed' => count($changedTargets)]);
 
         $this->pruneNonExistentConfigs($targets);
     }
@@ -949,13 +974,13 @@ class Bouncer
             $command->addFlag('n');
             $command->addFlag('m', $this->environment['BOUNCER_LETSENCRYPT_EMAIL']);
             $command->addArgument('agree-tos');
-            $this->logger->info('Generating letsencrypt for {target_name} - {command}', ['emoji' => Emoji::pencil() . ' Bouncer.php', 'target_name' => $target->getName(), 'command' => $command->__toString()]);
+            $this->logger->info('Generating letsencrypt for {target_name} - {command}', ['emoji' => Emoji::pencil() . ' ', 'target_name' => $target->getName(), 'command' => $command->__toString()]);
             $shell->run($command);
 
             if ($shell->getReturnValue() == 0) {
                 $this->logger->info('Generating successful', ['emoji' => Emoji::partyPopper()]);
             } else {
-                $this->logger->critical('Generating failed!', ['emoji' => Emoji::warning() . ' Bouncer.php']);
+                $this->logger->critical('Generating failed!', ['emoji' => Emoji::warning() . ' ']);
             }
 
             // Re-enable nginx tweaks
@@ -977,7 +1002,7 @@ class Bouncer
         $shell   = new Exec();
         $command = new CommandBuilder('/usr/sbin/nginx');
         $command->addFlag('s', 'reload');
-        $this->logger->info('Restarting nginx', ['emoji' => Emoji::timerClock() . ' Bouncer.php']);
+        $this->logger->info('Restarting nginx', ['emoji' => Emoji::timerClock() . '  ']);
         $nginxRestartOutput = $shell->run($command);
         $this->logger->debug('Nginx restarted {restart_output}', ['restart_output' => $nginxRestartOutput, 'emoji' => Emoji::partyPopper()]);
     }
@@ -990,7 +1015,7 @@ class Bouncer
                 if ($file['path'] == 'default.conf') {
                     continue;
                 }
-                $this->logger->info('Dumping {file}', ['emoji' => Emoji::pencil() . ' Bouncer.php', 'file' => $file['path']]);
+                $this->logger->info('Dumping {file}', ['emoji' => Emoji::pencil() . ' ', 'file' => $file['path']]);
                 echo $this->configFilesystem->read($file['path']);
             }
         }

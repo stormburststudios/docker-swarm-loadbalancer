@@ -28,7 +28,7 @@ lint:
     - markdownlint@0.41.0
     - taplo@0.8.1
     - actionlint@1.7.1
-    - checkov@3.2.161
+    - checkov@3.2.176
     - prettier@3.3.2
     - yamllint@1.35.1
   definitions:
@@ -50,7 +50,7 @@ tools:
     - gh@2.51.0
     - jq@jq-1.7.1
     - yq@4.44.2
-    - awscli@1.33.18
+    - awscli@1.33.22
     - action-validator@0.6.0
     - act@0.2.63
     - shellcheck@0.10.0
@@ -58,5 +58,5 @@ tools:
     - svgo@3.3.2
     - tofu@1.7.2
     - trunk-toolbox@0.3.2
-    - tflint@0.51.2
+    - tflint@0.52.0
     - terraform@1.1.4

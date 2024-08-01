@@ -106,7 +106,7 @@ EXPOSE 443
 # A moderately long start period is important because while it IS serving a HTTP 200 immediately, it might not have
 # completed probing the docker socket and generating the config yet.
 HEALTHCHECK --start-period=30s \
-    CMD curl -s -o /dev/null -w "200" http://localhost:80/ || exit 1
+    CMD curl -s -o /dev/null -w "200" http://localhost:80/health || exit 1
 
 # checkov:skip=CKV_DOCKER_3 This is a test container.
 FROM ghcr.io/benzine-framework/php:nginx-8.2 AS test-app

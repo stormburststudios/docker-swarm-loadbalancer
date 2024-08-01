@@ -10,7 +10,7 @@ on:
 jobs:
   php-stan:
     name: PHPStan
-    runs-on: ${{ vars.RUNS_ON }}
+    runs-on: ${{ vars.RUNS_ON || 'ubuntu-latest' }}
     permissions:
       checks: write # To post annotations
       contents: read # For repo checkout
@@ -20,7 +20,7 @@ jobs:
 
   php-cs-fixer:
     name: PHP-CS-Fixer
-    runs-on: ${{ vars.RUNS_ON }}
+    runs-on: ${{ vars.RUNS_ON || 'ubuntu-latest' }}
     permissions:
       checks: write # For trunk to post annotations
       contents: read # For repo checkout

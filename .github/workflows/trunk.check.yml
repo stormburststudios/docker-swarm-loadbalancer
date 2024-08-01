@@ -10,7 +10,7 @@ on:
 jobs:
   trunk-check:
     name: Trunk Check Runner
-    runs-on: ${{ vars.RUNS_ON }}
+    runs-on: ${{ vars.RUNS_ON || 'ubuntu-latest' }}
     permissions:
       checks: write # For trunk to post annotations
       contents: read # For repo checkout

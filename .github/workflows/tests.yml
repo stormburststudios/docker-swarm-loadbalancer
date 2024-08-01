@@ -10,7 +10,7 @@ on:
 jobs:
   test-integration:
     name: Integration Tests
-    runs-on: ${{ vars.RUNS_ON }}
+    runs-on: ${{ vars.RUNS_ON || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
       - name: Start Loadbalancer
@@ -37,7 +37,7 @@ jobs:
         shell: bash
         run: |
           set -xeu
-          docker compose exec test-box curl -s -D - http://b.example.org 2>&1 > b.nossl.http 
+          docker compose exec test-box curl -s -D - http://b.example.org 2>&1 > b.nossl.http
           grep "HTTP/1.1 200 OK" b.nossl.http
           grep "<h1>Website B</h1>" b.nossl.http
       - name: SSL Connect to Web B

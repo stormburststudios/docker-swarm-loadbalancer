@@ -28,7 +28,7 @@ lint:
     - markdownlint@0.41.0
     - taplo@0.9.3
     - actionlint@1.7.1
-    - checkov@3.2.217
+    - checkov@3.2.218
     - prettier@3.3.3
     - yamllint@1.35.1
   definitions:
@@ -45,12 +45,12 @@ actions:
     - trunk-fmt-pre-commit
 tools:
   enabled:
-    - tfupdate@0.8.4
+    - tfupdate@0.8.5
     - phpstan@1.10.58
     - gh@2.53.0
     - jq@jq-1.7.1
-    - yq@4.44.2
-    - awscli@1.33.34
+    - yq@4.44.3
+    - awscli@1.33.35
     - action-validator@0.6.0
     - act@0.2.65
     - shellcheck@0.10.0

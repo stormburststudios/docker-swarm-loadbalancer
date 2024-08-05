@@ -10,7 +10,8 @@ on:
 
 env:
   PLATFORMS: ${{ vars.PLATFORMS }}
-  DOCKER_IMAGE: ghcr.io/${{ github.repository }}
+  CANDIDATE_IMAGE: ghcr.io/${{ github.repository }}:sha-${{ github.sha }}
+  DATEMARKED_IMAGE: ghcr.io/${{ github.repository }}:date-${{ env.DATE }}
 
 jobs:
   docker-build:
@@ -39,7 +40,7 @@ jobs:
           pull: true
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: |
-            ${{ env.DOCKER_IMAGE }}:date-${{ env.DATE }}
-            ${{ env.DOCKER_IMAGE }}:sha-${{ github.sha }}
+            ${{ env.CANDIDATE_IMAGE }}
+            ${{ env.DATEMARKED_IMAGE }}
           cache-from: ${{ env.DOCKER_CACHE_FROM }}
           cache-to: ${{ env.DOCKER_CACHE_TO }}
